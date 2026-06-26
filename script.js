@@ -74,6 +74,9 @@ const refs = {
   radiusMetric: document.getElementById("radiusMetric"),
   periodMetric: document.getElementById("periodMetric"),
   metricsNote: document.getElementById("metricsNote"),
+  equationTitle: document.getElementById("equationTitle"),
+  equationNote: document.getElementById("equationNote"),
+  equationLines: document.getElementById("equationLines"),
   showGridToggle: document.getElementById("showGridToggle"),
   showTrailToggle: document.getElementById("showTrailToggle"),
   showVectorsToggle: document.getElementById("showVectorsToggle"),
@@ -141,6 +144,95 @@ function formatScientific(value, digits = 2, unit = "") {
   const exponent = Number(exponentRaw);
   const text = `${coefficient}×10^${exponent}`;
   return unit ? `${text} ${unit}` : text;
+}
+
+function formatCoefficient(value, digits = 2) {
+  if (!Number.isFinite(value)) {
+    return "--";
+  }
+  if (value === 0) {
+    return "0";
+  }
+
+  const abs = Math.abs(value);
+  if (abs >= 1e3 || abs < 1e-2) {
+    const [coefficient, exponentRaw] = value.toExponential(digits).split("e");
+    return `${coefficient}×10^${Number(exponentRaw)}`;
+  }
+
+  if (abs >= 10) {
+    return value.toFixed(2);
+  }
+
+  return value.toFixed(3);
+}
+
+function getInitialVelocityComponents() {
+  const radians = (state.angle * Math.PI) / 180;
+  const speed = state.speed * SPEED_UNIT;
+  return {
+    vx0: speed * Math.cos(radians),
+    vy0: speed * Math.sin(radians)
+  };
+}
+
+function getScenarioKey() {
+  const hasElectric = Math.abs(state.electric) > 1e-12;
+  const hasMagnetic = Math.abs(state.magnetic) > 1e-12;
+  if (hasElectric && hasMagnetic) return "combined";
+  if (hasElectric) return "electric";
+  if (hasMagnetic) return "magnetic";
+  return "free";
+}
+
+function updateEquationPanel() {
+  const { q, m, ey, bz } = getPhysicsParams();
+  const { vx0, vy0 } = getInitialVelocityComponents();
+  const omega = Math.abs(bz) > 1e-12 ? (q * bz) / m : 0;
+  const drift = Math.abs(bz) > 1e-12 ? ey / bz : 0;
+  const accel = (q * ey) / m;
+  const scenario = getScenarioKey();
+
+  refs.equationLines.innerHTML = "";
+
+  function addLine(text) {
+    const div = document.createElement("div");
+    div.className = "equation-line";
+    div.textContent = text;
+    refs.equationLines.appendChild(div);
+  }
+
+  if (scenario === "free") {
+    refs.equationTitle.textContent = "匀速直线运动";
+    refs.equationNote.textContent = "当前电场和磁场都为 0，轨迹退化为匀速直线。";
+    addLine(`x(t) = ${formatCoefficient(vx0)} t`);
+    addLine(`y(t) = ${formatCoefficient(vy0)} t`);
+    return;
+  }
+
+  if (scenario === "electric") {
+    refs.equationTitle.textContent = "仅电场参数方程";
+    refs.equationNote.textContent = "当前是匀强电场情形：x 方向匀速，y 方向匀加速。";
+    addLine(`x(t) = ${formatCoefficient(vx0)} t`);
+    addLine(`y(t) = ${formatCoefficient(vy0)} t + 1/2·(${formatCoefficient(accel)}) t²`);
+    return;
+  }
+
+  if (scenario === "magnetic") {
+    refs.equationTitle.textContent = "仅磁场参数方程";
+    refs.equationNote.textContent = "当前是匀强磁场圆周运动的参数形式，ω = qB/m。";
+    addLine(`ω = ${formatCoefficient(omega)} rad/s`);
+    addLine(`x(t) = (${formatCoefficient(vx0 / omega)}) sin(ωt) - (${formatCoefficient(vy0 / omega)}) [cos(ωt) - 1]`);
+    addLine(`y(t) = (${formatCoefficient(vy0 / omega)}) sin(ωt) + (${formatCoefficient(vx0 / omega)}) [cos(ωt) - 1]`);
+    return;
+  }
+
+  refs.equationTitle.textContent = "电磁复合场参数方程";
+  refs.equationNote.textContent = "当前是匀强电场与匀强磁场共存的参数形式，沿 x 方向存在漂移项。";
+  addLine(`ω = ${formatCoefficient(omega)} rad/s`);
+  addLine(`v_d = E/B = ${formatCoefficient(drift)} m/s`);
+  addLine(`x(t) = (${formatCoefficient((vx0 - drift) / omega)}) sin(ωt) - (${formatCoefficient(vy0 / omega)}) [cos(ωt) - 1] + (${formatCoefficient(drift)}) t`);
+  addLine(`y(t) = (${formatCoefficient(vy0 / omega)}) sin(ωt) + (${formatCoefficient((vx0 - drift) / omega)}) [cos(ωt) - 1]`);
 }
 
 function getInstantKinematics() {
@@ -246,6 +338,7 @@ function syncReadouts() {
   refs.periodMetric.textContent =
     metrics.period == null ? "仅纯磁场圆周时适用" : formatScientific(metrics.period, 2, "s");
   refs.metricsNote.textContent = metrics.note;
+  updateEquationPanel();
 }
 
 function syncInputs() {
