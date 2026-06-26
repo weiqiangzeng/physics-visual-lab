@@ -32,230 +32,323 @@
           <div class="canvas-wrap">
             <canvas id="simCanvas" width="980" height="640" aria-label="带电粒子运动轨迹"></canvas>
           </div>
+          <div class="legend-bar">
+            <span class="legend-item"><i class="legend-dot particle-dot"></i>粒子</span>
+            <span class="legend-item"><i class="legend-dot trail-dot"></i>轨迹</span>
+            <span class="legend-item"><i class="legend-dot velocity-dot"></i>速度</span>
+            <span class="legend-item"><i class="legend-dot electric-dot"></i>电场力</span>
+            <span class="legend-item"><i class="legend-dot magnetic-dot"></i>磁场力</span>
+            <span class="legend-item"><i class="legend-dot net-dot"></i>合力</span>
+          </div>
         </div>
 
         <aside class="controls">
-          <label class="control">
-            <div class="label-row">
-              <div class="label-copy">
-                <span class="label-title">电荷量</span>
-                <span class="label-math">
-                  <math>
-                    <mi>q</mi>
-                    <mo>/</mo>
-                    <mi>e</mi>
-                  </math>
-                </span>
-              </div>
-              <strong id="chargeValue">+1 e</strong>
+          <div class="controls-overview">
+            <div>
+              <span class="preset-label">参数与读数</span>
+              <h2>教学实验控制台</h2>
             </div>
-            <input id="chargeInput" type="range" min="-6" max="6" step="1" value="1" />
-          </label>
+            <div class="overview-badges">
+              <span class="overview-badge" id="overviewMode">自定义调参</span>
+              <span class="overview-badge" id="overviewSpeed">1x</span>
+            </div>
+          </div>
+          <details class="section-panel" open>
+            <summary class="section-summary">
+              <span>参数与读数</span>
+            </summary>
+            <div class="section-body">
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">电荷量</span>
+                    <span class="label-math">
+                      <math>
+                        <mi>q</mi>
+                        <mo>/</mo>
+                        <mi>e</mi>
+                      </math>
+                    </span>
+                  </div>
+                  <div class="value-lock">
+                    <strong id="chargeValue">+1 e</strong>
+                    <button class="mini-lock" id="lockChargeButton" type="button">解锁</button>
+                  </div>
+                </div>
+                <input id="chargeInput" type="range" min="-6" max="6" step="1" value="1" />
+                <div class="inline-edit">
+                  <input id="chargeNumber" class="number-input" type="number" min="-6" max="6" step="1" value="1" />
+                  <span class="input-unit">e</span>
+                </div>
+              </label>
 
-          <label class="control">
-            <div class="label-row">
-              <div class="label-copy">
-                <span class="label-title">质量</span>
-                <span class="label-math">
-                  <math>
-                    <mi>m</mi>
-                    <mo>/</mo>
-                    <mrow>
-                      <mo>(</mo>
-                      <mo>&times;</mo>
-                      <msup>
-                        <mn>10</mn>
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">质量</span>
+                    <span class="label-math">
+                      <math>
+                        <mi>m</mi>
+                        <mo>/</mo>
                         <mrow>
-                          <mo>-</mo>
-                          <mn>27</mn>
+                          <mo>(</mo>
+                          <mo>&times;</mo>
+                          <msup>
+                            <mn>10</mn>
+                            <mrow>
+                              <mo>-</mo>
+                              <mn>27</mn>
+                            </mrow>
+                          </msup>
+                          <mtext> kg</mtext>
+                          <mo>)</mo>
                         </mrow>
-                      </msup>
-                      <mtext> kg</mtext>
-                      <mo>)</mo>
-                    </mrow>
-                  </math>
-                </span>
-              </div>
-              <strong id="massValue">1.5 ×10^-27 kg</strong>
-            </div>
-            <input id="massInput" type="range" min="0.5" max="10" step="0.5" value="1.5" />
-          </label>
-
-          <label class="control">
-            <div class="label-row">
-              <div class="label-copy">
-                <span class="label-title">电场强度</span>
-                <span class="label-math">
-                  <math>
-                    <msub>
-                      <mi>E</mi>
-                      <mi>y</mi>
-                    </msub>
-                    <mo>/</mo>
-                    <mrow>
-                      <mo>(</mo>
-                      <mo>&times;</mo>
-                      <msup>
-                        <mn>10</mn>
-                        <mn>5</mn>
-                      </msup>
-                      <mtext> N/C</mtext>
-                      <mo>)</mo>
-                    </mrow>
-                  </math>
-                </span>
-              </div>
-              <strong id="electricValue">+3.0 ×10^5 N/C</strong>
-            </div>
-            <div class="mode-hint" id="electricHint"></div>
-            <input id="electricInput" type="range" min="-24" max="24" step="0.5" value="3" />
-          </label>
-
-          <label class="control">
-            <div class="label-row">
-              <div class="label-copy">
-                <span class="label-title">磁感应强度</span>
-                <span class="label-math">
-                  <math>
-                    <msub>
-                      <mi>B</mi>
-                      <mi>z</mi>
-                    </msub>
-                    <mo>/</mo>
-                    <mi>T</mi>
-                  </math>
-                </span>
-              </div>
-              <strong id="magneticValue">0.00 T</strong>
-            </div>
-            <div class="mode-hint" id="magneticHint"></div>
-            <input id="magneticInput" type="range" min="-8" max="8" step="0.25" value="0" />
-          </label>
-
-          <label class="control">
-            <div class="label-row">
-              <div class="label-copy">
-                <span class="label-title">初速度</span>
-                <span class="label-math">
-                  <math>
-                    <msub>
-                      <mi>v</mi>
-                      <mn>0</mn>
-                    </msub>
-                    <mo>/</mo>
-                    <mrow>
-                      <mo>(</mo>
-                      <mo>&times;</mo>
-                      <msup>
-                        <mn>10</mn>
-                        <mn>6</mn>
-                      </msup>
-                      <mtext> m/s</mtext>
-                      <mo>)</mo>
-                    </mrow>
-                  </math>
-                </span>
-              </div>
-              <strong id="speedValue">8.0 ×10^6 m/s</strong>
-            </div>
-            <input id="speedInput" type="range" min="1" max="28" step="0.5" value="8" />
-          </label>
-
-          <label class="control">
-            <div class="label-row">
-              <div class="label-copy">
-                <span class="label-title">入射角</span>
-                <span class="label-math">
-                  <math>
-                    <mi>&theta;</mi>
-                    <mo>/</mo>
-                    <mo>&deg;</mo>
-                  </math>
-                </span>
-              </div>
-              <strong id="angleValue">0°</strong>
-            </div>
-            <input id="angleInput" type="range" min="-85" max="85" step="1" value="0" />
-          </label>
-
-          <section class="metrics-panel">
-            <div class="metrics-head">
-              <span class="preset-label">实时物理量</span>
-              <strong id="metricsModeTitle">当前场景</strong>
-            </div>
-            <div class="metrics-grid">
-              <article class="metric-card">
-                <span class="metric-name">
-                  <math>
-                    <msub><mi>F</mi><mi>E</mi></msub>
-                  </math>
-                </span>
-                <strong id="electricForceMetric">0 N</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-name">
-                  <math>
-                    <msub><mi>F</mi><mi>B</mi></msub>
-                  </math>
-                </span>
-                <strong id="magneticForceMetric">0 N</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-name">
-                  <math>
-                    <mi>v</mi>
-                  </math>
-                </span>
-                <strong id="speedMetric">0 m/s</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-name">
-                  <math>
-                    <msub><mi>F</mi><mtext>合</mtext></msub>
-                  </math>
-                </span>
-                <strong id="netForceMetric">0 N</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-name">
-                  <math>
-                    <mi>r</mi>
-                  </math>
-                </span>
-                <strong id="radiusMetric">--</strong>
-              </article>
-              <article class="metric-card">
-                <span class="metric-name">
-                  <math>
-                    <mi>T</mi>
-                  </math>
-                </span>
-                <strong id="periodMetric">--</strong>
-              </article>
-            </div>
-            <p class="metrics-note" id="metricsNote">当前显示的是单粒子在所选场景下的瞬时物理量。</p>
-          </section>
-
-          <section class="display-panel">
-            <div class="metrics-head">
-              <span class="preset-label">显示选项</span>
-              <strong>画面控制</strong>
-            </div>
-            <div class="toggle-grid">
-              <label class="toggle-item">
-                <input id="showGridToggle" type="checkbox" checked />
-                <span>显示网格</span>
+                      </math>
+                    </span>
+                  </div>
+                  <div class="value-lock">
+                    <strong id="massValue">1.5 ×10^-27 kg</strong>
+                    <button class="mini-lock" id="lockMassButton" type="button">解锁</button>
+                  </div>
+                </div>
+                <input id="massInput" type="range" min="0.5" max="10" step="0.1" value="1.5" />
+                <div class="inline-edit">
+                  <input id="massNumber" class="number-input" type="number" min="0.5" max="10" step="0.1" value="1.5" />
+                  <span class="input-unit">×10^-27 kg</span>
+                </div>
               </label>
-              <label class="toggle-item">
-                <input id="showTrailToggle" type="checkbox" checked />
-                <span>显示轨迹</span>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">电场强度</span>
+                    <span class="label-math">
+                      <math>
+                        <msub>
+                          <mi>E</mi>
+                          <mi>y</mi>
+                        </msub>
+                        <mo>/</mo>
+                        <mrow>
+                          <mo>(</mo>
+                          <mo>&times;</mo>
+                          <msup>
+                            <mn>10</mn>
+                            <mn>5</mn>
+                          </msup>
+                          <mtext> N/C</mtext>
+                          <mo>)</mo>
+                        </mrow>
+                      </math>
+                    </span>
+                  </div>
+                  <div class="value-lock">
+                    <strong id="electricValue">+3.0 ×10^5 N/C</strong>
+                    <button class="mini-lock" id="lockElectricButton" type="button">解锁</button>
+                  </div>
+                </div>
+                <div class="mode-hint" id="electricHint"></div>
+                <input id="electricInput" type="range" min="-24" max="24" step="0.1" value="3" />
+                <div class="inline-edit">
+                  <input id="electricNumber" class="number-input" type="number" min="-24" max="24" step="0.1" value="3" />
+                  <span class="input-unit">×10^5 N/C</span>
+                </div>
               </label>
-              <label class="toggle-item">
-                <input id="showVectorsToggle" type="checkbox" checked />
-                <span>显示箭头</span>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">磁感应强度</span>
+                    <span class="label-math">
+                      <math>
+                        <msub>
+                          <mi>B</mi>
+                          <mi>z</mi>
+                        </msub>
+                        <mo>/</mo>
+                        <mi>T</mi>
+                      </math>
+                    </span>
+                  </div>
+                  <div class="value-lock">
+                    <strong id="magneticValue">0.00 T</strong>
+                    <button class="mini-lock" id="lockMagneticButton" type="button">解锁</button>
+                  </div>
+                </div>
+                <div class="mode-hint" id="magneticHint"></div>
+                <input id="magneticInput" type="range" min="-8" max="8" step="0.05" value="0" />
+                <div class="inline-edit">
+                  <input id="magneticNumber" class="number-input" type="number" min="-8" max="8" step="0.05" value="0" />
+                  <span class="input-unit">T</span>
+                </div>
               </label>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">初速度</span>
+                    <span class="label-math">
+                      <math>
+                        <msub>
+                          <mi>v</mi>
+                          <mn>0</mn>
+                        </msub>
+                        <mo>/</mo>
+                        <mrow>
+                          <mo>(</mo>
+                          <mo>&times;</mo>
+                          <msup>
+                            <mn>10</mn>
+                            <mn>6</mn>
+                          </msup>
+                          <mtext> m/s</mtext>
+                          <mo>)</mo>
+                        </mrow>
+                      </math>
+                    </span>
+                  </div>
+                  <div class="value-lock">
+                    <strong id="speedValue">8.0 ×10^6 m/s</strong>
+                    <button class="mini-lock" id="lockSpeedButton" type="button">解锁</button>
+                  </div>
+                </div>
+                <input id="speedInput" type="range" min="1" max="28" step="0.1" value="8" />
+                <div class="inline-edit">
+                  <input id="speedNumber" class="number-input" type="number" min="1" max="28" step="0.1" value="8" />
+                  <span class="input-unit">×10^6 m/s</span>
+                </div>
+              </label>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">入射角</span>
+                    <span class="label-math">
+                      <math>
+                        <mi>&theta;</mi>
+                        <mo>/</mo>
+                        <mo>&deg;</mo>
+                      </math>
+                    </span>
+                  </div>
+                  <div class="value-lock">
+                    <strong id="angleValue">0°</strong>
+                    <button class="mini-lock" id="lockAngleButton" type="button">解锁</button>
+                  </div>
+                </div>
+                <input id="angleInput" type="range" min="-85" max="85" step="0.5" value="0" />
+                <div class="inline-edit">
+                  <input id="angleNumber" class="number-input" type="number" min="-85" max="85" step="0.5" value="0" />
+                  <span class="input-unit">°</span>
+                </div>
+              </label>
+
+              <section class="metrics-panel">
+                <div class="metrics-head">
+                  <span class="preset-label">实时物理量</span>
+                  <strong id="metricsModeTitle">当前场景</strong>
+                </div>
+                <div class="metrics-grid">
+                  <article class="metric-card">
+                    <span class="metric-name">
+                      <math>
+                        <msub><mi>F</mi><mi>E</mi></msub>
+                      </math>
+                    </span>
+                    <strong id="electricForceMetric">0 N</strong>
+                  </article>
+                  <article class="metric-card">
+                    <span class="metric-name">
+                      <math>
+                        <msub><mi>F</mi><mi>B</mi></msub>
+                      </math>
+                    </span>
+                    <strong id="magneticForceMetric">0 N</strong>
+                  </article>
+                  <article class="metric-card">
+                    <span class="metric-name">
+                      <math>
+                        <mi>v</mi>
+                      </math>
+                    </span>
+                    <strong id="speedMetric">0 m/s</strong>
+                  </article>
+                  <article class="metric-card">
+                    <span class="metric-name">
+                      <math>
+                        <msub><mi>F</mi><mtext>合</mtext></msub>
+                      </math>
+                    </span>
+                    <strong id="netForceMetric">0 N</strong>
+                  </article>
+                  <article class="metric-card">
+                    <span class="metric-name">
+                      <math>
+                        <mi>r</mi>
+                      </math>
+                    </span>
+                    <strong id="radiusMetric">--</strong>
+                  </article>
+                  <article class="metric-card">
+                    <span class="metric-name">
+                      <math>
+                        <mi>T</mi>
+                      </math>
+                    </span>
+                    <strong id="periodMetric">--</strong>
+                  </article>
+                </div>
+                <p class="metrics-note" id="metricsNote">当前显示的是单粒子在所选场景下的瞬时物理量。</p>
+              </section>
             </div>
-          </section>
+          </details>
+
+          <details class="section-panel">
+            <summary class="section-summary">
+              <span>显示选项</span>
+            </summary>
+            <div class="section-body">
+              <section class="display-panel">
+                <div class="metrics-head">
+                  <span class="preset-label">显示选项</span>
+                  <strong>画面控制</strong>
+                </div>
+                <div class="toggle-grid">
+                  <label class="toggle-item">
+                    <input id="showGridToggle" type="checkbox" checked />
+                    <span>显示网格</span>
+                  </label>
+                  <label class="toggle-item">
+                    <input id="showTrailToggle" type="checkbox" checked />
+                    <span>显示轨迹</span>
+                  </label>
+                  <label class="toggle-item">
+                    <input id="showVectorsToggle" type="checkbox" checked />
+                    <span>显示箭头</span>
+                  </label>
+                  <label class="toggle-item">
+                    <input id="preserveTrailToggle" type="checkbox" />
+                    <span>改参数时保留原轨迹</span>
+                  </label>
+                </div>
+                <div class="speed-panel">
+                  <span class="speed-label">播放速度</span>
+                  <div class="speed-buttons">
+                    <button class="speed-button" type="button" data-speed="0.25">0.25x</button>
+                    <button class="speed-button" type="button" data-speed="0.5">0.5x</button>
+                    <button class="speed-button active" type="button" data-speed="1">1x</button>
+                  </div>
+                </div>
+                <div class="speed-panel">
+                  <span class="speed-label">保存与导出</span>
+                  <div class="speed-buttons">
+                    <button id="exportPngButton" class="speed-button" type="button">导出截图</button>
+                    <button id="exportCsvButton" class="speed-button" type="button">导出数据</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </details>
         </aside>
       </section>
     </main>

@@ -9,6 +9,16 @@ const state = {
   showGrid: true,
   showTrail: true,
   showVectors: true,
+  preserveTrailOnChange: false,
+  timeScale: 1,
+  locks: {
+    charge: false,
+    mass: false,
+    electric: false,
+    magnetic: false,
+    speed: false,
+    angle: false
+  },
   running: false,
   paused: false
 };
@@ -36,6 +46,12 @@ const refs = {
   magneticInput: document.getElementById("magneticInput"),
   speedInput: document.getElementById("speedInput"),
   angleInput: document.getElementById("angleInput"),
+  chargeNumber: document.getElementById("chargeNumber"),
+  massNumber: document.getElementById("massNumber"),
+  electricNumber: document.getElementById("electricNumber"),
+  magneticNumber: document.getElementById("magneticNumber"),
+  speedNumber: document.getElementById("speedNumber"),
+  angleNumber: document.getElementById("angleNumber"),
   chargeValue: document.getElementById("chargeValue"),
   massValue: document.getElementById("massValue"),
   electricValue: document.getElementById("electricValue"),
@@ -60,7 +76,19 @@ const refs = {
   metricsNote: document.getElementById("metricsNote"),
   showGridToggle: document.getElementById("showGridToggle"),
   showTrailToggle: document.getElementById("showTrailToggle"),
-  showVectorsToggle: document.getElementById("showVectorsToggle")
+  showVectorsToggle: document.getElementById("showVectorsToggle"),
+  preserveTrailToggle: document.getElementById("preserveTrailToggle"),
+  speedButtons: Array.from(document.querySelectorAll(".speed-button")),
+  overviewMode: document.getElementById("overviewMode"),
+  overviewSpeed: document.getElementById("overviewSpeed"),
+  lockChargeButton: document.getElementById("lockChargeButton"),
+  lockMassButton: document.getElementById("lockMassButton"),
+  lockElectricButton: document.getElementById("lockElectricButton"),
+  lockMagneticButton: document.getElementById("lockMagneticButton"),
+  lockSpeedButton: document.getElementById("lockSpeedButton"),
+  lockAngleButton: document.getElementById("lockAngleButton"),
+  exportPngButton: document.getElementById("exportPngButton"),
+  exportCsvButton: document.getElementById("exportCsvButton")
 };
 
 const logicalWidth = 980;
@@ -97,6 +125,11 @@ function formatSignedFixed(value, digits) {
   return `${prefix}${value.toFixed(digits)}`;
 }
 
+function setLockButtonState(button, locked) {
+  button.textContent = locked ? "已锁" : "解锁";
+  button.classList.toggle("active", locked);
+}
+
 function formatScientific(value, digits = 2, unit = "") {
   if (!Number.isFinite(value)) {
     return "--";
@@ -104,7 +137,9 @@ function formatScientific(value, digits = 2, unit = "") {
   if (value === 0) {
     return unit ? `0 ${unit}` : "0";
   }
-  const text = value.toExponential(digits).replace("+", "");
+  const [coefficient, exponentRaw] = value.toExponential(digits).split("e");
+  const exponent = Number(exponentRaw);
+  const text = `${coefficient}×10^${exponent}`;
   return unit ? `${text} ${unit}` : text;
 }
 
@@ -192,6 +227,14 @@ function syncReadouts() {
   refs.electricHint.textContent = state.mode === "magnetic-only" ? modeConfigs["magnetic-only"].lockedHint : "";
   refs.magneticHint.textContent = state.mode === "electric-only" ? modeConfigs["electric-only"].lockedHint : "";
   refs.metricsModeTitle.textContent = modeConfigs[state.mode].title;
+  refs.overviewMode.textContent = modeConfigs[state.mode].title;
+  refs.overviewSpeed.textContent = `${state.timeScale}x`;
+  setLockButtonState(refs.lockChargeButton, state.locks.charge);
+  setLockButtonState(refs.lockMassButton, state.locks.mass);
+  setLockButtonState(refs.lockElectricButton, state.locks.electric);
+  setLockButtonState(refs.lockMagneticButton, state.locks.magnetic);
+  setLockButtonState(refs.lockSpeedButton, state.locks.speed);
+  setLockButtonState(refs.lockAngleButton, state.locks.angle);
 
   const metrics = computeLiveMetrics();
   refs.electricForceMetric.textContent = formatScientific(metrics.electricForce, 2, "N");
@@ -212,11 +255,31 @@ function syncInputs() {
   refs.magneticInput.value = state.magnetic;
   refs.speedInput.value = state.speed;
   refs.angleInput.value = state.angle;
-  refs.electricInput.disabled = state.mode === "magnetic-only";
-  refs.magneticInput.disabled = state.mode === "electric-only";
+  refs.chargeNumber.value = state.charge;
+  refs.massNumber.value = state.mass;
+  refs.electricNumber.value = state.electric;
+  refs.magneticNumber.value = state.magnetic;
+  refs.speedNumber.value = state.speed;
+  refs.angleNumber.value = state.angle;
+  refs.chargeInput.disabled = state.locks.charge;
+  refs.massInput.disabled = state.locks.mass;
+  refs.speedInput.disabled = state.locks.speed;
+  refs.angleInput.disabled = state.locks.angle;
+  refs.electricInput.disabled = state.locks.electric || state.mode === "magnetic-only";
+  refs.magneticInput.disabled = state.locks.magnetic || state.mode === "electric-only";
+  refs.chargeNumber.disabled = state.locks.charge;
+  refs.massNumber.disabled = state.locks.mass;
+  refs.speedNumber.disabled = state.locks.speed;
+  refs.angleNumber.disabled = state.locks.angle;
+  refs.electricNumber.disabled = state.locks.electric || state.mode === "magnetic-only";
+  refs.magneticNumber.disabled = state.locks.magnetic || state.mode === "electric-only";
   refs.showGridToggle.checked = state.showGrid;
   refs.showTrailToggle.checked = state.showTrail;
   refs.showVectorsToggle.checked = state.showVectors;
+  refs.preserveTrailToggle.checked = state.preserveTrailOnChange;
+  refs.speedButtons.forEach((button) => {
+    button.classList.toggle("active", Number(button.dataset.speed) === state.timeScale);
+  });
 }
 
 function resetParticle() {
@@ -251,6 +314,24 @@ function resetSimulation() {
   refs.pauseButton.textContent = "暂停";
   syncReadouts();
   renderScene();
+}
+
+function applyParameterChange() {
+  if (state.mode === "electric-only") {
+    state.magnetic = 0;
+  }
+  if (state.mode === "magnetic-only") {
+    state.electric = 0;
+  }
+
+  if (state.preserveTrailOnChange && particle) {
+    syncInputs();
+    syncReadouts();
+    renderScene();
+    return;
+  }
+
+  resetSimulation();
 }
 
 function applyMode(modeKey) {
@@ -334,9 +415,10 @@ function borisAdvance(dt) {
 
 function updateParticle() {
   const { dt, steps } = getStepConfig();
+  const effectiveDt = dt * state.timeScale;
 
   for (let step = 0; step < steps; step += 1) {
-    borisAdvance(dt);
+    borisAdvance(effectiveDt);
 
     if (!Number.isFinite(particle.x) || !Number.isFinite(particle.y)) {
       state.running = false;
@@ -767,13 +849,21 @@ function animate() {
 function bindInput(input, key) {
   input.addEventListener("input", (event) => {
     state[key] = Number(event.target.value);
-    if (state.mode === "electric-only") {
-      state.magnetic = 0;
+    applyParameterChange();
+  });
+}
+
+function bindNumberInput(input, key) {
+  input.addEventListener("change", (event) => {
+    const next = Number(event.target.value);
+    if (!Number.isFinite(next)) {
+      syncInputs();
+      return;
     }
-    if (state.mode === "magnetic-only") {
-      state.electric = 0;
-    }
-    resetSimulation();
+    const min = Number(input.min);
+    const max = Number(input.max);
+    state[key] = Math.min(max, Math.max(min, next));
+    applyParameterChange();
   });
 }
 
@@ -783,6 +873,12 @@ bindInput(refs.electricInput, "electric");
 bindInput(refs.magneticInput, "magnetic");
 bindInput(refs.speedInput, "speed");
 bindInput(refs.angleInput, "angle");
+bindNumberInput(refs.chargeNumber, "charge");
+bindNumberInput(refs.massNumber, "mass");
+bindNumberInput(refs.electricNumber, "electric");
+bindNumberInput(refs.magneticNumber, "magnetic");
+bindNumberInput(refs.speedNumber, "speed");
+bindNumberInput(refs.angleNumber, "angle");
 
 refs.startButton.addEventListener("click", () => {
   startSimulation();
@@ -812,6 +908,75 @@ refs.showVectorsToggle.addEventListener("change", (event) => {
   state.showVectors = event.target.checked;
   renderScene();
 });
+
+refs.preserveTrailToggle.addEventListener("change", (event) => {
+  state.preserveTrailOnChange = event.target.checked;
+  syncInputs();
+});
+
+refs.speedButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.timeScale = Number(button.dataset.speed);
+    syncInputs();
+    syncReadouts();
+  });
+});
+
+refs.exportPngButton.addEventListener("click", () => {
+  refs.canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "charged-particle-lab.png";
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+});
+
+refs.exportCsvButton.addEventListener("click", () => {
+  const header = [
+    "# charged-particle-lab export",
+    `# mode,${state.mode}`,
+    `# charge_e,${state.charge}`,
+    `# mass_1e-27kg,${state.mass}`,
+    `# electric_1e5N_per_C,${state.electric}`,
+    `# magnetic_T,${state.magnetic}`,
+    `# speed_1e6m_per_s,${state.speed}`,
+    `# angle_deg,${state.angle}`,
+    "index,x_m,y_m"
+  ];
+  const rows = path.map((point, index) => `${index},${point.x},${point.y}`);
+  const csv = `${header.join("\n")}\n${rows.join("\n")}`;
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "charged-particle-lab-data.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+function bindLockButton(button, key) {
+  button.addEventListener("click", () => {
+    state.locks[key] = !state.locks[key];
+    syncInputs();
+    syncReadouts();
+  });
+}
+
+bindLockButton(refs.lockChargeButton, "charge");
+bindLockButton(refs.lockMassButton, "mass");
+bindLockButton(refs.lockElectricButton, "electric");
+bindLockButton(refs.lockMagneticButton, "magnetic");
+bindLockButton(refs.lockSpeedButton, "speed");
+bindLockButton(refs.lockAngleButton, "angle");
+
+if (window.matchMedia("(pointer: coarse)").matches) {
+  Object.keys(state.locks).forEach((key) => {
+    state.locks[key] = true;
+  });
+}
 
 refs.presetButtons.forEach((button) => {
   button.addEventListener("click", () => {
