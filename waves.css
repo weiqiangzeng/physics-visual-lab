@@ -182,6 +182,10 @@ body.demo-mode .demo-badge {
   background: #fbfcfa;
 }
 
+.main-canvas {
+  box-shadow: inset 0 0 0 1px rgba(13, 113, 104, 0.04);
+}
+
 .canvas-wrap canvas,
 .visual-panel canvas {
   display: block;

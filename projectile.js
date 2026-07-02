@@ -153,6 +153,24 @@ function drawArrow(from, vector, color, label, scale = 1) {
   ctx.restore();
 }
 
+function drawLabelBox(text, x, y, color) {
+  ctx.save();
+  ctx.font = "700 13px Avenir Next, PingFang SC, sans-serif";
+  const widthText = ctx.measureText(text).width;
+  const boxWidth = widthText + 22;
+  const boxHeight = 30;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.roundRect(x, y, boxWidth, boxHeight, 14);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.fillText(text, x + 11, y + 20);
+  ctx.restore();
+}
+
 function drawAxes() {
   const { range, maxHeight } = getDerived();
   const xMax = Math.max(10, range * 1.12);
@@ -214,9 +232,11 @@ function drawTrajectory() {
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle = "#7b3fa0";
-  ctx.font = "13px Avenir Next, PingFang SC, sans-serif";
-  ctx.fillText("最高点 vy=0", apex.x - 42, apex.y - 14);
-  ctx.fillText("落地点", landing.x - 20, landing.y - 16);
+  ctx.beginPath();
+  ctx.arc(apex.x, apex.y, state.demoMode ? 6 : 5, 0, Math.PI * 2);
+  ctx.fill();
+  drawLabelBox("最高点 vy=0", apex.x - 52, apex.y - 42, "#7b3fa0");
+  drawLabelBox("落地点", landing.x - 38, landing.y - 44, "#c96b29");
 }
 
 function getCriticalState() {

@@ -150,6 +150,23 @@ function drawArrow(from, vector, color, label, scale = 1) {
   ctx.restore();
 }
 
+function drawLabelBox(text, x, y, color) {
+  ctx.save();
+  ctx.font = "700 13px Avenir Next, PingFang SC, sans-serif";
+  const boxWidth = ctx.measureText(text).width + 22;
+  const boxHeight = 30;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.roundRect(x, y, boxWidth, boxHeight, 14);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.fillText(text, x + 11, y + 20);
+  ctx.restore();
+}
+
 function drawGrid() {
   ctx.strokeStyle = "rgba(18, 31, 36, 0.08)";
   ctx.lineWidth = 1;
@@ -188,9 +205,7 @@ function drawCircle() {
   ctx.beginPath();
   ctx.arc(center.x, center.y, 5, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "rgba(18, 31, 36, 0.58)";
-  ctx.font = "13px Avenir Next, PingFang SC, sans-serif";
-  ctx.fillText("圆心", center.x + 10, center.y - 10);
+  drawLabelBox("圆心", center.x + 10, center.y - 38, "#121f24");
 }
 
 function getCriticalState() {
@@ -231,9 +246,9 @@ function render() {
   ctx.fill();
 
   if (state.showVectors) {
-    drawArrow(c, { x: point.vx, y: point.vy }, "#0d7168", "v", state.demoMode ? 30 : 24);
-    drawArrow(c, { x: point.ax, y: point.ay }, "#7b3fa0", "a_c", state.demoMode ? 18 : 14);
-    if (state.mode === "force") drawArrow(c, { x: point.ax, y: point.ay }, "#c96b29", "F_c", state.demoMode ? 26 : 20);
+    drawArrow(c, { x: point.vx, y: point.vy }, "#0d7168", "v", state.demoMode ? 34 : 28);
+    drawArrow(c, { x: point.ax, y: point.ay }, "#7b3fa0", "a_c", state.demoMode ? 20 : 16);
+    if (state.mode === "force") drawArrow(c, { x: point.ax, y: point.ay }, "#c96b29", "F_c", state.demoMode ? 27 : 21);
   }
   syncReadouts();
 }

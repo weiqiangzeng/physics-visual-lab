@@ -276,6 +276,14 @@ body.demo-mode .controls-overview h2 {
   font-size: 1rem;
 }
 
+.preset-copy p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .preset-buttons {
   display: flex;
   flex-wrap: wrap;
