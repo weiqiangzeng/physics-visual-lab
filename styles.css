@@ -94,7 +94,8 @@ body.demo-mode .demo-badge {
   gap: 12px;
 }
 
-button {
+button,
+.ghost-link {
   min-height: 48px;
   padding: 0 22px;
   border: 1px solid var(--line);
@@ -104,6 +105,9 @@ button {
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 button.primary {
@@ -847,8 +851,10 @@ input[type="range"]::-webkit-slider-thumb {
     width: 100%;
   }
 
-  button {
+  button,
+  .ghost-link {
     flex: 1 1 0;
+    justify-content: center;
   }
 
   .control {

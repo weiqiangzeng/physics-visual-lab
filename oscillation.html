@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>简谐振动可视化实验台</title>
+    <link rel="stylesheet" href="./oscillation.css?v=20260702-scrub" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="workspace">
+        <div class="stage">
+          <div class="stage-head">
+            <div class="stage-title">
+              <h1>简谐振动可视化实验台</h1>
+              <span class="demo-badge" id="demoBadge">教学演示中</span>
+            </div>
+            <div class="actions">
+              <a class="ghost-link" href="./index.html">带电粒子</a>
+              <button id="startButton" class="primary" type="button">开始</button>
+              <button id="pauseButton" type="button">暂停</button>
+              <button id="resetButton" type="button">重置</button>
+            </div>
+          </div>
+          <p class="stage-subtitle">把弹簧振子的真实运动、位移图像、速度图像、相位参考圆和能量转换放在同一时间轴上观察。</p>
+
+          <section class="lesson-guide" aria-label="当前观察任务">
+            <div class="guide-main">
+              <span class="preset-label">观察任务</span>
+              <strong id="modeGoal">观察位移、速度、加速度之间的相位关系</strong>
+              <p id="modePrompt">注意质点经过平衡位置时速度最大，经过端点时速度为 0、加速度最大。</p>
+            </div>
+            <div class="guide-formula" id="modeFormula">x = A cos(ωt + φ)</div>
+          </section>
+
+          <div class="canvas-wrap main-canvas">
+            <canvas id="motionCanvas" width="980" height="390" aria-label="弹簧振子运动"></canvas>
+          </div>
+
+          <section class="critical-strip" aria-label="简谐振动关键位置">
+            <article class="critical-card" id="leftCriticalCard" role="button" tabindex="0" data-jump="left">
+              <span>左端点 -A</span>
+              <strong>v = 0</strong>
+              <p>加速度指向平衡位置，势能最大。点击定位。</p>
+            </article>
+            <article class="critical-card" id="centerCriticalCard" role="button" tabindex="0" data-jump="center">
+              <span>平衡位置 O</span>
+              <strong>|v| 最大</strong>
+              <p>加速度为 0，动能最大。点击定位。</p>
+            </article>
+            <article class="critical-card" id="rightCriticalCard" role="button" tabindex="0" data-jump="right">
+              <span>右端点 +A</span>
+              <strong>v = 0</strong>
+              <p>加速度指向平衡位置，势能最大。点击定位。</p>
+            </article>
+            <article class="critical-now">
+              <span>当前观察</span>
+              <strong id="criticalStateLabel">右端点附近</strong>
+              <p id="criticalStateNote">此时速度接近 0，回复力和加速度最大。</p>
+            </article>
+          </section>
+
+          <div class="stage-readouts">
+            <article class="stage-readout">
+              <span>x</span>
+              <strong id="stageXMetric">0 m</strong>
+            </article>
+            <article class="stage-readout">
+              <span>v</span>
+              <strong id="stageVMetric">0 m/s</strong>
+            </article>
+            <article class="stage-readout">
+              <span>a</span>
+              <strong id="stageAMetric">0 m/s²</strong>
+            </article>
+            <article class="stage-readout">
+              <span>T</span>
+              <strong id="stagePeriodMetric">0 s</strong>
+            </article>
+            <article class="stage-readout">
+              <span>E</span>
+              <strong id="stageEnergyMetric">0 J</strong>
+            </article>
+          </div>
+
+          <section class="visual-grid">
+            <div class="visual-panel graph-panel">
+              <div class="panel-head">
+                <span class="preset-label">时间图像</span>
+                <strong>x / v / a</strong>
+              </div>
+              <canvas id="graphCanvas" width="980" height="300" aria-label="简谐振动时间图像"></canvas>
+            </div>
+            <div class="visual-panel phase-panel">
+              <div class="panel-head">
+                <span class="preset-label">相位图</span>
+                <strong>参考圆</strong>
+              </div>
+              <canvas id="phaseCanvas" width="420" height="300" aria-label="简谐振动相位参考圆"></canvas>
+            </div>
+            <div class="visual-panel energy-panel">
+              <div class="panel-head">
+                <span class="preset-label">能量转换</span>
+                <strong>K + U = E</strong>
+              </div>
+              <div class="energy-bars">
+                <div class="energy-row">
+                  <span>动能 K</span>
+                  <div class="energy-track"><i id="kineticBar"></i></div>
+                  <strong id="kineticMetric">0 J</strong>
+                </div>
+                <div class="energy-row">
+                  <span>势能 U</span>
+                  <div class="energy-track"><i id="potentialBar"></i></div>
+                  <strong id="potentialMetric">0 J</strong>
+                </div>
+                <div class="energy-row total-row">
+                  <span>总能量 E</span>
+                  <div class="energy-track"><i id="totalBar"></i></div>
+                  <strong id="totalMetric">0 J</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="controls">
+          <div class="controls-overview">
+            <div>
+              <span class="preset-label">实验控制</span>
+              <h2>振动参数</h2>
+            </div>
+            <div class="overview-badges">
+              <span class="overview-badge" id="overviewSpeed">1x</span>
+              <span class="overview-badge" id="overviewTime">0.00 s</span>
+            </div>
+          </div>
+
+          <details class="section-panel" open>
+            <summary class="section-summary">
+              <span>核心参数</span>
+            </summary>
+            <div class="section-body">
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">质量</span>
+                    <span class="label-math">m / kg</span>
+                  </div>
+                  <strong id="massValue">1.00 kg</strong>
+                </div>
+                <input id="massInput" type="range" min="0.2" max="5" step="0.1" value="1" />
+                <div class="inline-edit">
+                  <input id="massNumber" class="number-input" type="number" min="0.2" max="5" step="0.1" value="1" />
+                  <span class="input-unit">kg</span>
+                </div>
+              </label>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">劲度系数</span>
+                    <span class="label-math">k / (N/m)</span>
+                  </div>
+                  <strong id="springValue">16.0 N/m</strong>
+                </div>
+                <input id="springInput" type="range" min="1" max="80" step="0.5" value="16" />
+                <div class="inline-edit">
+                  <input id="springNumber" class="number-input" type="number" min="1" max="80" step="0.5" value="16" />
+                  <span class="input-unit">N/m</span>
+                </div>
+              </label>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">振幅</span>
+                    <span class="label-math">A / m</span>
+                  </div>
+                  <strong id="amplitudeValue">0.80 m</strong>
+                </div>
+                <input id="amplitudeInput" type="range" min="0.1" max="2" step="0.05" value="0.8" />
+                <div class="inline-edit">
+                  <input id="amplitudeNumber" class="number-input" type="number" min="0.1" max="2" step="0.05" value="0.8" />
+                  <span class="input-unit">m</span>
+                </div>
+              </label>
+
+              <label class="control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">初相位</span>
+                    <span class="label-math">φ / °</span>
+                  </div>
+                  <strong id="phaseValue">0°</strong>
+                </div>
+                <input id="phaseInput" type="range" min="-180" max="180" step="5" value="0" />
+                <div class="inline-edit">
+                  <input id="phaseNumber" class="number-input" type="number" min="-180" max="180" step="5" value="0" />
+                  <span class="input-unit">°</span>
+                </div>
+              </label>
+
+              <label class="control time-control">
+                <div class="label-row">
+                  <div class="label-copy">
+                    <span class="label-title">观察时刻</span>
+                    <span class="label-math">t / s</span>
+                  </div>
+                  <strong id="timeValue">0.00 s</strong>
+                </div>
+                <input id="timeInput" type="range" min="0" max="1.57" step="0.01" value="0" />
+                <div class="inline-edit">
+                  <input id="timeNumber" class="number-input" type="number" min="0" max="1.57" step="0.01" value="0" />
+                  <span class="input-unit">s，拖动会暂停</span>
+                </div>
+              </label>
+            </div>
+          </details>
+
+          <details class="section-panel">
+            <summary class="section-summary">
+              <span>显示与播放</span>
+            </summary>
+            <div class="section-body">
+              <section class="display-panel">
+                <div class="toggle-grid">
+                  <label class="toggle-item">
+                    <input id="showVectorsToggle" type="checkbox" checked />
+                    <span>显示速度和加速度</span>
+                  </label>
+                  <label class="toggle-item">
+                    <input id="showGraphsToggle" type="checkbox" checked />
+                    <span>显示图像</span>
+                  </label>
+                  <label class="toggle-item">
+                    <input id="demoModeToggle" type="checkbox" />
+                    <span>教学演示模式</span>
+                  </label>
+                </div>
+              </section>
+              <section class="display-panel">
+                <div class="speed-panel">
+                  <span class="speed-label">播放速度</span>
+                  <div class="speed-buttons">
+                    <button class="speed-button" type="button" data-speed="0.25">0.25x</button>
+                    <button class="speed-button" type="button" data-speed="0.5">0.5x</button>
+                    <button class="speed-button active" type="button" data-speed="1">1x</button>
+                    <button class="speed-button" type="button" data-speed="2">2x</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </details>
+        </aside>
+      </section>
+    </main>
+
+    <script src="./oscillation.js?v=20260702-phasecircle"></script>
+  </body>
+</html>
