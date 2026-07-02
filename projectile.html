@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>抛体运动分解可视化实验台</title>
+    <link rel="stylesheet" href="./waves.css?v=20260702-projectile" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="workspace">
+        <div class="stage">
+          <div class="stage-head">
+            <div class="stage-title">
+              <h1>抛体运动分解可视化实验台</h1>
+              <span class="demo-badge" id="demoBadge">教学演示中</span>
+            </div>
+            <div class="actions">
+              <a class="ghost-link" href="./index.html">实验目录</a>
+              <button id="startButton" class="primary" type="button">开始</button>
+              <button id="pauseButton" type="button">暂停</button>
+              <button id="resetButton" type="button">重置</button>
+            </div>
+          </div>
+          <p class="stage-subtitle">把斜抛运动拆成水平方向的匀速运动和竖直方向的匀变速运动，重点观察最高点和落地点。</p>
+
+          <section class="lesson-guide" aria-label="当前观察任务">
+            <div class="guide-main">
+              <span class="preset-label">观察任务</span>
+              <strong id="modeGoal">观察最高点处竖直速度为 0</strong>
+              <p id="modePrompt">拖动时间条到最高点，比较 vx、vy 和速度方向；再观察水平方向是否仍在前进。</p>
+            </div>
+            <div class="guide-formula" id="modeFormula">x = v₀cosθ · t</div>
+          </section>
+
+          <div class="preset-bar">
+            <div class="preset-copy">
+              <span class="preset-label">观察模式</span>
+              <strong id="presetTitle">运动分解</strong>
+            </div>
+            <div class="preset-buttons">
+              <button class="preset-button active" type="button" data-mode="decompose">运动分解</button>
+              <button class="preset-button" type="button" data-mode="apex">最高点</button>
+              <button class="preset-button" type="button" data-mode="range">射程</button>
+            </div>
+          </div>
+
+          <div class="canvas-wrap main-canvas">
+            <canvas id="projectileCanvas" width="980" height="500" aria-label="抛体运动轨迹"></canvas>
+          </div>
+
+          <section class="critical-strip" aria-label="抛体运动关键时刻">
+            <article class="critical-card" id="launchCard" role="button" tabindex="0" data-jump="launch">
+              <span>发射瞬间</span>
+              <strong>v₀ 分解</strong>
+              <p>速度分解为 vx 和 vy，点击定位。</p>
+            </article>
+            <article class="critical-card" id="apexCard" role="button" tabindex="0" data-jump="apex">
+              <span>最高点</span>
+              <strong>vy = 0</strong>
+              <p>速度不为 0，只剩水平分量。点击定位。</p>
+            </article>
+            <article class="critical-card" id="landingCard" role="button" tabindex="0" data-jump="landing">
+              <span>落地点</span>
+              <strong>y = 0</strong>
+              <p>飞行时间和射程在这里读出。点击定位。</p>
+            </article>
+            <article class="critical-now">
+              <span>当前观察</span>
+              <strong id="criticalStateLabel">发射上升</strong>
+              <p id="criticalStateNote">竖直速度向上，但正在被重力逐渐减小。</p>
+            </article>
+          </section>
+
+          <div class="stage-readouts">
+            <article class="stage-readout"><span>x</span><strong id="xMetric">0 m</strong></article>
+            <article class="stage-readout"><span>y</span><strong id="yMetric">0 m</strong></article>
+            <article class="stage-readout"><span>vx</span><strong id="vxMetric">0 m/s</strong></article>
+            <article class="stage-readout"><span>vy</span><strong id="vyMetric">0 m/s</strong></article>
+            <article class="stage-readout"><span>R</span><strong id="rangeMetric">0 m</strong></article>
+            <article class="stage-readout"><span>t</span><strong id="timeMetric">0 s</strong></article>
+          </div>
+        </div>
+
+        <aside class="controls">
+          <div class="controls-overview">
+            <div>
+              <span class="preset-label">实验控制</span>
+              <h2>抛射参数</h2>
+            </div>
+            <div class="overview-badges">
+              <span class="overview-badge" id="overviewSpeed">1x</span>
+              <span class="overview-badge" id="overviewTime">0.00 s</span>
+            </div>
+          </div>
+
+          <details class="section-panel" open>
+            <summary class="section-summary"><span>核心参数</span></summary>
+            <div class="section-body">
+              <label class="control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">初速度</span><span class="label-math">v₀ / (m/s)</span></div><strong id="speedValue">18.0 m/s</strong></div>
+                <input id="speedInput" type="range" min="5" max="35" step="0.5" value="18" />
+                <div class="inline-edit"><input id="speedNumber" class="number-input" type="number" min="5" max="35" step="0.5" value="18" /><span class="input-unit">m/s</span></div>
+              </label>
+              <label class="control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">发射角</span><span class="label-math">θ / °</span></div><strong id="angleValue">45°</strong></div>
+                <input id="angleInput" type="range" min="10" max="80" step="1" value="45" />
+                <div class="inline-edit"><input id="angleNumber" class="number-input" type="number" min="10" max="80" step="1" value="45" /><span class="input-unit">°</span></div>
+              </label>
+              <label class="control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">重力加速度</span><span class="label-math">g / (m/s²)</span></div><strong id="gravityValue">9.8 m/s²</strong></div>
+                <input id="gravityInput" type="range" min="1" max="16" step="0.1" value="9.8" />
+                <div class="inline-edit"><input id="gravityNumber" class="number-input" type="number" min="1" max="16" step="0.1" value="9.8" /><span class="input-unit">m/s²</span></div>
+              </label>
+              <label class="control time-control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">观察时刻</span><span class="label-math">t / s</span></div><strong id="timeValue">0.00 s</strong></div>
+                <input id="timeInput" type="range" min="0" max="2.6" step="0.01" value="0" />
+                <div class="inline-edit"><input id="timeNumber" class="number-input" type="number" min="0" max="2.6" step="0.01" value="0" /><span class="input-unit">s，拖动会暂停</span></div>
+              </label>
+            </div>
+          </details>
+
+          <details class="section-panel">
+            <summary class="section-summary"><span>显示与播放</span></summary>
+            <div class="section-body">
+              <section class="display-panel">
+                <div class="toggle-grid">
+                  <label class="toggle-item"><input id="showComponentsToggle" type="checkbox" checked /><span>显示速度分解</span></label>
+                  <label class="toggle-item"><input id="showTrailToggle" type="checkbox" checked /><span>显示轨迹</span></label>
+                  <label class="toggle-item"><input id="demoModeToggle" type="checkbox" /><span>教学演示模式</span></label>
+                </div>
+              </section>
+              <section class="display-panel">
+                <div class="speed-panel">
+                  <span class="speed-label">播放速度</span>
+                  <div class="speed-buttons">
+                    <button class="speed-button" type="button" data-speed="0.25">0.25x</button>
+                    <button class="speed-button" type="button" data-speed="0.5">0.5x</button>
+                    <button class="speed-button active" type="button" data-speed="1">1x</button>
+                    <button class="speed-button" type="button" data-speed="2">2x</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </details>
+        </aside>
+      </section>
+    </main>
+
+    <script src="./projectile.js?v=20260702"></script>
+  </body>
+</html>

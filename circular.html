@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>圆周运动与向心力可视化实验台</title>
+    <link rel="stylesheet" href="./waves.css?v=20260702-circular" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="workspace">
+        <div class="stage">
+          <div class="stage-head">
+            <div class="stage-title">
+              <h1>圆周运动与向心力可视化实验台</h1>
+              <span class="demo-badge" id="demoBadge">教学演示中</span>
+            </div>
+            <div class="actions">
+              <a class="ghost-link" href="./index.html">实验目录</a>
+              <button id="startButton" class="primary" type="button">开始</button>
+              <button id="pauseButton" type="button">暂停</button>
+              <button id="resetButton" type="button">重置</button>
+            </div>
+          </div>
+          <p class="stage-subtitle">观察匀速圆周运动中速度方向不断改变、加速度始终指向圆心，并比较半径和速度对向心力的影响。</p>
+
+          <section class="lesson-guide" aria-label="当前观察任务">
+            <div class="guide-main">
+              <span class="preset-label">观察任务</span>
+              <strong id="modeGoal">观察速度切向、加速度指向圆心</strong>
+              <p id="modePrompt">暂停到任意位置，比较速度箭头和向心加速度箭头的方向关系。</p>
+            </div>
+            <div class="guide-formula" id="modeFormula">a_c = v² / r</div>
+          </section>
+
+          <div class="preset-bar">
+            <div class="preset-copy">
+              <span class="preset-label">观察模式</span>
+              <strong id="presetTitle">方向关系</strong>
+            </div>
+            <div class="preset-buttons">
+              <button class="preset-button active" type="button" data-mode="vectors">方向关系</button>
+              <button class="preset-button" type="button" data-mode="force">向心力</button>
+              <button class="preset-button" type="button" data-mode="period">周期频率</button>
+            </div>
+          </div>
+
+          <div class="canvas-wrap main-canvas">
+            <canvas id="circularCanvas" width="980" height="500" aria-label="圆周运动和向心力"></canvas>
+          </div>
+
+          <section class="critical-strip" aria-label="圆周运动关键位置">
+            <article class="critical-card" id="rightCard" role="button" tabindex="0" data-jump="right">
+              <span>最右点</span>
+              <strong>v 向上</strong>
+              <p>a 指向圆心，点击定位。</p>
+            </article>
+            <article class="critical-card" id="topCard" role="button" tabindex="0" data-jump="top">
+              <span>最高点</span>
+              <strong>v 向左</strong>
+              <p>速度与半径垂直，点击定位。</p>
+            </article>
+            <article class="critical-card" id="leftCard" role="button" tabindex="0" data-jump="left">
+              <span>最左点</span>
+              <strong>v 向下</strong>
+              <p>a 仍指向圆心，点击定位。</p>
+            </article>
+            <article class="critical-now">
+              <span>当前观察</span>
+              <strong id="criticalStateLabel">速度切向</strong>
+              <p id="criticalStateNote">速度方向沿切线，加速度方向沿半径指向圆心。</p>
+            </article>
+          </section>
+
+          <div class="stage-readouts">
+            <article class="stage-readout"><span>r</span><strong id="radiusMetric">0 m</strong></article>
+            <article class="stage-readout"><span>v</span><strong id="speedMetric">0 m/s</strong></article>
+            <article class="stage-readout"><span>ω</span><strong id="omegaMetric">0 rad/s</strong></article>
+            <article class="stage-readout"><span>a_c</span><strong id="accelMetric">0 m/s²</strong></article>
+            <article class="stage-readout"><span>F_c</span><strong id="forceMetric">0 N</strong></article>
+            <article class="stage-readout"><span>T</span><strong id="periodMetric">0 s</strong></article>
+          </div>
+        </div>
+
+        <aside class="controls">
+          <div class="controls-overview">
+            <div>
+              <span class="preset-label">实验控制</span>
+              <h2>圆周参数</h2>
+            </div>
+            <div class="overview-badges">
+              <span class="overview-badge" id="overviewSpeed">1x</span>
+              <span class="overview-badge" id="overviewTime">0.00 s</span>
+            </div>
+          </div>
+
+          <details class="section-panel" open>
+            <summary class="section-summary"><span>核心参数</span></summary>
+            <div class="section-body">
+              <label class="control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">质量</span><span class="label-math">m / kg</span></div><strong id="massValue">1.00 kg</strong></div>
+                <input id="massInput" type="range" min="0.2" max="5" step="0.1" value="1" />
+                <div class="inline-edit"><input id="massNumber" class="number-input" type="number" min="0.2" max="5" step="0.1" value="1" /><span class="input-unit">kg</span></div>
+              </label>
+              <label class="control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">半径</span><span class="label-math">r / m</span></div><strong id="radiusValue">1.20 m</strong></div>
+                <input id="radiusInput" type="range" min="0.4" max="2.4" step="0.05" value="1.2" />
+                <div class="inline-edit"><input id="radiusNumber" class="number-input" type="number" min="0.4" max="2.4" step="0.05" value="1.2" /><span class="input-unit">m</span></div>
+              </label>
+              <label class="control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">线速度</span><span class="label-math">v / (m/s)</span></div><strong id="speedValue">2.40 m/s</strong></div>
+                <input id="speedInput" type="range" min="0.4" max="6" step="0.1" value="2.4" />
+                <div class="inline-edit"><input id="speedNumber" class="number-input" type="number" min="0.4" max="6" step="0.1" value="2.4" /><span class="input-unit">m/s</span></div>
+              </label>
+              <label class="control time-control">
+                <div class="label-row"><div class="label-copy"><span class="label-title">观察时刻</span><span class="label-math">t / s</span></div><strong id="timeValue">0.00 s</strong></div>
+                <input id="timeInput" type="range" min="0" max="3.14" step="0.01" value="0" />
+                <div class="inline-edit"><input id="timeNumber" class="number-input" type="number" min="0" max="3.14" step="0.01" value="0" /><span class="input-unit">s，拖动会暂停</span></div>
+              </label>
+            </div>
+          </details>
+
+          <details class="section-panel">
+            <summary class="section-summary"><span>显示与播放</span></summary>
+            <div class="section-body">
+              <section class="display-panel">
+                <div class="toggle-grid">
+                  <label class="toggle-item"><input id="showVectorsToggle" type="checkbox" checked /><span>显示矢量</span></label>
+                  <label class="toggle-item"><input id="showTrailToggle" type="checkbox" checked /><span>显示运动轨迹</span></label>
+                  <label class="toggle-item"><input id="demoModeToggle" type="checkbox" /><span>教学演示模式</span></label>
+                </div>
+              </section>
+              <section class="display-panel">
+                <div class="speed-panel">
+                  <span class="speed-label">播放速度</span>
+                  <div class="speed-buttons">
+                    <button class="speed-button" type="button" data-speed="0.25">0.25x</button>
+                    <button class="speed-button" type="button" data-speed="0.5">0.5x</button>
+                    <button class="speed-button active" type="button" data-speed="1">1x</button>
+                    <button class="speed-button" type="button" data-speed="2">2x</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </details>
+        </aside>
+      </section>
+    </main>
+
+    <script src="./circular.js?v=20260702"></script>
+  </body>
+</html>
