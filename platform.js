@@ -234,6 +234,11 @@
         ? "用演示路线、关键问题和动态现象，组织一节看得见物理关系的新课。"
         : "用可调参数、动态轨迹和关键状态，把公式背后的物理关系看清楚。";
     }
+    document.querySelectorAll(".task-body-head .task-note").forEach((note) => {
+      note.textContent = audience === "teacher"
+        ? "按演示路线组织观察，让学生先判断，再用读数和轨迹核对。"
+        : "先观察现象，再用读数、图像和公式验证自己的判断。";
+    });
     document.querySelectorAll("[data-audience]").forEach((control) => {
       control.classList.toggle("active", control.dataset.audience === audience);
       control.setAttribute("aria-pressed", control.dataset.audience === audience ? "true" : "false");

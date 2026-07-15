@@ -664,6 +664,10 @@
   line-height: 1.45;
 }
 
+.audience-content[hidden] {
+  display: none !important;
+}
+
 .teacher-content {
   display: grid;
   gap: 10px;
