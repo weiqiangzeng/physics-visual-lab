@@ -161,14 +161,16 @@
     const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
     const modelTitle = document.getElementById("modelTitle");
     const modelSummary = document.getElementById("modelSummary");
+    const modelSelectionNote = document.getElementById("modelSelectionNote");
     const modelFilters = document.getElementById("modelFilters");
     const modelCatalog = document.getElementById("modelCatalog");
     if (!tabs.length || !outline || !modelCatalog) return;
 
     let selectedChapterId = "";
     let selectedCategory = "全部";
+    const directoryModels = curriculum.directoryModels || curriculum.models;
 
-    const chapterModels = (book) => curriculum.models.filter((item) => book.chapters.some((chapter) => chapter.id === item.chapterId));
+    const chapterModels = (book) => directoryModels.filter((item) => book.chapters.some((chapter) => chapter.id === item.chapterId));
 
     const renderModelCatalog = (book) => {
       const models = chapterModels(book).filter((item) => {
@@ -183,8 +185,9 @@
         modelTitle.textContent = scope || `${book.title} · 全部模型`;
       }
       if (modelSummary) {
-        modelSummary.textContent = `${models.length} 个模型 · ${openCount} 个可视化实验已开放 · 其余模型可先查看内容骨架。`;
+        modelSummary.textContent = `精选 ${models.length} 个模型 · ${openCount} 个可视化实验已开放。`;
       }
+      if (modelSelectionNote) modelSelectionNote.textContent = curriculum.selectionNote || "只展示适合通过动态关系帮助理解的核心模型。";
       if (!models.length) {
         modelCatalog.innerHTML = '<p class="catalog-empty">当前筛选下暂无模型。</p>';
         return;
@@ -222,10 +225,14 @@
 
     const renderOutline = (book) => {
       outline.innerHTML = book.chapters.map((chapter) => {
-        const models = curriculum.models.filter((item) => item.chapterId === chapter.id);
+        const models = directoryModels.filter((item) => item.chapterId === chapter.id);
         const openCount = models.filter((item) => item.status === "open").length;
         const active = selectedChapterId === chapter.id;
-        const status = openCount ? `${openCount} 个实验已开放` : `${models.length} 个模型待开发`;
+        const status = openCount
+          ? `${openCount} 个实验已开放`
+          : models.length
+            ? `${models.length} 个模型待开发`
+            : "本章暂不单列可视化模型";
         return `<button type="button" class="course-chapter ${openCount ? "has-lab" : "building"} ${active ? "active" : ""}" data-chapter="${chapter.id}" aria-pressed="${active ? "true" : "false"}">
           <strong>${chapter.title}</strong>
           <span>${models.length} 个模型 · ${status}</span>

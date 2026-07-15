@@ -921,9 +921,62 @@
     })
   ];
 
+  // The directory is intentionally selective: the remaining models stay available
+  // as source material for later development without making the student view noisy.
+  const featuredModelIds = new Set([
+    "motion-graphs",
+    "uniform-acceleration",
+    "free-fall",
+    "friction-model",
+    "newton-laws",
+
+    "projectile-decomposition",
+    "circular-motion",
+    "centripetal-force",
+    "orbital-motion",
+    "mechanical-energy",
+
+    "electric-field",
+    "electric-conductor",
+    "electric-potential",
+    "capacitor-energy",
+    "ohm-circuit",
+    "internal-resistance",
+    "electromagnetic-induction-basic",
+
+    "momentum-collision",
+    "simple-harmonic-motion",
+    "resonance",
+    "wave-propagation",
+    "wave-superposition",
+    "thin-lens-imaging",
+    "light-interference-diffraction",
+
+    "magnetic-field",
+    "lorentz-force",
+    "velocity-selector",
+    "faraday-law",
+    "alternating-current",
+    "transformer",
+    "lc-oscillation",
+
+    "gas-laws",
+    "first-law-thermodynamics",
+    "heat-engine",
+    "photoelectric-effect",
+    "radioactive-decay",
+    "binding-energy"
+  ]);
+
+  models.forEach((item) => {
+    item.featured = featuredModelIds.has(item.id);
+  });
+
   window.physicsCurriculum = {
     books,
     models,
+    directoryModels: models.filter((item) => item.featured),
+    selectionNote: "目录只展示适合通过动态关系、图像或模型实验帮助理解的核心内容；其他教材知识保留在课程顺序中，不单独制作可视化模型。",
     categories: ["全部", "运动与力", "能量与动量", "振动与波", "电磁学", "热学", "光学", "近代物理", "综合应用"],
     statusLabels: {
       open: "可视化实验已开放",

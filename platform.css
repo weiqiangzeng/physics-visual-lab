@@ -315,6 +315,14 @@
   text-align: right;
 }
 
+.model-selection-note {
+  max-width: 780px;
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
 .model-filters {
   display: flex;
   flex-wrap: wrap;
