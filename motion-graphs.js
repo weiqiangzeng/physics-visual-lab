@@ -108,16 +108,23 @@ function motionDrawAxes(x, y, width, height, range, yLabel, xLabel) {
   motionCtx.lineTo(x, y + height);
   motionCtx.lineTo(x + width, y + height);
   motionCtx.stroke();
+  const tickValues = new Set();
   for (let step = 0; step <= 4; step += 1) {
-    const value = range.min + ((range.max - range.min) * step) / 4;
-    const py = y + height - (height * step) / 4;
-    motionCtx.strokeStyle = "rgba(18, 31, 36, 0.07)";
-    motionCtx.beginPath();
-    motionCtx.moveTo(x, py);
-    motionCtx.lineTo(x + width, py);
-    motionCtx.stroke();
-    motionDrawText(value.toFixed(1), x - 42, py + 4);
+    tickValues.add(range.min + ((range.max - range.min) * step) / 4);
   }
+  if (range.min < 0 && range.max > 0) tickValues.add(0);
+  [...tickValues].sort((first, second) => first - second).forEach((value) => {
+    const zero = Math.abs(value) < 0.000001;
+    const normalized = (value - range.min) / (range.max - range.min || 1);
+    const zeroY = y + height - normalized * height;
+    motionCtx.strokeStyle = zero ? "rgba(18, 31, 36, 0.3)" : "rgba(18, 31, 36, 0.07)";
+    motionCtx.lineWidth = zero ? 1.6 : 1;
+    motionCtx.beginPath();
+    motionCtx.moveTo(x, zeroY);
+    motionCtx.lineTo(x + width, zeroY);
+    motionCtx.stroke();
+    motionDrawText(zero ? "0" : value.toFixed(1), x - 42, zeroY + 4, zero ? "#121f24" : "#5c686d", 11, zero ? "700" : "400");
+  });
   for (let step = 0; step <= 6; step += 1) {
     const px = x + (width * step) / 6;
     motionCtx.strokeStyle = "rgba(18, 31, 36, 0.06)";
@@ -156,6 +163,29 @@ function motionDrawChart(x, y, width, height, field, color, label, show) {
   motionCtx.beginPath();
   motionCtx.arc(currentX, currentY, motionState.demoMode ? 7 : 5, 0, Math.PI * 2);
   motionCtx.fill();
+
+  if (field === "velocity" && motionState.acceleration !== 0) {
+    const reversalTime = -motionState.initialSpeed / motionState.acceleration;
+    if (reversalTime > 0 && reversalTime < motionState.duration) {
+      const reversalX = x + (width * reversalTime) / motionState.duration;
+      const zeroY = y + height - motionMap(0, range.min, range.max, 0, height);
+      motionCtx.save();
+      motionCtx.strokeStyle = "rgba(201, 107, 41, 0.82)";
+      motionCtx.lineWidth = 1.8;
+      motionCtx.setLineDash([6, 5]);
+      motionCtx.beginPath();
+      motionCtx.moveTo(reversalX, y);
+      motionCtx.lineTo(reversalX, y + height);
+      motionCtx.stroke();
+      motionCtx.setLineDash([]);
+      motionCtx.fillStyle = "#c96b29";
+      motionCtx.beginPath();
+      motionCtx.arc(reversalX, zeroY, 6, 0, Math.PI * 2);
+      motionCtx.fill();
+      motionDrawText("v = 0：方向反向", reversalX + 8, zeroY - 10, "#c96b29", 11, "700");
+      motionCtx.restore();
+    }
+  }
 }
 
 function motionDrawTrack() {
