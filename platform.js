@@ -140,8 +140,8 @@
   const volumeStorageKey = "physics-visual-lab-volume-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
-  let mathTypesetSource = "";
   let katexPromise = null;
+  let mathTypesetRequest = 0;
 
   function loadKaTeX() {
     if (window.renderMathInElement) return Promise.resolve();
@@ -170,14 +170,19 @@
   }
 
   function typesetMath() {
-    const targets = Array.from(document.querySelectorAll(".task-panel, .guide-formula, .formula-panel, .critical-card"));
+    const targets = Array.from(document.querySelectorAll(
+      ".task-panel, .guide-formula, .formula-panel, .critical-card, .equation-lines, .speed-match-formula"
+    )).filter((target) => ["\\(", "\\[", "$$", "$"]
+      .some((delimiter) => target.textContent.includes(delimiter)));
     if (!targets.length) return;
-    const source = targets.map((target) => target.textContent).join("\n");
-    if (source === mathTypesetSource) return;
-    mathTypesetSource = source;
+    const request = ++mathTypesetRequest;
     loadKaTeX().then(() => {
-      if (!window.renderMathInElement) return null;
-      targets.forEach((target) => window.renderMathInElement(target, {
+      if (request !== mathTypesetRequest || !window.renderMathInElement) return null;
+      const latestTargets = Array.from(document.querySelectorAll(
+        ".task-panel, .guide-formula, .formula-panel, .critical-card, .equation-lines, .speed-match-formula"
+      )).filter((target) => ["\\(", "\\[", "$$", "$"]
+        .some((delimiter) => target.textContent.includes(delimiter)));
+      latestTargets.forEach((target) => window.renderMathInElement(target, {
         delimiters: [
           { left: "\\[", right: "\\]", display: true },
           { left: "\\(", right: "\\)", display: false },
@@ -185,7 +190,8 @@
           { left: "$", right: "$", display: false }
         ],
         throwOnError: false,
-        ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+        ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"],
+        ignoredClasses: ["katex"]
       }));
     }).catch(() => {
       // Formula text remains readable if the local typesetter is unavailable.

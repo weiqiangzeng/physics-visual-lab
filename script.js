@@ -267,19 +267,24 @@ function getSpeedMatchHint(sourceKey) {
 }
 
 function renderSpeedMatchFormulaPanel(data) {
+  const lines = [
+    ...data.formulaLines,
+    data.targetSpeed == null
+      ? "当前无法计算 v配"
+      : `当前目标速度：v_{\\mathrm{配}} = ${formatScientific(data.targetSpeed, 2, "m/s")}`
+  ];
+  const source = lines.join("\n");
+  if (refs.speedMatchFormulaLines.dataset.source === source) return;
+  refs.speedMatchFormulaLines.dataset.source = source;
   refs.speedMatchFormulaLines.innerHTML = "";
   refs.speedMatchFormulaNote.textContent = data.formulaTitle;
-  data.formulaLines.forEach((line) => {
+  lines.forEach((line) => {
     const div = document.createElement("div");
     div.className = "equation-line";
-    div.textContent = line;
+    div.textContent = `\\(${line}\\)`;
     refs.speedMatchFormulaLines.appendChild(div);
   });
-  const target = document.createElement("div");
-  target.className = "equation-line";
-  target.textContent =
-    data.targetSpeed == null ? "当前无法计算 v配" : `当前目标速度：v配 = ${formatScientific(data.targetSpeed, 2, "m/s")}`;
-  refs.speedMatchFormulaLines.appendChild(target);
+  window.physicsTypesetMath?.();
 }
 
 function getInitialVelocityComponents() {
@@ -412,17 +417,31 @@ function getSpeedMatchingData() {
 }
 
 function updateEquationPanel() {
+  const setEquationLines = (lines) => {
+    const source = lines.join("\n");
+    if (refs.equationLines.dataset.source === source) return;
+    refs.equationLines.dataset.source = source;
+    refs.equationLines.innerHTML = "";
+    lines.forEach((line) => {
+      const div = document.createElement("div");
+      div.className = "equation-line";
+      div.textContent = `\\(${line}\\)`;
+      refs.equationLines.appendChild(div);
+    });
+    window.physicsTypesetMath?.();
+  };
+
   if (state.mode === "speed-matching") {
     refs.equationTitle.textContent = "配速法轨迹判据";
     refs.equationNote.textContent = "先构造配速 v配，使竖直方向合力为 0；再用 v = v配 + v余 去理解后续运动。";
-    refs.equationLines.innerHTML = "";
     const data = getSpeedMatchingData();
     if (data) {
-      const lines = [
+      setEquationLines([
         ...data.formulaLines,
-        data.targetSpeed == null ? "当前无法计算 v配" : `当前目标速度：v配 = ${formatScientific(data.targetSpeed, 2, "m/s")}`
-      ];
-      lines.forEach((text) => addLine(text));
+        data.targetSpeed == null
+          ? "当前无法计算 v配"
+          : `当前目标速度：v_{\\mathrm{配}} = ${formatScientific(data.targetSpeed, 2, "m/s")}`
+      ]);
     }
     return;
   }
@@ -434,46 +453,45 @@ function updateEquationPanel() {
   const accel = (q * ey) / m;
   const scenario = getScenarioKey();
 
-  refs.equationLines.innerHTML = "";
-
-  function addLine(text) {
-    const div = document.createElement("div");
-    div.className = "equation-line";
-    div.textContent = text;
-    refs.equationLines.appendChild(div);
-  }
-
   if (scenario === "free") {
     refs.equationTitle.textContent = "匀速直线运动";
     refs.equationNote.textContent = "当前电场和磁场都为 0，轨迹退化为匀速直线。";
-    addLine(`x(t) = ${formatCoefficient(vx0)} t`);
-    addLine(`y(t) = ${formatCoefficient(vy0)} t`);
+    setEquationLines([
+      `x(t) = ${formatCoefficient(vx0)} t`,
+      `y(t) = ${formatCoefficient(vy0)} t`
+    ]);
     return;
   }
 
   if (scenario === "electric") {
     refs.equationTitle.textContent = "仅电场参数方程";
     refs.equationNote.textContent = "当前是匀强电场情形：x 方向匀速，y 方向匀加速。";
-    addLine(`x(t) = ${formatCoefficient(vx0)} t`);
-    addLine(`y(t) = ${formatCoefficient(vy0)} t + 1/2·(${formatCoefficient(accel)}) t²`);
+    setEquationLines([
+      `x(t) = ${formatCoefficient(vx0)} t`,
+      `y(t) = ${formatCoefficient(vy0)} t + 1/2\\cdot(${formatCoefficient(accel)}) t^2`
+    ]);
     return;
   }
 
   if (scenario === "magnetic") {
     refs.equationTitle.textContent = "仅磁场参数方程";
     refs.equationNote.textContent = "当前是匀强磁场圆周运动的参数形式，ω = qB/m。";
-    addLine(`ω = ${formatCoefficient(omega)} rad/s`);
-    addLine(`x(t) = (${formatCoefficient(vx0 / omega)}) sin(ωt) - (${formatCoefficient(vy0 / omega)}) [cos(ωt) - 1]`);
-    addLine(`y(t) = (${formatCoefficient(vy0 / omega)}) sin(ωt) + (${formatCoefficient(vx0 / omega)}) [cos(ωt) - 1]`);
+    setEquationLines([
+      `\\omega = ${formatCoefficient(omega)}\\,\\mathrm{rad/s}`,
+      `x(t) = (${formatCoefficient(vx0 / omega)})\\sin(\\omega t) - (${formatCoefficient(vy0 / omega)})[\\cos(\\omega t) - 1]`,
+      `y(t) = (${formatCoefficient(vy0 / omega)})\\sin(\\omega t) + (${formatCoefficient(vx0 / omega)})[\\cos(\\omega t) - 1]`
+    ]);
     return;
   }
 
   refs.equationTitle.textContent = "电磁复合场参数方程";
   refs.equationNote.textContent = "当前是匀强电场与匀强磁场共存的参数形式，沿 x 方向存在漂移项。";
-  addLine(`ω = ${formatCoefficient(omega)} rad/s`);
-  addLine(`v_d = E/B = ${formatCoefficient(drift)} m/s`);
-  addLine(`x(t) = (${formatCoefficient((vx0 - drift) / omega)}) sin(ωt) - (${formatCoefficient(vy0 / omega)}) [cos(ωt) - 1] + (${formatCoefficient(drift)}) t`);
-  addLine(`y(t) = (${formatCoefficient(vy0 / omega)}) sin(ωt) + (${formatCoefficient((vx0 - drift) / omega)}) [cos(ωt) - 1]`);
+  setEquationLines([
+    `\\omega = ${formatCoefficient(omega)}\\,\\mathrm{rad/s}`,
+    `v_d = E/B = ${formatCoefficient(drift)}\\,\\mathrm{m/s}`,
+    `x(t) = (${formatCoefficient((vx0 - drift) / omega)})\\sin(\\omega t) - (${formatCoefficient(vy0 / omega)})[\\cos(\\omega t) - 1] + (${formatCoefficient(drift)})t`,
+    `y(t) = (${formatCoefficient(vy0 / omega)})\\sin(\\omega t) + (${formatCoefficient((vx0 - drift) / omega)})[\\cos(\\omega t) - 1]`
+  ]);
 }
 
 function getInstantKinematics() {
