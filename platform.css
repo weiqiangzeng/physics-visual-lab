@@ -734,14 +734,16 @@
   border-color: rgba(23, 93, 89, 0.38);
 }
 
-.task-panel mjx-container,
-.guide-formula mjx-container,
-.formula-panel mjx-container {
+.task-panel .katex,
+.guide-formula .katex,
+.formula-panel .katex,
+.critical-card .katex {
   font-size: 1.02em;
 }
 
-.guide-formula mjx-container,
-.formula-panel mjx-container {
+.guide-formula .katex,
+.formula-panel .katex,
+.critical-card .katex {
   margin: 0 !important;
 }
 

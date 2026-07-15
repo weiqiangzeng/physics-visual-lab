@@ -141,43 +141,54 @@
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
   let mathTypesetSource = "";
+  let katexPromise = null;
 
-  function loadMathJax() {
-    window.MathJax = window.MathJax || {
-      tex: {
-        inlineMath: [["\\(", "\\)"], ["$", "$"]]
-      },
-      options: {
-        skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+  function loadKaTeX() {
+    if (window.renderMathInElement) return Promise.resolve();
+    if (katexPromise) return katexPromise;
+    katexPromise = new Promise((resolve) => {
+      if (!document.querySelector("link[data-katex]")) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.dataset.katex = "true";
+        link.href = "./vendor/katex/katex.min.css?v=0.17.0";
+        document.head.appendChild(link);
       }
-    };
-    if (window.MathJax.typesetPromise) return Promise.resolve();
-    return new Promise((resolve) => {
-      let script = document.querySelector("script[data-mathjax]");
-      if (!script) {
-        script = document.createElement("script");
+      const loadScript = (src, next) => {
+        const script = document.createElement("script");
         script.async = true;
-        script.dataset.mathjax = "true";
-        script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        script.src = src;
+        script.addEventListener("load", next, { once: true });
+        script.addEventListener("error", resolve, { once: true });
         document.head.appendChild(script);
-      }
-      script.addEventListener("load", resolve, { once: true });
-      script.addEventListener("error", resolve, { once: true });
+      };
+      loadScript("./vendor/katex/katex.min.js?v=0.17.0", () => {
+        loadScript("./vendor/katex/contrib/auto-render.min.js?v=0.17.0", resolve);
+      });
     });
+    return katexPromise;
   }
 
   function typesetMath() {
-    const targets = Array.from(document.querySelectorAll(".task-panel, .guide-formula, .formula-panel"));
+    const targets = Array.from(document.querySelectorAll(".task-panel, .guide-formula, .formula-panel, .critical-card"));
     if (!targets.length) return;
     const source = targets.map((target) => target.textContent).join("\n");
     if (source === mathTypesetSource) return;
     mathTypesetSource = source;
-    loadMathJax().then(() => {
-      if (window.MathJax?.typesetClear) window.MathJax.typesetClear(targets);
-      if (window.MathJax?.typesetPromise) return window.MathJax.typesetPromise(targets);
-      return null;
+    loadKaTeX().then(() => {
+      if (!window.renderMathInElement) return null;
+      targets.forEach((target) => window.renderMathInElement(target, {
+        delimiters: [
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false }
+        ],
+        throwOnError: false,
+        ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+      }));
     }).catch(() => {
-      // Formula text remains readable if the external typesetter is unavailable.
+      // Formula text remains readable if the local typesetter is unavailable.
     });
   }
   window.physicsTypesetMath = typesetMath;
