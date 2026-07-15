@@ -120,6 +120,7 @@
 }
 
 .route-panel,
+.course-panel,
 .lesson-section {
   padding: 28px 36px 0;
 }
@@ -199,6 +200,87 @@
   border-radius: inherit;
   background: var(--platform-strong);
   transition: width 180ms ease;
+}
+
+.volume-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 22px;
+  padding: 5px;
+  border: 1px solid var(--platform-border);
+  border-radius: 10px;
+  background: rgba(18, 31, 36, 0.04);
+}
+
+.volume-tabs button {
+  min-height: 42px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.volume-tabs button.active {
+  background: var(--platform-strong);
+  color: #f8fbf8;
+}
+
+.course-outline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.course-chapter {
+  display: grid;
+  align-content: space-between;
+  min-height: 82px;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--platform-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.course-chapter strong {
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.course-chapter span {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.course-chapter.has-lab {
+  border-color: rgba(23, 93, 89, 0.32);
+  background: rgba(23, 93, 89, 0.08);
+}
+
+.course-chapter.has-lab span {
+  color: var(--platform-strong);
+  font-weight: 700;
+}
+
+.volume-empty {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-left: 3px solid rgba(18, 31, 36, 0.24);
+  background: rgba(18, 31, 36, 0.05);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.experiment-card[hidden] {
+  display: none;
 }
 
 .lesson-heading {
@@ -481,6 +563,7 @@ summary:focus-visible {
   }
 
   .route-panel,
+  .course-panel,
   .lesson-section {
     padding: 24px 20px 0;
   }
@@ -496,6 +579,14 @@ summary:focus-visible {
   }
 
   .experiment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .volume-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .course-outline {
     grid-template-columns: 1fr;
   }
 

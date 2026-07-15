@@ -85,8 +85,80 @@
       takeaway: "复合场轨迹取决于各力的方向和大小，配速只消除特定方向的合力。"
     }
   };
+  const courseBooks = [
+    {
+      id: "required-1",
+      title: "必修第一册",
+      summary: "运动与力的基础概念，按人教版章节顺序学习。",
+      chapters: [
+        ["required-1-1", "第一章 运动的描述"],
+        ["required-1-2", "第二章 匀变速直线运动的研究"],
+        ["required-1-3", "第三章 相互作用"],
+        ["required-1-4", "第四章 运动和力的关系"]
+      ]
+    },
+    {
+      id: "required-2",
+      title: "必修第二册",
+      summary: "从曲线运动进入万有引力、功和机械能。",
+      chapters: [
+        ["required-2-5", "第五章 抛体运动"],
+        ["required-2-6", "第六章 圆周运动"],
+        ["required-2-7", "第七章 万有引力与宇宙航行"],
+        ["required-2-8", "第八章 机械能守恒定律"]
+      ]
+    },
+    {
+      id: "required-3",
+      title: "必修第三册",
+      summary: "从静电场、电路到电磁感应与电磁波初步。",
+      chapters: [
+        ["required-3-9", "第九章 静电场及其应用"],
+        ["required-3-10", "第十章 静电场中的能量"],
+        ["required-3-11", "第十一章 电路及其应用"],
+        ["required-3-12", "第十二章 电能 能量守恒定律"],
+        ["required-3-13", "第十三章 电磁感应与电磁波初步"]
+      ]
+    },
+    {
+      id: "selective-1",
+      title: "选择性必修第一册",
+      summary: "动量、机械振动、机械波和光。",
+      chapters: [
+        ["selective-1-1", "第一章 动量守恒定律"],
+        ["selective-1-2", "第二章 机械振动"],
+        ["selective-1-3", "第三章 机械波"],
+        ["selective-1-4", "第四章 光"]
+      ]
+    },
+    {
+      id: "selective-2",
+      title: "选择性必修第二册",
+      summary: "安培力、洛伦兹力、电磁感应、交变电流和传感器。",
+      chapters: [
+        ["selective-2-1", "第一章 安培力与洛伦兹力"],
+        ["selective-2-2", "第二章 电磁感应"],
+        ["selective-2-3", "第三章 交变电流"],
+        ["selective-2-4", "第四章 电磁振荡与电磁波"],
+        ["selective-2-5", "第五章 传感器"]
+      ]
+    },
+    {
+      id: "selective-3",
+      title: "选择性必修第三册",
+      summary: "分子动理论、热力学、原子结构和原子核。",
+      chapters: [
+        ["selective-3-1", "第一章 分子动理论"],
+        ["selective-3-2", "第二章 气体、固体和液体"],
+        ["selective-3-3", "第三章 热力学定律"],
+        ["selective-3-4", "第四章 原子结构和波粒二象性"],
+        ["selective-3-5", "第五章 原子核"]
+      ]
+    }
+  ];
   const storageKey = "physics-visual-lab-progress-v1";
   const audienceStorageKey = "physics-visual-lab-audience-v1";
+  const volumeStorageKey = "physics-visual-lab-volume-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
 
@@ -103,6 +175,23 @@
       window.localStorage.setItem(audienceStorageKey, audience);
     } catch {
       // Audience mode is a preference, never a requirement for using an experiment.
+    }
+  }
+
+  function readVolume() {
+    try {
+      const stored = window.localStorage.getItem(volumeStorageKey);
+      return courseBooks.some((book) => book.id === stored) ? stored : courseBooks[0].id;
+    } catch {
+      return courseBooks[0].id;
+    }
+  }
+
+  function saveVolume(volume) {
+    try {
+      window.localStorage.setItem(volumeStorageKey, volume);
+    } catch {
+      // The course navigator remains usable when storage is unavailable.
     }
   }
 
@@ -127,6 +216,57 @@
       if (label) label.textContent = audience === "teacher" ? "课堂演示" : "学习任务";
       if (count) count.hidden = audience === "teacher";
     });
+  }
+
+  function renderCourseNavigation() {
+    if (!isHome) return;
+    const tabs = Array.from(document.querySelectorAll("[data-volume]"));
+    const outline = document.getElementById("courseOutline");
+    const title = document.getElementById("courseTitle");
+    const courseSummary = document.getElementById("courseSummary");
+    const lessonTitle = document.getElementById("lessonTitle");
+    const volumeSummary = document.getElementById("volumeSummary");
+    const empty = document.getElementById("volumeEmpty");
+    const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
+    if (!tabs.length || !outline) return;
+
+    const selectVolume = (volumeId) => {
+      const book = courseBooks.find((item) => item.id === volumeId) || courseBooks[0];
+      const matchedCards = cards.filter((card) => (card.dataset.volumes || "").split(/\s+/).includes(book.id));
+      const matchedChapters = new Set();
+      matchedCards.forEach((card) => {
+        (card.dataset.chapters || "").split(/\s+/).forEach((chapter) => matchedChapters.add(chapter));
+      });
+
+      tabs.forEach((tab) => {
+        const active = tab.dataset.volume === book.id;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", active ? "true" : "false");
+      });
+      cards.forEach((card) => {
+        card.hidden = !(card.dataset.volumes || "").split(/\s+/).includes(book.id);
+      });
+      if (title) title.textContent = book.title;
+      if (courseSummary) courseSummary.textContent = book.summary;
+      if (lessonTitle) lessonTitle.textContent = `${book.title} · 可视化实验`;
+      if (volumeSummary) {
+        volumeSummary.textContent = matchedCards.length
+          ? `本册已有 ${matchedCards.length} 个可视化实验，先观察现象，再回到章节概念。`
+          : "本册暂未开放可视化实验，章节内容正在建设中。";
+      }
+      if (empty) empty.hidden = matchedCards.length > 0;
+      outline.innerHTML = book.chapters.map(([id, chapter]) => {
+        const hasLab = matchedChapters.has(id);
+        return `<div class="course-chapter ${hasLab ? "has-lab" : "building"}">
+          <strong>${chapter}</strong>
+          <span>${hasLab ? "可视化实验已开放" : "内容建设中"}</span>
+        </div>`;
+      }).join("");
+      saveVolume(book.id);
+    };
+
+    tabs.forEach((tab) => tab.addEventListener("click", () => selectVolume(tab.dataset.volume)));
+    selectVolume(readVolume());
   }
 
   const audience = readAudience();
@@ -198,6 +338,7 @@
       }
       if (progress.completed[lesson]) card.classList.add("completed");
     });
+    renderCourseNavigation();
     return;
   }
 
