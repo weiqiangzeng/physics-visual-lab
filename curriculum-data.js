@@ -104,7 +104,9 @@
       relations: ["x-t 斜率 -> v", "v-t 斜率 -> a", "v-t 面积 -> Δx"],
       explore: ["在匀速、加速和减速三种状态间切换，比较两类图像。", "改变运动方向，观察图像正负号和面积符号。"],
       misconceptions: "图像的高度、斜率和面积代表不同物理量，不能混用。",
-      prerequisite: "速度、加速度和函数图像的斜率"
+      prerequisite: "速度、加速度和函数图像的斜率",
+      status: "open",
+      lab: "motion-graphs.html"
     }),
     model({
       id: "uniform-acceleration",
@@ -160,7 +162,9 @@
       relations: ["0 <= f静 <= fmax", "fmax = μsN", "f滑 = μkN"],
       explore: ["逐渐增大水平拉力，记录静摩擦力和加速度。", "改变正压力，比较最大静摩擦力和滑动摩擦力。"],
       misconceptions: "静摩擦力不总是等于 μN；没有相对运动不代表没有摩擦力。",
-      prerequisite: "受力分析、平衡条件和牛顿第二定律"
+      prerequisite: "受力分析、平衡条件和牛顿第二定律",
+      status: "open",
+      lab: "friction.html"
     }),
     model({
       id: "elastic-force",
@@ -188,7 +192,9 @@
       relations: ["a ∝ F合", "a ∝ 1/m", "F合决定加速度而非速度"],
       explore: ["固定质量改变合力，拟合 a-F 图像。", "固定合力改变质量，比较相同时间内的速度变化。"],
       misconceptions: "合力越大不一定速度越大；没有合力只表示加速度为零。",
-      prerequisite: "受力分析、加速度和矢量合成"
+      prerequisite: "受力分析、加速度和矢量合成",
+      status: "open",
+      lab: "newton-laws.html"
     }),
     model({
       id: "action-reaction",
