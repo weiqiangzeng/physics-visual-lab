@@ -163,14 +163,14 @@
                 <div class="label-row">
                   <div class="label-copy">
                     <span class="label-title">质量</span>
-                    <span class="label-math">m / kg</span>
+                    <span class="label-math">\(m / \mathrm{kg}\)</span>
                   </div>
                   <strong id="massValue">1.00 kg</strong>
                 </div>
                 <input id="massInput" type="range" min="0.2" max="5" step="0.1" value="1" />
                 <div class="inline-edit">
                   <input id="massNumber" class="number-input" type="number" min="0.2" max="5" step="0.1" value="1" />
-                  <span class="input-unit">kg</span>
+                  <span class="input-unit">\(\mathrm{kg}\)</span>
                 </div>
               </label>
 
@@ -178,14 +178,14 @@
                 <div class="label-row">
                   <div class="label-copy">
                     <span class="label-title">劲度系数</span>
-                    <span class="label-math">k / (N/m)</span>
+                    <span class="label-math">\(k / (\mathrm{N/m})\)</span>
                   </div>
                   <strong id="springValue">16.0 N/m</strong>
                 </div>
                 <input id="springInput" type="range" min="1" max="80" step="0.5" value="16" />
                 <div class="inline-edit">
                   <input id="springNumber" class="number-input" type="number" min="1" max="80" step="0.5" value="16" />
-                  <span class="input-unit">N/m</span>
+                  <span class="input-unit">\(\mathrm{N/m}\)</span>
                 </div>
               </label>
 
@@ -193,14 +193,14 @@
                 <div class="label-row">
                   <div class="label-copy">
                     <span class="label-title">振幅</span>
-                    <span class="label-math">A / m</span>
+                    <span class="label-math">\(A / \mathrm{m}\)</span>
                   </div>
                   <strong id="amplitudeValue">0.80 m</strong>
                 </div>
                 <input id="amplitudeInput" type="range" min="0.1" max="2" step="0.05" value="0.8" />
                 <div class="inline-edit">
                   <input id="amplitudeNumber" class="number-input" type="number" min="0.1" max="2" step="0.05" value="0.8" />
-                  <span class="input-unit">m</span>
+                  <span class="input-unit">\(\mathrm{m}\)</span>
                 </div>
               </label>
 
@@ -208,14 +208,14 @@
                 <div class="label-row">
                   <div class="label-copy">
                     <span class="label-title">初相位</span>
-                    <span class="label-math">φ / °</span>
+                    <span class="label-math">\(\phi / {}^\circ\)</span>
                   </div>
                   <strong id="phaseValue">0°</strong>
                 </div>
                 <input id="phaseInput" type="range" min="-180" max="180" step="5" value="0" />
                 <div class="inline-edit">
                   <input id="phaseNumber" class="number-input" type="number" min="-180" max="180" step="5" value="0" />
-                  <span class="input-unit">°</span>
+                  <span class="input-unit">\({}^\circ\)</span>
                 </div>
               </label>
 
@@ -223,14 +223,14 @@
                 <div class="label-row">
                   <div class="label-copy">
                     <span class="label-title">观察时刻</span>
-                    <span class="label-math">t / s</span>
+                    <span class="label-math">\(t / \mathrm{s}\)</span>
                   </div>
                   <strong id="timeValue">0.00 s</strong>
                 </div>
                 <input id="timeInput" type="range" min="0" max="1.57" step="0.01" value="0" />
                 <div class="inline-edit">
                   <input id="timeNumber" class="number-input" type="number" min="0" max="1.57" step="0.01" value="0" />
-                  <span class="input-unit">s，拖动会暂停</span>
+                  <span class="input-unit">\(\mathrm{s}\)，拖动会暂停</span>
                 </div>
               </label>
             </div>
@@ -275,6 +275,6 @@
     </main>
 
     <script src="./oscillation.js?v=20260702-phasecircle"></script>
-    <script src="./platform.js?v=platform"></script>
+    <script src="./platform.js?v=math-controls-3"></script>
   </body>
 </html>

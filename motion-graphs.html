@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>运动图像可视化实验台</title>
-    <link rel="stylesheet" href="./styles.css?v=platform" />
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=friction-fix-1" />
     <link rel="stylesheet" href="./model-lab.css?v=friction-fix-1" />
   </head>
@@ -26,15 +26,15 @@
         </div>
         <aside class="controls"><div class="controls-overview"><div><span class="preset-label">实验控制</span><h2>运动参数</h2></div><div class="overview-badges"><span class="overview-badge" id="overviewSpeed">1x</span><span class="overview-badge" id="overviewTime">0.00 s</span></div></div>
           <details class="section-panel" open><summary class="section-summary"><span>核心参数</span></summary><div class="section-body">
-            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">初速度</span><span class="label-math">v₀ / (m/s)</span></div><strong id="initialSpeedValue">2.00 m/s</strong></div><input id="initialSpeedInput" type="range" min="-5" max="5" step="0.1" value="2" /><div class="inline-edit"><input id="initialSpeedNumber" class="number-input" type="number" min="-5" max="5" step="0.1" value="2" /><span class="input-unit">m/s</span></div></label>
-            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">加速度</span><span class="label-math">a / (m/s²)</span></div><strong id="accelerationValue">1.00 m/s²</strong></div><input id="accelerationInput" type="range" min="-3" max="3" step="0.1" value="1" /><div class="inline-edit"><input id="accelerationNumber" class="number-input" type="number" min="-3" max="3" step="0.1" value="1" /><span class="input-unit">m/s²</span></div></label>
-            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">观察时刻</span><span class="label-math">t / s</span></div><strong id="timeValue">0.00 s</strong></div><input id="timeInput" type="range" min="0" max="6" step="0.01" value="0" /><div class="inline-edit"><input id="timeNumber" class="number-input" type="number" min="0" max="6" step="0.01" value="0" /><span class="input-unit">s，拖动会暂停</span></div></label>
+            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">初速度</span><span class="label-math">\(v_0 / (\mathrm{m/s})\)</span></div><strong id="initialSpeedValue">2.00 m/s</strong></div><input id="initialSpeedInput" type="range" min="-5" max="5" step="0.1" value="2" /><div class="inline-edit"><input id="initialSpeedNumber" class="number-input" type="number" min="-5" max="5" step="0.1" value="2" /><span class="input-unit">\(\mathrm{m/s}\)</span></div></label>
+            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">加速度</span><span class="label-math">\(a / (\mathrm{m/s^2})\)</span></div><strong id="accelerationValue">1.00 m/s²</strong></div><input id="accelerationInput" type="range" min="-3" max="3" step="0.1" value="1" /><div class="inline-edit"><input id="accelerationNumber" class="number-input" type="number" min="-3" max="3" step="0.1" value="1" /><span class="input-unit">\(\mathrm{m/s^2}\)</span></div></label>
+            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">观察时刻</span><span class="label-math">\(t / \mathrm{s}\)</span></div><strong id="timeValue">0.00 s</strong></div><input id="timeInput" type="range" min="0" max="6" step="0.01" value="0" /><div class="inline-edit"><input id="timeNumber" class="number-input" type="number" min="0" max="6" step="0.01" value="0" /><span class="input-unit">\(\mathrm{s}\)，拖动会暂停</span></div></label>
           </div></details>
           <details class="section-panel" open><summary class="section-summary"><span>显示与播放</span></summary><div class="section-body"><section class="display-panel"><div class="toggle-grid"><label class="toggle-item"><input id="showPositionToggle" type="checkbox" checked /><span>显示位置曲线</span></label><label class="toggle-item"><input id="showVelocityToggle" type="checkbox" checked /><span>显示速度曲线</span></label><label class="toggle-item"><input id="demoModeToggle" type="checkbox" /><span>教学演示模式</span></label></div></section><section class="display-panel"><div class="speed-panel"><span class="speed-label">播放速度</span><div class="speed-buttons"><button class="speed-button" type="button" data-speed="0.25">0.25x</button><button class="speed-button" type="button" data-speed="0.5">0.5x</button><button class="speed-button active" type="button" data-speed="1">1x</button><button class="speed-button" type="button" data-speed="2">2x</button></div></div></section></div></details>
           <details class="section-panel" open><summary class="section-summary"><span>公式与读图</span></summary><div class="section-body"><div class="formula-panel"><strong>\(x = v_0t + \frac{1}{2}at^2\)</strong><strong>\(v = v_0 + at\)</strong><p>同一时刻的竖线把运动、x-t 图像和 v-t 图像对应起来。</p></div></div></details>
         </aside>
       </section>
     </main>
-    <script src="./motion-graphs.js?v=curriculum"></script><script src="./platform.js?v=platform"></script>
+    <script src="./motion-graphs.js?v=curriculum"></script><script src="./platform.js?v=math-controls-3"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>带电粒子在电场与磁场中的运动虚拟实验台</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=friction-fix-1" />
   </head>
   <body>
@@ -112,13 +112,7 @@
                     <div class="label-row">
                       <div class="label-copy">
                         <span class="label-title">电荷量</span>
-                        <span class="label-math">
-                          <math>
-                            <mi>q</mi>
-                            <mo>/</mo>
-                            <mi>e</mi>
-                          </math>
-                        </span>
+                        <span class="label-math">\(q / e\)</span>
                       </div>
                       <div class="value-lock">
                         <strong id="chargeValue">+1 e</strong>
@@ -128,7 +122,7 @@
                     <input id="chargeInput" type="range" min="-6" max="6" step="1" value="1" />
                     <div class="inline-edit">
                       <input id="chargeNumber" class="number-input" type="number" min="-6" max="6" step="1" value="1" />
-                      <span class="input-unit">e</span>
+                      <span class="input-unit">\(e\)</span>
                     </div>
                   </label>
 
@@ -136,25 +130,7 @@
                     <div class="label-row">
                       <div class="label-copy">
                         <span class="label-title">质量</span>
-                        <span class="label-math">
-                          <math>
-                            <mi>m</mi>
-                            <mo>/</mo>
-                            <mrow>
-                              <mo>(</mo>
-                              <mo>&times;</mo>
-                              <msup>
-                                <mn>10</mn>
-                                <mrow>
-                                  <mo>-</mo>
-                                  <mn>27</mn>
-                                </mrow>
-                              </msup>
-                              <mtext> kg</mtext>
-                              <mo>)</mo>
-                            </mrow>
-                          </math>
-                        </span>
+                        <span class="label-math">\(m / (\times 10^{-27}\,\mathrm{kg})\)</span>
                       </div>
                       <div class="value-lock">
                         <strong id="massValue">1.5 ×10^-27 kg</strong>
@@ -164,7 +140,7 @@
                     <input id="massInput" type="range" min="0.5" max="10" step="0.1" value="1.5" />
                     <div class="inline-edit">
                       <input id="massNumber" class="number-input" type="number" min="0.5" max="10" step="0.1" value="1.5" />
-                      <span class="input-unit">×10^-27 kg</span>
+                      <span class="input-unit">\(\times 10^{-27}\,\mathrm{kg}\)</span>
                     </div>
                   </label>
 
@@ -172,25 +148,7 @@
                     <div class="label-row">
                       <div class="label-copy">
                         <span class="label-title">电场强度</span>
-                        <span class="label-math">
-                          <math>
-                            <msub>
-                              <mi>E</mi>
-                              <mi>y</mi>
-                            </msub>
-                            <mo>/</mo>
-                            <mrow>
-                              <mo>(</mo>
-                              <mo>&times;</mo>
-                              <msup>
-                                <mn>10</mn>
-                                <mn>5</mn>
-                              </msup>
-                              <mtext> N/C</mtext>
-                              <mo>)</mo>
-                            </mrow>
-                          </math>
-                        </span>
+                        <span class="label-math">\(E_y / (\times 10^{5}\,\mathrm{N/C})\)</span>
                       </div>
                       <div class="value-lock">
                         <strong id="electricValue">+3.0 ×10^5 N/C</strong>
@@ -201,7 +159,7 @@
                     <input id="electricInput" type="range" min="-24" max="24" step="0.1" value="3" />
                     <div class="inline-edit">
                       <input id="electricNumber" class="number-input" type="number" min="-24" max="24" step="0.1" value="3" />
-                      <span class="input-unit">×10^5 N/C</span>
+                      <span class="input-unit">\(\times 10^{5}\,\mathrm{N/C}\)</span>
                     </div>
                   </label>
 
@@ -209,16 +167,7 @@
                     <div class="label-row">
                       <div class="label-copy">
                         <span class="label-title">磁感应强度</span>
-                        <span class="label-math">
-                          <math>
-                            <msub>
-                              <mi>B</mi>
-                              <mi>z</mi>
-                            </msub>
-                            <mo>/</mo>
-                            <mi>T</mi>
-                          </math>
-                        </span>
+                        <span class="label-math">\(B_z / \mathrm{T}\)</span>
                       </div>
                       <div class="value-lock">
                         <strong id="magneticValue">0.00 T</strong>
@@ -229,7 +178,7 @@
                     <input id="magneticInput" type="range" min="-8" max="8" step="0.05" value="0" />
                     <div class="inline-edit">
                       <input id="magneticNumber" class="number-input" type="number" min="-8" max="8" step="0.05" value="0" />
-                      <span class="input-unit">T</span>
+                      <span class="input-unit">\(\mathrm{T}\)</span>
                     </div>
                   </label>
 
@@ -237,25 +186,7 @@
                     <div class="label-row">
                       <div class="label-copy">
                         <span class="label-title">初速度</span>
-                        <span class="label-math">
-                          <math>
-                            <msub>
-                              <mi>v</mi>
-                              <mn>0</mn>
-                            </msub>
-                            <mo>/</mo>
-                            <mrow>
-                              <mo>(</mo>
-                              <mo>&times;</mo>
-                              <msup>
-                                <mn>10</mn>
-                                <mn>6</mn>
-                              </msup>
-                              <mtext> m/s</mtext>
-                              <mo>)</mo>
-                            </mrow>
-                          </math>
-                        </span>
+                        <span class="label-math">\(v_0 / (\times 10^{6}\,\mathrm{m/s})\)</span>
                       </div>
                       <div class="value-lock">
                         <strong id="speedValue">8.0 ×10^6 m/s</strong>
@@ -265,7 +196,7 @@
                     <input id="speedInput" type="range" min="1" max="28" step="0.1" value="8" />
                     <div class="inline-edit">
                       <input id="speedNumber" class="number-input" type="number" min="1" max="28" step="0.1" value="8" />
-                      <span class="input-unit">×10^6 m/s</span>
+                      <span class="input-unit">\(\times 10^{6}\,\mathrm{m/s}\)</span>
                     </div>
                   </label>
 
@@ -273,13 +204,7 @@
                     <div class="label-row">
                       <div class="label-copy">
                         <span class="label-title">入射角</span>
-                        <span class="label-math">
-                          <math>
-                            <mi>&theta;</mi>
-                            <mo>/</mo>
-                            <mo>&deg;</mo>
-                          </math>
-                        </span>
+                        <span class="label-math">\(\theta / {}^\circ\)</span>
                       </div>
                       <div class="value-lock">
                         <strong id="angleValue">0°</strong>
@@ -289,7 +214,7 @@
                     <input id="angleInput" type="range" min="-85" max="85" step="0.5" value="0" />
                     <div class="inline-edit">
                       <input id="angleNumber" class="number-input" type="number" min="-85" max="85" step="0.5" value="0" />
-                      <span class="input-unit">°</span>
+                      <span class="input-unit">\({}^\circ\)</span>
                     </div>
                   </label>
                 </div>
@@ -315,16 +240,16 @@
                       <div class="inline-edit">
                         <input id="gravityInput" type="range" min="1" max="50" step="0.1" value="25.6" />
                         <input id="gravityNumber" class="number-input" type="number" min="1" max="50" step="0.1" value="25.6" />
-                        <span class="input-unit">×10^13 m/s²</span>
+                        <span class="input-unit">\(\times 10^{13}\,\mathrm{m/s^2}\)</span>
                       </div>
                     </div>
 
                     <div class="speed-match-control hidden" id="constantForceControl">
-                      <span class="speed-label">恒力 F₀</span>
+                      <span class="speed-label">恒力 \(F_0\)</span>
                       <div class="inline-edit">
                         <input id="constantForceInput" type="range" min="-5" max="5" step="0.05" value="-1" />
                         <input id="constantForceNumber" class="number-input" type="number" min="-5" max="5" step="0.05" value="-1" />
-                        <span class="input-unit">×10^-12 N</span>
+                        <span class="input-unit">\(\times 10^{-12}\,\mathrm{N}\)</span>
                       </div>
                     </div>
 
@@ -337,15 +262,15 @@
                       <p class="equation-note">配速辅助</p>
                       <div class="metrics-grid helper-grid">
                         <article class="metric-card">
-                          <span class="metric-name">v配</span>
+                          <span class="metric-name">\(v_{\text{配}}\)</span>
                           <strong id="targetSpeedInline">--</strong>
                         </article>
                         <article class="metric-card">
-                          <span class="metric-name">v余</span>
+                          <span class="metric-name">\(v_{\text{余}}\)</span>
                           <strong id="residualSpeedInline">--</strong>
                         </article>
                         <article class="metric-card">
-                          <span class="metric-name">Δv</span>
+                          <span class="metric-name">\(\Delta v\)</span>
                           <strong id="deltaSpeedInline">--</strong>
                         </article>
                         <article class="metric-card">
@@ -375,75 +300,43 @@
                     </div>
                     <div class="metrics-grid">
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <msub><mi>F</mi><mi>E</mi></msub>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(F_E\)</span>
                         <strong id="electricForceMetric">0 N</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <msub><mi>F</mi><mi>B</mi></msub>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(F_B\)</span>
                         <strong id="magneticForceMetric">0 N</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <mi>v</mi>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(v\)</span>
                         <strong id="speedMetric">0 m/s</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <msub><mi>F</mi><mtext>合</mtext></msub>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(F_{\text{合}}\)</span>
                         <strong id="netForceMetric">0 N</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <mi>r</mi>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(r\)</span>
                         <strong id="radiusMetric">--</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <mi>T</mi>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(T\)</span>
                         <strong id="periodMetric">--</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <mi>t</mi>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(t\)</span>
                         <strong id="timeMetric">0 μs</strong>
                       </article>
                       <article class="metric-card">
-                        <span class="metric-name">
-                          <math>
-                            <msub><mi>t</mi><mtext>max</mtext></msub>
-                          </math>
-                        </span>
+                        <span class="metric-name">\(t_{\max}\)</span>
                         <strong id="maxTimeMetric">8.0 μs</strong>
                       </article>
                       <article class="metric-card hidden" id="matchForceCard">
-                        <span class="metric-name" id="matchForceLabel">F外</span>
+                        <span class="metric-name" id="matchForceLabel">\(F_{\text{外}}\)</span>
                         <strong id="matchForceMetric">--</strong>
                       </article>
                       <article class="metric-card hidden" id="targetSpeedCard">
-                        <span class="metric-name">v配</span>
+                        <span class="metric-name">\(v_{\text{配}}\)</span>
                         <strong id="targetSpeedMetric">--</strong>
                       </article>
                     </div>
@@ -521,7 +414,7 @@
                       <span class="speed-label">模拟时间边界</span>
                       <div class="inline-edit">
                         <input id="maxTimeNumber" class="number-input" type="number" min="0.5" max="100" step="0.5" value="8.0" />
-                        <span class="input-unit">μs</span>
+                        <span class="input-unit">\(\mu\mathrm{s}\)</span>
                       </div>
                     </div>
                   </section>
@@ -548,7 +441,7 @@
       </section>
     </main>
 
-    <script src="./script.js"></script>
-    <script src="./platform.js?v=platform"></script>
+    <script src="./script.js?v=math-controls-3"></script>
+    <script src="./platform.js?v=math-controls-3"></script>
   </body>
 </html>

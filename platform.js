@@ -142,6 +142,7 @@
   const isHome = currentPage === "index.html";
   let katexPromise = null;
   let mathTypesetRequest = 0;
+  let controlValueObserver = null;
 
   function loadKaTeX() {
     if (window.renderMathInElement) return Promise.resolve();
@@ -170,8 +171,9 @@
   }
 
   function typesetMath() {
+    prepareControlValues();
     const targets = Array.from(document.querySelectorAll(
-      ".task-panel, .guide-formula, .formula-panel, .critical-card, .equation-lines, .speed-match-formula"
+      ".task-panel, .guide-formula, .formula-panel, .critical-card, .equation-lines, .speed-match-formula, .equation-note, .label-math, .input-unit, .metric-name, .math-label, .speed-label, .label-row > strong, .metric-card > strong"
     )).filter((target) => ["\\(", "\\[", "$$", "$"]
       .some((delimiter) => target.textContent.includes(delimiter)));
     if (!targets.length) return;
@@ -179,8 +181,8 @@
     loadKaTeX().then(() => {
       if (request !== mathTypesetRequest || !window.renderMathInElement) return null;
       const latestTargets = Array.from(document.querySelectorAll(
-        ".task-panel, .guide-formula, .formula-panel, .critical-card, .equation-lines, .speed-match-formula"
-      )).filter((target) => ["\\(", "\\[", "$$", "$"]
+        ".task-panel, .guide-formula, .formula-panel, .critical-card, .equation-lines, .speed-match-formula, .equation-note, .label-math, .input-unit, .metric-name, .math-label, .speed-label, .label-row > strong, .metric-card > strong"
+    )).filter((target) => ["\\(", "\\[", "$$", "$"]
         .some((delimiter) => target.textContent.includes(delimiter)));
       latestTargets.forEach((target) => window.renderMathInElement(target, {
         delimiters: [
@@ -196,6 +198,49 @@
     }).catch(() => {
       // Formula text remains readable if the local typesetter is unavailable.
     });
+  }
+
+  function controlValueToTex(rawValue) {
+    const value = rawValue.trim();
+    if (!/^[+\-−]?\d/.test(value)) return null;
+    let tex = value
+      .replace(/×\s*10\^(-?\d+)/g, "\\times 10^{$1}")
+      .replace(/m\/s²/g, "\\mathrm{m/s^2}")
+      .replace(/m\/s/g, "\\mathrm{m/s}")
+      .replace(/N\/C/g, "\\mathrm{N/C}")
+      .replace(/N\/m/g, "\\mathrm{N/m}")
+      .replace(/μs/g, "\\mu\\mathrm{s}")
+      .replace(/°/g, "{}^\\circ")
+      .replace(/\b(kg|Hz|N|T|J|m|s|e)\b/g, "\\mathrm{$1}")
+      .replace(/\s+/g, "\\,");
+    return tex;
+  }
+
+  function prepareControlValues() {
+    document.querySelectorAll(".controls .label-row > strong, .controls .metric-card > strong").forEach((element) => {
+      if (element.querySelector(".katex")) return;
+      const tex = controlValueToTex(element.textContent);
+      if (tex) element.innerHTML = `\\(${tex}\\)`;
+    });
+  }
+
+  function observeControlValues() {
+    const controls = document.querySelector(".controls");
+    if (!controls || controlValueObserver || !window.MutationObserver) return;
+    let queued = false;
+    controlValueObserver = new MutationObserver((records) => {
+      const relevant = records.some((record) => {
+        const node = record.target.nodeType === Node.ELEMENT_NODE ? record.target : record.target.parentElement;
+        return node?.closest(".label-row > strong, .metric-card > strong");
+      });
+      if (!relevant || queued) return;
+      queued = true;
+      window.requestAnimationFrame(() => {
+        queued = false;
+        typesetMath();
+      });
+    });
+    controlValueObserver.observe(controls, { childList: true, characterData: true, subtree: true });
   }
   window.physicsTypesetMath = typesetMath;
 
@@ -577,5 +622,6 @@
     actions.prepend(link);
  }
  moveActionsToCanvas();
+  observeControlValues();
   typesetMath();
 })();

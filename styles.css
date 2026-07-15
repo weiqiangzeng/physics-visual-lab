@@ -755,6 +755,23 @@ body.demo-mode .controls-overview h2 {
   font-family: "Times New Roman", "Cambria Math", serif;
 }
 
+.label-math .katex,
+.input-unit .katex,
+.metric-name .katex,
+.math-label .katex,
+.speed-label .katex {
+  font-size: 1em;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.label-row > strong .katex,
+.metric-card > strong .katex {
+  font-size: 1em;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
 .mode-hint {
   min-height: 1.1rem;
   margin: -4px 0 10px;

@@ -258,12 +258,12 @@ function formatCoefficient(value, digits = 2) {
 
 function getSpeedMatchHint(sourceKey) {
   if (sourceKey === "gravity") {
-    return "先配出一个速度，使 qvB 与 mg 在竖直方向平衡，再把总轨迹理解为漂移与圆周分运动。";
+    return "先配出一个速度，使 \\(qvB\\) 与 \\(mg\\) 在竖直方向平衡，再把总轨迹理解为漂移与圆周分运动。";
   }
   if (sourceKey === "electric") {
-    return "先令 qvB 与 qE 平衡，得到一个特殊速度；再把实际运动看成配速漂移与余速运动的叠加。";
+    return "先令 \\(qvB\\) 与 \\(qE\\) 平衡，得到一个特殊速度；再把实际运动看成配速漂移与余速运动的叠加。";
   }
-  return "先令 qvB 与恒力 F₀ 平衡，得到配速，再把总轨迹理解为漂移与圆周分运动的叠加。";
+  return "先令 \\(qvB\\) 与恒力 \\(F_0\\) 平衡，得到配速，再把总轨迹理解为漂移与圆周分运动的叠加。";
 }
 
 function renderSpeedMatchFormulaPanel(data) {
@@ -315,7 +315,7 @@ function getSpeedMatchSourceConfig() {
     const force = -(state.mass * MASS_UNIT) * (state.gravityScale * GRAVITY_UNIT);
     return {
       title: "重力型恒力",
-      label: "mg",
+      label: "\\(mg\\)",
       forceY: force,
       formulaTitle: "配速公式",
       formulaLines: [
@@ -329,7 +329,7 @@ function getSpeedMatchSourceConfig() {
     const force = state.charge * ELEMENTARY_CHARGE * state.electric * ELECTRIC_FIELD_UNIT;
     return {
       title: "电场力",
-      label: "F_E",
+      label: "\\(F_E\\)",
       forceY: force,
       formulaTitle: "配速公式",
       formulaLines: [
@@ -341,7 +341,7 @@ function getSpeedMatchSourceConfig() {
 
   return {
     title: "其他恒力",
-    label: "F₀",
+    label: "\\(F_0\\)",
     forceY: state.constantForceScale * CONSTANT_FORCE_UNIT,
     formulaTitle: "配速公式",
     formulaLines: [
@@ -419,7 +419,10 @@ function getSpeedMatchingData() {
 function updateEquationPanel() {
   const setEquationLines = (lines) => {
     const source = lines.join("\n");
-    if (refs.equationLines.dataset.source === source) return;
+    if (refs.equationLines.dataset.source === source) {
+      window.physicsTypesetMath?.();
+      return;
+    }
     refs.equationLines.dataset.source = source;
     refs.equationLines.innerHTML = "";
     lines.forEach((line) => {
@@ -433,7 +436,7 @@ function updateEquationPanel() {
 
   if (state.mode === "speed-matching") {
     refs.equationTitle.textContent = "配速法轨迹判据";
-    refs.equationNote.textContent = "先构造配速 v配，使竖直方向合力为 0；再用 v = v配 + v余 去理解后续运动。";
+    refs.equationNote.textContent = "先构造配速 \\(v_{\\mathrm{配}}\\)，使竖直方向合力为 0；再用 \\(v = v_{\\mathrm{配}} + v_{\\mathrm{余}}\\) 去理解后续运动。";
     const data = getSpeedMatchingData();
     if (data) {
       setEquationLines([
