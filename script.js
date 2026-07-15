@@ -3,14 +3,15 @@ const state = {
   mass: 1.5,
   electric: 3,
   magnetic: 0,
-  force: 4.8,
   speed: 8,
   angle: 0,
-  mode: "electric-only",
+  mode: "custom",
+  speedMatchSource: "gravity",
+  gravityScale: 25.6,
+  constantForceScale: -1,
   showGrid: true,
   showTrail: true,
   showVectors: true,
-  showDecomposition: true,
   demoMode: false,
   preserveTrailOnChange: false,
   timeScale: 1,
@@ -22,7 +23,6 @@ const state = {
     mass: false,
     electric: false,
     magnetic: false,
-    force: false,
     speed: false,
     angle: false
   },
@@ -33,7 +33,7 @@ const state = {
 
 const modeConfigs = {
   custom: {
-    title: "自由调参"
+    title: "自定义调参"
   },
   "electric-only": {
     title: "仅电场",
@@ -45,46 +45,41 @@ const modeConfigs = {
     lock: "electric",
     lockedHint: "当前模式下电场固定为 0"
   },
-  combined: {
-    title: "电磁复合场"
-  },
-  "force-magnetic": {
-    title: "恒力 + 磁场",
-    lockedHint: "当前模式下电场固定为 0，改用外加恒力"
+  "speed-matching": {
+    title: "配速法",
+    lockedHint: "先配速度，再做漂移与圆周分解"
   }
 };
 
 const MAGNETIC_MODE_DEFAULT_B = 1.0;
-const COMBINED_MODE_DEFAULT_E = 3;
-const COMBINED_MODE_DEFAULT_B = 1.0;
-const FORCE_MODE_DEFAULT_F = 4.8;
-const FORCE_UNIT = 1e-14;
-
-const lessonGuides = {
-  custom: {
-    goal: "自由组合参数，比较不同场强下的轨迹差异",
-    prompt: "适合在完成三个标准场景后开放探索。调整参数时先预测轨迹，再运行验证。",
-    formula: "F = q(E + v x B)"
+const GRAVITY_UNIT = 1e13;
+const CONSTANT_FORCE_UNIT = 1e-12;
+const SPEED_MATCH_DEFAULTS = {
+  gravity: {
+    charge: 1,
+    mass: 4.0,
+    electric: 0,
+    magnetic: -0.8,
+    speed: 8.0,
+    angle: 0,
+    gravityScale: 25.6
   },
-  "electric-only": {
-    goal: "观察电场如何让粒子发生偏转",
-    prompt: "改变电荷量 q 或电场强度 E，比较轨迹弯曲方向和弯曲程度。",
-    formula: "F_E = qE"
+  electric: {
+    charge: 1,
+    mass: 4.0,
+    electric: -8.0,
+    magnetic: -0.8,
+    speed: 1.0,
+    angle: 0
   },
-  "magnetic-only": {
-    goal: "观察磁场如何只改变速度方向",
-    prompt: "改变磁感应强度 B 或速度 v，关注圆周半径 r 和周期 T 的变化。",
-    formula: "r = mv / |qB|"
-  },
-  combined: {
-    goal: "观察电场与磁场共同作用下的漂移轨迹",
-    prompt: "比较电场力、磁场力和合力箭头，判断粒子为什么不再只是抛物线或圆。",
-    formula: "F = qE + qv x B"
-  },
-  "force-magnetic": {
-    goal: "把圆周运动和恒力漂移拆开来看",
-    prompt: "恒力不随电荷量改变，漂移方向会随 q 的正负改变；这正是它和 E x B 漂移最值得比较的地方。",
-    formula: "v_d = (F x B) / (qB^2)"
+  constant: {
+    charge: 1,
+    mass: 4.0,
+    electric: 0,
+    magnetic: -0.8,
+    speed: 8.0,
+    angle: 0,
+    constantForceScale: -1.0
   }
 };
 
@@ -93,21 +88,18 @@ const refs = {
   massInput: document.getElementById("massInput"),
   electricInput: document.getElementById("electricInput"),
   magneticInput: document.getElementById("magneticInput"),
-  forceInput: document.getElementById("forceInput"),
   speedInput: document.getElementById("speedInput"),
   angleInput: document.getElementById("angleInput"),
   chargeNumber: document.getElementById("chargeNumber"),
   massNumber: document.getElementById("massNumber"),
   electricNumber: document.getElementById("electricNumber"),
   magneticNumber: document.getElementById("magneticNumber"),
-  forceNumber: document.getElementById("forceNumber"),
   speedNumber: document.getElementById("speedNumber"),
   angleNumber: document.getElementById("angleNumber"),
   chargeValue: document.getElementById("chargeValue"),
   massValue: document.getElementById("massValue"),
   electricValue: document.getElementById("electricValue"),
   magneticValue: document.getElementById("magneticValue"),
-  forceValue: document.getElementById("forceValue"),
   speedValue: document.getElementById("speedValue"),
   angleValue: document.getElementById("angleValue"),
   startButton: document.getElementById("startButton"),
@@ -116,37 +108,60 @@ const refs = {
   canvas: document.getElementById("simCanvas"),
   presetTitle: document.getElementById("presetTitle"),
   presetButtons: Array.from(document.querySelectorAll(".preset-button")),
-  modeGoal: document.getElementById("modeGoal"),
-  modePrompt: document.getElementById("modePrompt"),
-  modeFormula: document.getElementById("modeFormula"),
   electricHint: document.getElementById("electricHint"),
   magneticHint: document.getElementById("magneticHint"),
-  forceHint: document.getElementById("forceHint"),
   metricsModeTitle: document.getElementById("metricsModeTitle"),
   electricForceMetric: document.getElementById("electricForceMetric"),
   magneticForceMetric: document.getElementById("magneticForceMetric"),
-  constantForceMetric: document.getElementById("constantForceMetric"),
   speedMetric: document.getElementById("speedMetric"),
   netForceMetric: document.getElementById("netForceMetric"),
   stageSpeedMetric: document.getElementById("stageSpeedMetric"),
   stageElectricForceMetric: document.getElementById("stageElectricForceMetric"),
   stageMagneticForceMetric: document.getElementById("stageMagneticForceMetric"),
-  stageConstantForceMetric: document.getElementById("stageConstantForceMetric"),
-  stageDriftMetric: document.getElementById("stageDriftMetric"),
   stageNetForceMetric: document.getElementById("stageNetForceMetric"),
+  stageTargetReadout: document.getElementById("stageTargetReadout"),
+  stageTargetSpeedMetric: document.getElementById("stageTargetSpeedMetric"),
   radiusMetric: document.getElementById("radiusMetric"),
-  driftMetric: document.getElementById("driftMetric"),
   periodMetric: document.getElementById("periodMetric"),
   timeMetric: document.getElementById("timeMetric"),
   maxTimeMetric: document.getElementById("maxTimeMetric"),
+  matchForceCard: document.getElementById("matchForceCard"),
+  targetSpeedCard: document.getElementById("targetSpeedCard"),
+  matchForceLabel: document.getElementById("matchForceLabel"),
+  matchForceMetric: document.getElementById("matchForceMetric"),
+  targetSpeedMetric: document.getElementById("targetSpeedMetric"),
   metricsNote: document.getElementById("metricsNote"),
   equationTitle: document.getElementById("equationTitle"),
   equationNote: document.getElementById("equationNote"),
   equationLines: document.getElementById("equationLines"),
+  speedMatchPanel: document.getElementById("speedMatchPanel"),
+  speedMatchSourceTitle: document.getElementById("speedMatchSourceTitle"),
+  speedMatchHint: document.getElementById("speedMatchHint"),
+  gravityControl: document.getElementById("gravityControl"),
+  constantForceControl: document.getElementById("constantForceControl"),
+  gravityInput: document.getElementById("gravityInput"),
+  gravityNumber: document.getElementById("gravityNumber"),
+  constantForceInput: document.getElementById("constantForceInput"),
+  constantForceNumber: document.getElementById("constantForceNumber"),
+  speedMatchFormulaNote: document.getElementById("speedMatchFormulaNote"),
+  speedMatchFormulaLines: document.getElementById("speedMatchFormulaLines"),
+  targetSpeedInline: document.getElementById("targetSpeedInline"),
+  residualSpeedInline: document.getElementById("residualSpeedInline"),
+  deltaSpeedInline: document.getElementById("deltaSpeedInline"),
+  regionStateInline: document.getElementById("regionStateInline"),
+  applyTargetSpeedButton: document.getElementById("applyTargetSpeedButton"),
+  adjustButtons: Array.from(document.querySelectorAll(".adjust-button")),
+  matchBanner: document.getElementById("matchBanner"),
+  matchStatus: document.getElementById("matchStatus"),
+  matchMessage: document.getElementById("matchMessage"),
+  sourceButtons: Array.from(document.querySelectorAll(".source-button")),
+  extraForceLegend: document.getElementById("extraForceLegend"),
+  extraForceLegendLabel: document.getElementById("extraForceLegendLabel"),
+  driftLegend: document.getElementById("driftLegend"),
+  circleLegend: document.getElementById("circleLegend"),
   showGridToggle: document.getElementById("showGridToggle"),
   showTrailToggle: document.getElementById("showTrailToggle"),
   showVectorsToggle: document.getElementById("showVectorsToggle"),
-  showDecompositionToggle: document.getElementById("showDecompositionToggle"),
   demoModeToggle: document.getElementById("demoModeToggle"),
   preserveTrailToggle: document.getElementById("preserveTrailToggle"),
   speedButtons: Array.from(document.querySelectorAll(".speed-button")),
@@ -158,7 +173,6 @@ const refs = {
   lockMassButton: document.getElementById("lockMassButton"),
   lockElectricButton: document.getElementById("lockElectricButton"),
   lockMagneticButton: document.getElementById("lockMagneticButton"),
-  lockForceButton: document.getElementById("lockForceButton"),
   lockSpeedButton: document.getElementById("lockSpeedButton"),
   lockAngleButton: document.getElementById("lockAngleButton"),
   exportPngButton: document.getElementById("exportPngButton"),
@@ -204,7 +218,7 @@ function formatSignedFixed(value, digits) {
 }
 
 function setLockButtonState(button, locked) {
-  button.textContent = locked ? "已锁" : "锁定";
+  button.textContent = locked ? "已锁" : "解锁";
   button.classList.toggle("active", locked);
 }
 
@@ -242,6 +256,32 @@ function formatCoefficient(value, digits = 2) {
   return value.toFixed(3);
 }
 
+function getSpeedMatchHint(sourceKey) {
+  if (sourceKey === "gravity") {
+    return "先配出一个速度，使 qvB 与 mg 在竖直方向平衡，再把总轨迹理解为漂移与圆周分运动。";
+  }
+  if (sourceKey === "electric") {
+    return "先令 qvB 与 qE 平衡，得到一个特殊速度；再把实际运动看成配速漂移与余速运动的叠加。";
+  }
+  return "先令 qvB 与恒力 F₀ 平衡，得到配速，再把总轨迹理解为漂移与圆周分运动的叠加。";
+}
+
+function renderSpeedMatchFormulaPanel(data) {
+  refs.speedMatchFormulaLines.innerHTML = "";
+  refs.speedMatchFormulaNote.textContent = data.formulaTitle;
+  data.formulaLines.forEach((line) => {
+    const div = document.createElement("div");
+    div.className = "equation-line";
+    div.textContent = line;
+    refs.speedMatchFormulaLines.appendChild(div);
+  });
+  const target = document.createElement("div");
+  target.className = "equation-line";
+  target.textContent =
+    data.targetSpeed == null ? "当前无法计算 v配" : `当前目标速度：v配 = ${formatScientific(data.targetSpeed, 2, "m/s")}`;
+  refs.speedMatchFormulaLines.appendChild(target);
+}
+
 function getInitialVelocityComponents() {
   const radians = (state.angle * Math.PI) / 180;
   const speed = state.speed * SPEED_UNIT;
@@ -252,24 +292,146 @@ function getInitialVelocityComponents() {
 }
 
 function getScenarioKey() {
+  if (state.mode === "speed-matching") return "speed-matching";
   const hasElectric = Math.abs(state.electric) > 1e-12;
   const hasMagnetic = Math.abs(state.magnetic) > 1e-12;
-  const hasConstantForce = state.mode === "force-magnetic" && Math.abs(state.force) > 1e-12;
-  if (hasConstantForce && hasMagnetic) return "force-magnetic";
-  if (hasConstantForce) return "force";
   if (hasElectric && hasMagnetic) return "combined";
   if (hasElectric) return "electric";
   if (hasMagnetic) return "magnetic";
   return "free";
 }
 
+function getCurrentSpeedMatchRegion() {
+  return state.mode === "speed-matching" ? "matching" : "normal";
+}
+
+function getSpeedMatchSourceConfig() {
+  if (state.speedMatchSource === "gravity") {
+    const force = -(state.mass * MASS_UNIT) * (state.gravityScale * GRAVITY_UNIT);
+    return {
+      title: "重力型恒力",
+      label: "mg",
+      forceY: force,
+      formulaTitle: "配速公式",
+      formulaLines: [
+        "竖直平衡条件：qvB = mg",
+        "目标速度：v配 = mg / (|q|B)"
+      ]
+    };
+  }
+
+  if (state.speedMatchSource === "electric") {
+    const force = state.charge * ELEMENTARY_CHARGE * state.electric * ELECTRIC_FIELD_UNIT;
+    return {
+      title: "电场力",
+      label: "F_E",
+      forceY: force,
+      formulaTitle: "配速公式",
+      formulaLines: [
+        "竖直平衡条件：qvB = qE",
+        "目标速度：v配 = E / B"
+      ]
+    };
+  }
+
+  return {
+    title: "其他恒力",
+    label: "F₀",
+    forceY: state.constantForceScale * CONSTANT_FORCE_UNIT,
+    formulaTitle: "配速公式",
+    formulaLines: [
+      "竖直平衡条件：qvB = F₀",
+      "目标速度：v配 = F₀ / (|q|B)"
+    ]
+  };
+}
+
+function getSpeedMatchingData() {
+  if (state.mode !== "speed-matching") {
+    return null;
+  }
+
+  const { q, ey, bz } = getPhysicsParams();
+  const { speed } = getInstantKinematics();
+  const source = getSpeedMatchSourceConfig();
+  const magneticForceY = -q * speed * bz;
+  const electricForceY = q * ey;
+  const sourceForceY = state.speedMatchSource === "electric" ? electricForceY : source.forceY;
+  const reference = Math.max(Math.abs(sourceForceY), Math.abs(magneticForceY), 1e-30);
+  const residualY = magneticForceY + sourceForceY;
+  const success = Math.abs(residualY) <= reference * 0.04;
+  let targetSpeed = null;
+  let targetVelocitySigned = null;
+
+  if (Math.abs(q) > 1e-30 && Math.abs(bz) > 1e-12) {
+    if (state.speedMatchSource === "electric") {
+      targetSpeed = Math.abs((state.electric * ELECTRIC_FIELD_UNIT) / bz);
+      targetVelocitySigned = (state.electric * ELECTRIC_FIELD_UNIT) / bz;
+    } else {
+      targetSpeed = Math.abs(source.forceY) / (Math.abs(q) * Math.abs(bz));
+      targetVelocitySigned = sourceForceY / (q * bz);
+    }
+  }
+  const residualSpeedSigned = targetVelocitySigned == null ? null : speed - targetVelocitySigned;
+
+  let status = "待配平";
+  let message = "先调节速度得到配速，再把实际运动看成配速漂移与余速运动的组合。";
+
+  if (Math.abs(q) < 1e-30 || Math.abs(bz) < 1e-12) {
+    status = "条件不足";
+    message = "配速法要求电荷量和磁感应强度都不为 0，否则洛伦兹力无法形成配平。";
+  } else if (success) {
+    status = "配速成功";
+    message = "当前竖直方向合力接近 0，可以把这个速度视为后续运动中的配速。";
+  } else if (sourceForceY * magneticForceY > 0) {
+    status = "方向错误";
+    message = "当前外力与洛伦兹力同向，无法配平。请先调整磁场方向、电荷正负或电场方向。";
+  } else if (residualY > 0) {
+    status = "向上偏转";
+    message = "当前竖直合力向上。一般需要减小速度，或减小外力、增大反向磁场效应。";
+  } else {
+    status = "向下偏转";
+    message = "当前竖直合力向下。一般需要增大速度，或增大外力的反向平衡项。";
+  }
+
+  return {
+    title: source.title,
+    label: source.label,
+    sourceForceY,
+    magneticForceY,
+    residualY,
+    targetSpeed,
+    targetVelocitySigned,
+    residualSpeedSigned,
+    status,
+    message,
+    success,
+    formulaTitle: source.formulaTitle,
+    formulaLines: source.formulaLines
+  };
+}
+
 function updateEquationPanel() {
-  const { q, m, ey, bz, fy } = getPhysicsParams();
+  if (state.mode === "speed-matching") {
+    refs.equationTitle.textContent = "配速法轨迹判据";
+    refs.equationNote.textContent = "先构造配速 v配，使竖直方向合力为 0；再用 v = v配 + v余 去理解后续运动。";
+    refs.equationLines.innerHTML = "";
+    const data = getSpeedMatchingData();
+    if (data) {
+      const lines = [
+        ...data.formulaLines,
+        data.targetSpeed == null ? "当前无法计算 v配" : `当前目标速度：v配 = ${formatScientific(data.targetSpeed, 2, "m/s")}`
+      ];
+      lines.forEach((text) => addLine(text));
+    }
+    return;
+  }
+
+  const { q, m, ey, bz } = getPhysicsParams();
   const { vx0, vy0 } = getInitialVelocityComponents();
   const omega = Math.abs(bz) > 1e-12 ? (q * bz) / m : 0;
   const drift = Math.abs(bz) > 1e-12 ? ey / bz : 0;
   const accel = (q * ey) / m;
-  const forceAccel = fy / m;
   const scenario = getScenarioKey();
 
   refs.equationLines.innerHTML = "";
@@ -306,24 +468,6 @@ function updateEquationPanel() {
     return;
   }
 
-  if (scenario === "force") {
-    refs.equationTitle.textContent = "仅恒力参数方程";
-    refs.equationNote.textContent = "当前磁场为 0，外加恒力使粒子沿力方向做匀加速运动。";
-    addLine(`x(t) = ${formatCoefficient(vx0)} t`);
-    addLine(`y(t) = ${formatCoefficient(vy0)} t + 1/2·(${formatCoefficient(forceAccel)}) t²`);
-    return;
-  }
-
-  if (scenario === "force-magnetic") {
-    const forceDrift = Math.abs(q * bz) > 1e-30 ? fy / (q * bz) : 0;
-    refs.equationTitle.textContent = "恒力与磁场复合运动";
-    refs.equationNote.textContent = "轨迹可看作回旋运动叠加导引中心漂移；恒力漂移方向会随电荷正负改变。";
-    addLine(`ω = ${formatCoefficient(omega)} rad/s`);
-    addLine(`v_d = F_y/(qB) = ${formatCoefficient(forceDrift)} m/s`);
-    addLine(`重点观察：粒子仍在回旋，但回旋中心沿 x 方向缓慢漂移。`);
-    return;
-  }
-
   refs.equationTitle.textContent = "电磁复合场参数方程";
   refs.equationNote.textContent = "当前是匀强电场与匀强磁场共存的参数形式，沿 x 方向存在漂移项。";
   addLine(`ω = ${formatCoefficient(omega)} rad/s`);
@@ -344,47 +488,45 @@ function getInstantKinematics() {
 }
 
 function getLiveVectorState() {
-  const { q, ey, bz, fy } = getPhysicsParams();
+  const { q, ey, bz, extraFy } = getPhysicsParams();
   const { speed, vx, vy } = getInstantKinematics();
   const electricForceVector = {
     x: 0,
     y: q * ey
   };
-  const constantForceVector = {
+  const extraForceVector = {
     x: 0,
-    y: fy
+    y: extraFy
   };
   const magneticForceVector = {
     x: q * vy * bz,
     y: -q * vx * bz
   };
   const netForceVector = {
-    x: electricForceVector.x + constantForceVector.x + magneticForceVector.x,
-    y: electricForceVector.y + constantForceVector.y + magneticForceVector.y
+    x: electricForceVector.x + magneticForceVector.x + extraForceVector.x,
+    y: electricForceVector.y + magneticForceVector.y + extraForceVector.y
   };
 
   return {
     speed,
     velocityVector: { x: vx, y: vy },
     electricForceVector,
-    constantForceVector,
+    extraForceVector,
     magneticForceVector,
     netForceVector
   };
 }
 
 function computeLiveMetrics() {
-  const { q, m, ey, fy, bz } = getPhysicsParams();
-  const { speed, velocityVector, electricForceVector, constantForceVector, magneticForceVector, netForceVector } =
-    getLiveVectorState();
+  const { q, m, ey, bz } = getPhysicsParams();
+  const { speed, velocityVector, electricForceVector, extraForceVector, magneticForceVector, netForceVector } = getLiveVectorState();
   const electricForce = Math.abs(q * ey);
-  const constantForce = Math.hypot(constantForceVector.x, constantForceVector.y);
+  const extraForce = Math.abs(extraForceVector.y);
   const magneticForce = Math.abs(q * speed * bz);
   const netForce = Math.hypot(netForceVector.x, netForceVector.y);
 
   let radius = null;
   let period = null;
-  let driftSpeed = null;
   let note = "当前显示的是单粒子在所选场景下的瞬时物理量。";
 
   if (state.mode === "magnetic-only" && Math.abs(q) > 0 && Math.abs(bz) > 1e-12) {
@@ -393,29 +535,22 @@ function computeLiveMetrics() {
     note = "仅磁场模式下，半径和周期具有稳定物理意义，可直接对应课本公式。";
   } else if (state.mode === "electric-only") {
     note = "仅电场模式下，粒子沿场方向做加速偏转，重点看电场力和速率变化。";
-  } else if (state.mode === "force-magnetic") {
-    if (Math.abs(q * bz) > 1e-30) {
-      driftSpeed = fy / (q * bz);
-      const relativeSpeed = Math.hypot(velocityVector.x - driftSpeed, velocityVector.y);
-      radius = relativeSpeed / Math.abs((q * bz) / m);
-      period = (2 * Math.PI * m) / (Math.abs(q) * Math.abs(bz));
-    }
-    note = "恒力 + 磁场模式下，橄榄色点是导引中心，虚线圆表示瞬时回旋运动。";
+  } else if (state.mode === "speed-matching") {
+    note = "配速法模块强调先配出一个特殊速度，再把后续运动理解为该速度条件下的真实轨迹。";
   }
 
   return {
     electricForce,
-    constantForce,
+    extraForce,
     magneticForce,
     netForce,
     speed,
     radius,
-    driftSpeed,
     period,
     note,
     velocityVector,
     electricForceVector,
-    constantForceVector,
+    extraForceVector,
     magneticForceVector,
     netForceVector
   };
@@ -426,26 +561,14 @@ function syncReadouts() {
   refs.massValue.textContent = `${state.mass.toFixed(1)} ×10^-27 kg`;
   refs.electricValue.textContent = `${formatSigned(state.electric)} ×10^5 N/C`;
   refs.magneticValue.textContent = `${formatSignedFixed(state.magnetic, 2)} T`;
-  refs.forceValue.textContent = `${formatSigned(state.force)} ×10^-14 N`;
   refs.speedValue.textContent = `${state.speed.toFixed(1)} ×10^6 m/s`;
   refs.angleValue.textContent = `${state.angle.toFixed(0)}°`;
   refs.presetTitle.textContent = modeConfigs[state.mode].title;
-  const guide = lessonGuides[state.mode];
-  refs.modeGoal.textContent = guide.goal;
-  refs.modePrompt.textContent = guide.prompt;
-  refs.modeFormula.textContent = guide.formula;
   refs.presetButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.mode === state.mode);
   });
-  refs.electricHint.textContent =
-    state.mode === "magnetic-only"
-      ? modeConfigs["magnetic-only"].lockedHint
-      : state.mode === "force-magnetic"
-        ? modeConfigs["force-magnetic"].lockedHint
-        : "";
+  refs.electricHint.textContent = state.mode === "magnetic-only" ? modeConfigs["magnetic-only"].lockedHint : "";
   refs.magneticHint.textContent = state.mode === "electric-only" ? modeConfigs["electric-only"].lockedHint : "";
-  refs.forceHint.textContent =
-    state.mode === "force-magnetic" ? "恒力是外加力，不随电荷量 q 改变" : "仅在“恒力+磁场”模式下启用";
   refs.metricsModeTitle.textContent = modeConfigs[state.mode].title;
   refs.overviewMode.textContent = modeConfigs[state.mode].title;
   refs.overviewSpeed.textContent = `${state.timeScale}x`;
@@ -455,7 +578,6 @@ function syncReadouts() {
   setLockButtonState(refs.lockMassButton, state.locks.mass);
   setLockButtonState(refs.lockElectricButton, state.locks.electric);
   setLockButtonState(refs.lockMagneticButton, state.locks.magnetic);
-  setLockButtonState(refs.lockForceButton, state.locks.force);
   setLockButtonState(refs.lockSpeedButton, state.locks.speed);
   setLockButtonState(refs.lockAngleButton, state.locks.angle);
   refs.recordVideoButton.textContent = state.isRecording ? "停止录制" : "开始录制";
@@ -464,25 +586,57 @@ function syncReadouts() {
   const metrics = computeLiveMetrics();
   refs.electricForceMetric.textContent = formatScientific(metrics.electricForce, 2, "N");
   refs.magneticForceMetric.textContent = formatScientific(metrics.magneticForce, 2, "N");
-  refs.constantForceMetric.textContent = formatScientific(metrics.constantForce, 2, "N");
   refs.speedMetric.textContent = formatScientific(metrics.speed, 2, "m/s");
   refs.netForceMetric.textContent = formatScientific(metrics.netForce, 2, "N");
   refs.stageElectricForceMetric.textContent = formatScientific(metrics.electricForce, 2, "N");
   refs.stageMagneticForceMetric.textContent = formatScientific(metrics.magneticForce, 2, "N");
-  refs.stageConstantForceMetric.textContent = formatScientific(metrics.constantForce, 2, "N");
   refs.stageSpeedMetric.textContent = formatScientific(metrics.speed, 2, "m/s");
-  refs.stageDriftMetric.textContent =
-    metrics.driftSpeed == null ? "仅恒力+磁场适用" : formatScientific(metrics.driftSpeed, 2, "m/s");
   refs.stageNetForceMetric.textContent = formatScientific(metrics.netForce, 2, "N");
   refs.radiusMetric.textContent =
-    metrics.radius == null ? "仅纯磁场或恒力+磁场适用" : formatScientific(metrics.radius, 2, "m");
-  refs.driftMetric.textContent =
-    metrics.driftSpeed == null ? "仅恒力+磁场适用" : formatScientific(metrics.driftSpeed, 2, "m/s");
+    metrics.radius == null ? "仅纯磁场圆周时适用" : formatScientific(metrics.radius, 2, "m");
   refs.periodMetric.textContent =
-    metrics.period == null ? "仅纯磁场或恒力+磁场适用" : formatScientific(metrics.period, 2, "s");
+    metrics.period == null ? "仅纯磁场圆周时适用" : formatScientific(metrics.period, 2, "s");
   refs.timeMetric.textContent = `${state.simulationTime.toFixed(2)} μs`;
   refs.maxTimeMetric.textContent = `${state.maxSimulationTimeUs.toFixed(1)} μs`;
   refs.metricsNote.textContent = metrics.note;
+  const speedMatch = getSpeedMatchingData();
+  const inSpeedMatch = state.mode === "speed-matching" && speedMatch;
+  document.body.classList.toggle("speed-match-mode", Boolean(inSpeedMatch));
+  refs.speedMatchPanel.classList.toggle("hidden", !inSpeedMatch);
+  refs.matchBanner.classList.toggle("hidden", !inSpeedMatch);
+  refs.stageTargetReadout.classList.toggle("hidden", !inSpeedMatch);
+  refs.matchForceCard.classList.toggle("hidden", !inSpeedMatch);
+  refs.targetSpeedCard.classList.toggle("hidden", !inSpeedMatch);
+  refs.extraForceLegend.classList.toggle("hidden", !(inSpeedMatch && state.speedMatchSource !== "electric"));
+  refs.driftLegend.classList.toggle("hidden", !inSpeedMatch);
+  refs.circleLegend.classList.toggle("hidden", !inSpeedMatch);
+
+  if (inSpeedMatch) {
+    refs.speedMatchSourceTitle.textContent = speedMatch.title;
+    refs.speedMatchHint.textContent = getSpeedMatchHint(state.speedMatchSource);
+    refs.gravityControl.classList.toggle("hidden", state.speedMatchSource !== "gravity");
+    refs.constantForceControl.classList.toggle("hidden", state.speedMatchSource !== "constant");
+    refs.sourceButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.source === state.speedMatchSource);
+    });
+    refs.matchForceLabel.textContent = speedMatch.label;
+    refs.extraForceLegendLabel.textContent = speedMatch.label;
+    refs.matchForceMetric.textContent = formatScientific(Math.abs(speedMatch.sourceForceY), 2, "N");
+    const targetText = speedMatch.targetSpeed == null ? "--" : formatScientific(speedMatch.targetSpeed, 2, "m/s");
+    refs.targetSpeedMetric.textContent = targetText;
+    refs.stageTargetSpeedMetric.textContent = targetText;
+    refs.targetSpeedInline.textContent = targetText;
+    refs.residualSpeedInline.textContent =
+      speedMatch.residualSpeedSigned == null ? "--" : formatScientific(speedMatch.residualSpeedSigned, 2, "m/s");
+    refs.deltaSpeedInline.textContent =
+      speedMatch.targetSpeed == null ? "--" : formatScientific(metrics.speed - speedMatch.targetSpeed, 2, "m/s");
+    refs.regionStateInline.textContent = "漂移 + 圆周";
+    refs.matchStatus.textContent = speedMatch.status;
+    refs.matchMessage.textContent = speedMatch.message;
+    refs.matchBanner.classList.toggle("success", speedMatch.success);
+    refs.matchBanner.classList.toggle("warning", !speedMatch.success);
+    renderSpeedMatchFormulaPanel(speedMatch);
+  }
   updateEquationPanel();
 }
 
@@ -491,37 +645,48 @@ function syncInputs() {
   refs.massInput.value = state.mass;
   refs.electricInput.value = state.electric;
   refs.magneticInput.value = state.magnetic;
-  refs.forceInput.value = state.force;
   refs.speedInput.value = state.speed;
   refs.angleInput.value = state.angle;
+  refs.gravityInput.value = state.gravityScale;
+  refs.gravityNumber.value = state.gravityScale;
+  refs.constantForceInput.value = state.constantForceScale;
+  refs.constantForceNumber.value = state.constantForceScale;
   refs.chargeNumber.value = state.charge;
   refs.massNumber.value = state.mass;
   refs.electricNumber.value = state.electric;
   refs.magneticNumber.value = state.magnetic;
-  refs.forceNumber.value = state.force;
   refs.speedNumber.value = state.speed;
   refs.angleNumber.value = state.angle;
   refs.maxTimeNumber.value = state.maxSimulationTimeUs;
   refs.chargeInput.disabled = state.locks.charge;
   refs.massInput.disabled = state.locks.mass;
   refs.speedInput.disabled = state.locks.speed;
-  refs.angleInput.disabled = state.locks.angle;
-  refs.electricInput.disabled = state.locks.electric || state.mode === "magnetic-only" || state.mode === "force-magnetic";
+  refs.angleInput.disabled = state.locks.angle || state.mode === "speed-matching";
+  refs.electricInput.disabled =
+    state.locks.electric ||
+    state.mode === "magnetic-only" ||
+    (state.mode === "speed-matching" && state.speedMatchSource !== "electric");
   refs.magneticInput.disabled = state.locks.magnetic || state.mode === "electric-only";
-  refs.forceInput.disabled = state.locks.force || state.mode !== "force-magnetic";
   refs.chargeNumber.disabled = state.locks.charge;
   refs.massNumber.disabled = state.locks.mass;
   refs.speedNumber.disabled = state.locks.speed;
-  refs.angleNumber.disabled = state.locks.angle;
-  refs.electricNumber.disabled = state.locks.electric || state.mode === "magnetic-only" || state.mode === "force-magnetic";
-  refs.magneticNumber.disabled = state.locks.magnetic || state.mode === "electric-only";
-  refs.forceNumber.disabled = state.locks.force || state.mode !== "force-magnetic";
+  refs.angleNumber.disabled = state.locks.angle || state.mode === "speed-matching";
+  refs.electricNumber.disabled =
+    state.locks.electric ||
+    state.mode === "magnetic-only" ||
+    (state.mode === "speed-matching" && state.speedMatchSource !== "electric");
+  refs.magneticNumber.disabled =
+    state.locks.magnetic ||
+    state.mode === "electric-only";
   refs.showGridToggle.checked = state.showGrid;
   refs.showTrailToggle.checked = state.showTrail;
   refs.showVectorsToggle.checked = state.showVectors;
-  refs.showDecompositionToggle.checked = state.showDecomposition;
   refs.demoModeToggle.checked = state.demoMode;
   refs.preserveTrailToggle.checked = state.preserveTrailOnChange;
+  refs.gravityInput.disabled = state.mode !== "speed-matching" || state.speedMatchSource !== "gravity";
+  refs.gravityNumber.disabled = state.mode !== "speed-matching" || state.speedMatchSource !== "gravity";
+  refs.constantForceInput.disabled = state.mode !== "speed-matching" || state.speedMatchSource !== "constant";
+  refs.constantForceNumber.disabled = state.mode !== "speed-matching" || state.speedMatchSource !== "constant";
   refs.speedButtons.forEach((button) => {
     button.classList.toggle("active", Number(button.dataset.speed) === state.timeScale);
   });
@@ -571,8 +736,11 @@ function applyParameterChange() {
   if (state.mode === "magnetic-only") {
     state.electric = 0;
   }
-  if (state.mode === "force-magnetic") {
-    state.electric = 0;
+  if (state.mode === "speed-matching") {
+    state.angle = 0;
+    if (state.speedMatchSource !== "electric") {
+      state.electric = 0;
+    }
   }
 
   if (state.preserveTrailOnChange && particle) {
@@ -586,6 +754,16 @@ function applyParameterChange() {
 }
 
 function applyMode(modeKey) {
+  if (modeKey === "speed-matching") {
+    Object.assign(state, SPEED_MATCH_DEFAULTS[state.speedMatchSource], {
+      mode: "speed-matching",
+      angle: 0
+    });
+    syncInputs();
+    resetSimulation();
+    return;
+  }
+
   state.mode = modeKey;
   if (modeKey === "electric-only") {
     state.magnetic = 0;
@@ -596,44 +774,50 @@ function applyMode(modeKey) {
       state.magnetic = MAGNETIC_MODE_DEFAULT_B;
     }
   }
-  if (modeKey === "combined") {
-    if (Math.abs(state.electric) < 1e-12) {
-      state.electric = COMBINED_MODE_DEFAULT_E;
-    }
-    if (Math.abs(state.magnetic) < 1e-12) {
-      state.magnetic = COMBINED_MODE_DEFAULT_B;
-    }
-  }
-  if (modeKey === "force-magnetic") {
-    state.electric = 0;
-    if (Math.abs(state.magnetic) < 1e-12) {
-      state.magnetic = MAGNETIC_MODE_DEFAULT_B;
-    }
-    if (Math.abs(state.force) < 1e-12) {
-      state.force = FORCE_MODE_DEFAULT_F;
-    }
-  }
+  syncInputs();
+  resetSimulation();
+}
+
+function applySpeedMatchSource(sourceKey) {
+  state.speedMatchSource = sourceKey;
+  Object.assign(state, SPEED_MATCH_DEFAULTS[sourceKey], {
+    mode: "speed-matching",
+    speedMatchSource: sourceKey,
+    angle: 0
+  });
   syncInputs();
   resetSimulation();
 }
 
 function getPhysicsParams() {
+  const inSpeedMatch = state.mode === "speed-matching";
+  let extraFy = 0;
+  const ey = state.electric * ELECTRIC_FIELD_UNIT;
+  const bz = state.magnetic;
+
+  if (inSpeedMatch) {
+    if (state.speedMatchSource === "gravity") {
+      extraFy = -(state.mass * MASS_UNIT) * (state.gravityScale * GRAVITY_UNIT);
+    } else if (state.speedMatchSource === "constant") {
+      extraFy = state.constantForceScale * CONSTANT_FORCE_UNIT;
+    }
+  }
+
   return {
     q: state.charge * ELEMENTARY_CHARGE,
     m: state.mass * MASS_UNIT,
     ex: 0,
-    ey: state.electric * ELECTRIC_FIELD_UNIT,
-    fy: state.mode === "force-magnetic" ? state.force * FORCE_UNIT : 0,
-    bz: state.magnetic
+    ey,
+    bz,
+    extraFy
   };
 }
 
 function getStepConfig() {
-  const { q, m, ey, fy, bz } = getPhysicsParams();
+  const { q, m, ey, bz } = getPhysicsParams();
   const speed = Math.max(state.speed * SPEED_UNIT, 1);
   let dtMag = Infinity;
   let dtElectric = Infinity;
-  let dtForce = Infinity;
 
   if (Math.abs(q) > 0 && Math.abs(bz) > 1e-12) {
     const period = (2 * Math.PI * m) / (Math.abs(q) * Math.abs(bz));
@@ -644,29 +828,34 @@ function getStepConfig() {
   if (accelY > 0) {
     dtElectric = (0.0025 * speed) / accelY;
   }
-  const forceAccelY = Math.abs(fy / m);
-  if (forceAccelY > 0) {
-    dtForce = (0.0025 * speed) / forceAccelY;
-  }
 
-  const dt = Math.min(dtMag, dtElectric, dtForce, 2e-10);
+  const dt = Math.min(dtMag, dtElectric, 2e-10);
   const safeDt = Number.isFinite(dt) ? Math.min(Math.max(dt, 2e-13), 2e-10) : 1e-10;
 
   let steps = 14;
   if (Math.abs(bz) > 3) steps = 20;
-  if (Math.abs(ey) > 8 * ELECTRIC_FIELD_UNIT || Math.abs(fy) > 8 * FORCE_UNIT) steps = Math.max(steps, 18);
+  if (Math.abs(ey) > 8 * ELECTRIC_FIELD_UNIT) steps = Math.max(steps, 18);
 
   return { dt: safeDt, steps };
 }
 
 function borisAdvance(dt) {
-  const { q, m, ex, ey, fy, bz } = getPhysicsParams();
-  const qm = q / m;
-  const halfAx = ((q * ex) / m) * dt * 0.5;
-  const halfAy = ((q * ey + fy) / m) * dt * 0.5;
+  const { q, m, ex, ey, bz, extraFy } = getPhysicsParams();
 
-  let vxMinus = particle.vx + halfAx;
-  let vyMinus = particle.vy + halfAy;
+  if (q === 0) {
+    particle.x += particle.vx * dt;
+    particle.vy += (extraFy / m) * dt;
+    particle.y += particle.vy * dt;
+    return;
+  }
+
+  const qm = q / m;
+  const halfEx = qm * ex * dt * 0.5;
+  const halfEy = qm * ey * dt * 0.5;
+  const halfExtraVy = (extraFy / m) * dt * 0.5;
+
+  let vxMinus = particle.vx + halfEx;
+  let vyMinus = particle.vy + halfEy + halfExtraVy;
 
   const tz = qm * bz * dt * 0.5;
   const sz = (2 * tz) / (1 + tz * tz);
@@ -677,8 +866,8 @@ function borisAdvance(dt) {
   const vxPlus = vxMinus + vyPrime * sz;
   const vyPlus = vyMinus - vxPrime * sz;
 
-  particle.vx = vxPlus + halfAx;
-  particle.vy = vyPlus + halfAy;
+  particle.vx = vxPlus + halfEx;
+  particle.vy = vyPlus + halfEy + halfExtraVy;
   particle.x += particle.vx * dt;
   particle.y += particle.vy * dt;
 }
@@ -724,18 +913,7 @@ function getBounds() {
     };
   }
 
-  const decomposition = getMotionDecomposition();
   const points = [...path, { x: 0, y: 0 }];
-  if (decomposition) {
-    points.push(
-      decomposition.center,
-      decomposition.initialCenter,
-      { x: decomposition.center.x + decomposition.radius, y: decomposition.center.y },
-      { x: decomposition.center.x - decomposition.radius, y: decomposition.center.y },
-      { x: decomposition.center.x, y: decomposition.center.y + decomposition.radius },
-      { x: decomposition.center.x, y: decomposition.center.y - decomposition.radius }
-    );
-  }
   let minX = points[0].x;
   let maxX = points[0].x;
   let minY = points[0].y;
@@ -972,98 +1150,49 @@ function drawPath(bounds) {
   ctx.stroke();
 }
 
-function getMotionDecomposition() {
-  if (!particle || state.mode !== "force-magnetic") {
-    return null;
-  }
-
-  const { q, m, fy, bz } = getPhysicsParams();
-  if (Math.abs(q * bz) < 1e-30) {
-    return null;
-  }
-
-  const omega = (q * bz) / m;
-  const driftVelocity = fy / (q * bz);
-  const relativeVelocity = {
-    x: particle.vx - driftVelocity,
-    y: particle.vy
-  };
-  const center = {
-    x: particle.x + relativeVelocity.y / omega,
-    y: particle.y - relativeVelocity.x / omega
-  };
-
-  const { vx0, vy0 } = getInitialVelocityComponents();
-  const initialRelativeVelocity = {
-    x: vx0 - driftVelocity,
-    y: vy0
-  };
-  const initialCenter = {
-    x: initialRelativeVelocity.y / omega,
-    y: -initialRelativeVelocity.x / omega
-  };
-
-  return {
-    center,
-    initialCenter,
-    driftVelocity,
-    radius: Math.hypot(relativeVelocity.x, relativeVelocity.y) / Math.abs(omega)
-  };
-}
-
-function drawMotionDecomposition(bounds) {
-  if (!state.showDecomposition) {
+function drawSpeedMatchDecomposition(bounds) {
+  const data = getSpeedMatchingData();
+  if (state.mode !== "speed-matching" || !data || data.targetVelocitySigned == null) {
     return;
   }
 
-  const decomposition = getMotionDecomposition();
-  if (!decomposition) {
-    return;
-  }
-
-  const center = worldToCanvas(decomposition.center, bounds);
-  const start = worldToCanvas(decomposition.initialCenter, bounds);
-  const edge = worldToCanvas(
-    {
-      x: decomposition.center.x + decomposition.radius,
-      y: decomposition.center.y
-    },
-    bounds
-  );
-  const radiusPx = Math.max(3, Math.abs(edge.x - center.x));
-  const centerRadius = state.demoMode ? 7 : 5;
+  const t = state.simulationTime * 1e-6;
+  const driftEnd = { x: data.targetVelocitySigned * t, y: 0 };
+  const driftStartCanvas = worldToCanvas({ x: 0, y: 0 }, bounds);
+  const driftEndCanvas = worldToCanvas(driftEnd, bounds);
 
   ctx.save();
-  ctx.setLineDash([8, 7]);
-  ctx.strokeStyle = "rgba(95, 111, 47, 0.48)";
-  ctx.lineWidth = state.demoMode ? 2.4 : 1.8;
+  ctx.setLineDash([8, 6]);
+  ctx.strokeStyle = "rgba(42, 143, 106, 0.8)";
+  ctx.lineWidth = state.demoMode ? 3 : 2;
   ctx.beginPath();
-  ctx.arc(center.x, center.y, radiusPx, 0, Math.PI * 2);
+  ctx.moveTo(driftStartCanvas.x, driftStartCanvas.y);
+  ctx.lineTo(driftEndCanvas.x, driftEndCanvas.y);
   ctx.stroke();
 
-  ctx.strokeStyle = "rgba(95, 111, 47, 0.72)";
-  ctx.beginPath();
-  ctx.moveTo(start.x, start.y);
-  ctx.lineTo(center.x, center.y);
-  ctx.stroke();
+  if (data.residualSpeedSigned != null) {
+    const { q, m, bz } = getPhysicsParams();
+    if (Math.abs(q) > 1e-30 && Math.abs(bz) > 1e-12) {
+      const omega = (q * bz) / m;
+      if (Math.abs(omega) > 1e-30) {
+        const radius = Math.abs(data.residualSpeedSigned / omega);
+        const centerWorld = {
+          x: driftEnd.x,
+          y: -(data.residualSpeedSigned / omega)
+        };
+        const centerCanvas = worldToCanvas(centerWorld, bounds);
+        const edgeCanvas = worldToCanvas({ x: centerWorld.x + radius, y: centerWorld.y }, bounds);
+        const radiusPx = Math.abs(edgeCanvas.x - centerCanvas.x);
+
+        ctx.strokeStyle = "rgba(67, 97, 194, 0.78)";
+        ctx.lineWidth = state.demoMode ? 2.6 : 1.8;
+        ctx.beginPath();
+        ctx.arc(centerCanvas.x, centerCanvas.y, radiusPx, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+  }
   ctx.restore();
-
-  ctx.fillStyle = "#5f6f2f";
-  ctx.beginPath();
-  ctx.arc(center.x, center.y, centerRadius, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.font = `${state.demoMode ? 16 : 12}px "Avenir Next", "PingFang SC", sans-serif`;
-  ctx.fillText("导引中心", center.x + 9, center.y - 10);
-
-  drawArrow(
-    decomposition.center,
-    { x: decomposition.driftVelocity, y: 0 },
-    bounds,
-    "#5f6f2f",
-    "v_d",
-    state.demoMode ? 58 : 42
-  );
 }
 
 function getPathExtent() {
@@ -1156,7 +1285,6 @@ function drawVectors(bounds) {
 
   const maxForceMagnitude = Math.max(
     Math.hypot(metrics.electricForceVector.x, metrics.electricForceVector.y),
-    Math.hypot(metrics.constantForceVector.x, metrics.constantForceVector.y),
     Math.hypot(metrics.magneticForceVector.x, metrics.magneticForceVector.y),
     Math.hypot(metrics.netForceVector.x, metrics.netForceVector.y),
     1e-30
@@ -1194,20 +1322,24 @@ function drawVectors(bounds) {
   );
   drawArrow(
     anchor,
-    metrics.constantForceVector,
-    bounds,
-    "#5f6f2f",
-    "F恒",
-    getDynamicArrowLength(Math.hypot(metrics.constantForceVector.x, metrics.constantForceVector.y), maxForceMagnitude, forceMin, forceMax)
-  );
-  drawArrow(
-    anchor,
     metrics.netForceVector,
     bounds,
     "#7b3fa0",
     "F合",
     getDynamicArrowLength(Math.hypot(metrics.netForceVector.x, metrics.netForceVector.y), maxForceMagnitude, forceMin, forceMax)
   );
+
+  if (state.mode === "speed-matching" && state.speedMatchSource !== "electric") {
+    const extraMagnitude = Math.hypot(metrics.extraForceVector.x, metrics.extraForceVector.y);
+    drawArrow(
+      anchor,
+      metrics.extraForceVector,
+      bounds,
+      "#d14c64",
+      state.speedMatchSource === "gravity" ? "mg" : "F₀",
+      getDynamicArrowLength(extraMagnitude, Math.max(maxForceMagnitude, extraMagnitude), forceMin, forceMax)
+    );
+  }
 }
 
 function drawParticle(bounds) {
@@ -1231,8 +1363,8 @@ function drawParticle(bounds) {
 function renderScene() {
   const bounds = getBounds();
   drawBackground(bounds);
+  drawSpeedMatchDecomposition(bounds);
   drawPath(bounds);
-  drawMotionDecomposition(bounds);
   drawVectors(bounds);
   drawParticle(bounds);
 }
@@ -1272,16 +1404,45 @@ bindInput(refs.chargeInput, "charge");
 bindInput(refs.massInput, "mass");
 bindInput(refs.electricInput, "electric");
 bindInput(refs.magneticInput, "magnetic");
-bindInput(refs.forceInput, "force");
 bindInput(refs.speedInput, "speed");
 bindInput(refs.angleInput, "angle");
 bindNumberInput(refs.chargeNumber, "charge");
 bindNumberInput(refs.massNumber, "mass");
 bindNumberInput(refs.electricNumber, "electric");
 bindNumberInput(refs.magneticNumber, "magnetic");
-bindNumberInput(refs.forceNumber, "force");
 bindNumberInput(refs.speedNumber, "speed");
 bindNumberInput(refs.angleNumber, "angle");
+
+refs.gravityInput.addEventListener("input", (event) => {
+  state.gravityScale = Number(event.target.value);
+  applyParameterChange();
+});
+
+refs.gravityNumber.addEventListener("change", (event) => {
+  const next = Number(event.target.value);
+  if (!Number.isFinite(next)) {
+    syncInputs();
+    return;
+  }
+  state.gravityScale = Math.min(50, Math.max(1, next));
+  applyParameterChange();
+});
+
+refs.constantForceInput.addEventListener("input", (event) => {
+  state.constantForceScale = Number(event.target.value);
+  applyParameterChange();
+});
+
+refs.constantForceNumber.addEventListener("change", (event) => {
+  const next = Number(event.target.value);
+  if (!Number.isFinite(next)) {
+    syncInputs();
+    return;
+  }
+  state.constantForceScale = Math.min(5, Math.max(-5, next));
+  applyParameterChange();
+});
+
 
 refs.startButton.addEventListener("click", () => {
   startSimulation();
@@ -1309,11 +1470,6 @@ refs.showTrailToggle.addEventListener("change", (event) => {
 
 refs.showVectorsToggle.addEventListener("change", (event) => {
   state.showVectors = event.target.checked;
-  renderScene();
-});
-
-refs.showDecompositionToggle.addEventListener("change", (event) => {
-  state.showDecomposition = event.target.checked;
   renderScene();
 });
 
@@ -1347,6 +1503,23 @@ refs.maxTimeNumber.addEventListener("change", (event) => {
   syncReadouts();
 });
 
+refs.applyTargetSpeedButton.addEventListener("click", () => {
+  const data = getSpeedMatchingData();
+  if (!data || data.targetSpeed == null) {
+    return;
+  }
+  state.speed = Math.min(28, Math.max(1, data.targetSpeed / SPEED_UNIT));
+  applyParameterChange();
+});
+
+refs.adjustButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const percent = Number(button.dataset.adjust) / 100;
+    state.speed = Math.min(28, Math.max(1, state.speed * (1 + percent)));
+    applyParameterChange();
+  });
+});
+
 refs.exportPngButton.addEventListener("click", () => {
   refs.canvas.toBlob((blob) => {
     if (!blob) return;
@@ -1367,7 +1540,6 @@ refs.exportCsvButton.addEventListener("click", () => {
     `# mass_1e-27kg,${state.mass}`,
     `# electric_1e5N_per_C,${state.electric}`,
     `# magnetic_T,${state.magnetic}`,
-    `# constant_force_1e-14N,${state.force}`,
     `# speed_1e6m_per_s,${state.speed}`,
     `# angle_deg,${state.angle}`,
     "index,x_m,y_m"
@@ -1453,7 +1625,6 @@ bindLockButton(refs.lockChargeButton, "charge");
 bindLockButton(refs.lockMassButton, "mass");
 bindLockButton(refs.lockElectricButton, "electric");
 bindLockButton(refs.lockMagneticButton, "magnetic");
-bindLockButton(refs.lockForceButton, "force");
 bindLockButton(refs.lockSpeedButton, "speed");
 bindLockButton(refs.lockAngleButton, "angle");
 
@@ -1468,6 +1639,13 @@ refs.presetButtons.forEach((button) => {
     applyMode(button.dataset.mode);
   });
 });
+
+refs.sourceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    applySpeedMatchSource(button.dataset.source);
+  });
+});
+
 
 clearTrajectory();
 syncInputs();
