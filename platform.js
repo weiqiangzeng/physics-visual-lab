@@ -85,77 +85,8 @@
       takeaway: "复合场轨迹取决于各力的方向和大小，配速只消除特定方向的合力。"
     }
   };
-  const courseBooks = [
-    {
-      id: "required-1",
-      title: "必修第一册",
-      summary: "运动与力的基础概念，按人教版章节顺序学习。",
-      chapters: [
-        ["required-1-1", "第一章 运动的描述"],
-        ["required-1-2", "第二章 匀变速直线运动的研究"],
-        ["required-1-3", "第三章 相互作用"],
-        ["required-1-4", "第四章 运动和力的关系"]
-      ]
-    },
-    {
-      id: "required-2",
-      title: "必修第二册",
-      summary: "从曲线运动进入万有引力、功和机械能。",
-      chapters: [
-        ["required-2-5", "第五章 抛体运动"],
-        ["required-2-6", "第六章 圆周运动"],
-        ["required-2-7", "第七章 万有引力与宇宙航行"],
-        ["required-2-8", "第八章 机械能守恒定律"]
-      ]
-    },
-    {
-      id: "required-3",
-      title: "必修第三册",
-      summary: "从静电场、电路到电磁感应与电磁波初步。",
-      chapters: [
-        ["required-3-9", "第九章 静电场及其应用"],
-        ["required-3-10", "第十章 静电场中的能量"],
-        ["required-3-11", "第十一章 电路及其应用"],
-        ["required-3-12", "第十二章 电能 能量守恒定律"],
-        ["required-3-13", "第十三章 电磁感应与电磁波初步"]
-      ]
-    },
-    {
-      id: "selective-1",
-      title: "选择性必修第一册",
-      summary: "动量、机械振动、机械波和光。",
-      chapters: [
-        ["selective-1-1", "第一章 动量守恒定律"],
-        ["selective-1-2", "第二章 机械振动"],
-        ["selective-1-3", "第三章 机械波"],
-        ["selective-1-4", "第四章 光"]
-      ]
-    },
-    {
-      id: "selective-2",
-      title: "选择性必修第二册",
-      summary: "安培力、洛伦兹力、电磁感应、交变电流和传感器。",
-      chapters: [
-        ["selective-2-1", "第一章 安培力与洛伦兹力"],
-        ["selective-2-2", "第二章 电磁感应"],
-        ["selective-2-3", "第三章 交变电流"],
-        ["selective-2-4", "第四章 电磁振荡与电磁波"],
-        ["selective-2-5", "第五章 传感器"]
-      ]
-    },
-    {
-      id: "selective-3",
-      title: "选择性必修第三册",
-      summary: "分子动理论、热力学、原子结构和原子核。",
-      chapters: [
-        ["selective-3-1", "第一章 分子动理论"],
-        ["selective-3-2", "第二章 气体、固体和液体"],
-        ["selective-3-3", "第三章 热力学定律"],
-        ["selective-3-4", "第四章 原子结构和波粒二象性"],
-        ["selective-3-5", "第五章 原子核"]
-      ]
-    }
-  ];
+  const curriculum = window.physicsCurriculum || { books: [], models: [], categories: ["全部"], statusLabels: {} };
+  const courseBooks = curriculum.books;
   const storageKey = "physics-visual-lab-progress-v1";
   const audienceStorageKey = "physics-visual-lab-audience-v1";
   const volumeStorageKey = "physics-visual-lab-volume-v1";
@@ -228,10 +159,91 @@
     const volumeSummary = document.getElementById("volumeSummary");
     const empty = document.getElementById("volumeEmpty");
     const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
-    if (!tabs.length || !outline) return;
+    const modelTitle = document.getElementById("modelTitle");
+    const modelSummary = document.getElementById("modelSummary");
+    const modelFilters = document.getElementById("modelFilters");
+    const modelCatalog = document.getElementById("modelCatalog");
+    if (!tabs.length || !outline || !modelCatalog) return;
+
+    let selectedChapterId = "";
+    let selectedCategory = "全部";
+
+    const chapterModels = (book) => curriculum.models.filter((item) => book.chapters.some((chapter) => chapter.id === item.chapterId));
+
+    const renderModelCatalog = (book) => {
+      const models = chapterModels(book).filter((item) => {
+        const chapterMatch = !selectedChapterId || item.chapterId === selectedChapterId;
+        const categoryMatch = selectedCategory === "全部" || item.category === selectedCategory;
+        return chapterMatch && categoryMatch;
+      });
+      const chaptersById = new Map(book.chapters.map((chapter) => [chapter.id, chapter.title]));
+      const openCount = models.filter((item) => item.status === "open").length;
+      if (modelTitle) {
+        const scope = selectedChapterId ? chaptersById.get(selectedChapterId) : `${book.title} · 全部模型`;
+        modelTitle.textContent = scope || `${book.title} · 全部模型`;
+      }
+      if (modelSummary) {
+        modelSummary.textContent = `${models.length} 个模型 · ${openCount} 个可视化实验已开放 · 其余模型可先查看内容骨架。`;
+      }
+      if (!models.length) {
+        modelCatalog.innerHTML = '<p class="catalog-empty">当前筛选下暂无模型。</p>';
+        return;
+      }
+      modelCatalog.innerHTML = models.map((item) => `
+        <article class="model-card ${item.status === "open" ? "is-open" : "is-planned"}">
+          <div class="model-card-topline">
+            <span class="subject-tag">${item.category}</span>
+            <span class="model-status">${curriculum.statusLabels[item.status] || item.status}</span>
+          </div>
+          <h3>${item.title}</h3>
+          <p>${item.summary}</p>
+          <div class="model-card-meta">
+            <span>${chaptersById.get(item.chapterId) || "高中物理"}</span>
+            <span>${item.visual}</span>
+          </div>
+          <a class="card-link" href="./model.html?id=${encodeURIComponent(item.id)}">查看模型内容<span aria-hidden="true">→</span></a>
+        </article>`).join("");
+    };
+
+    const renderFilters = (book) => {
+      const available = new Set(chapterModels(book).map((item) => item.category));
+      const categories = curriculum.categories.filter((category) => category === "全部" || available.has(category));
+      if (!modelFilters) return;
+      modelFilters.innerHTML = categories.map((category) => `
+        <button type="button" class="model-filter ${selectedCategory === category ? "active" : ""}" data-category="${category}" aria-pressed="${selectedCategory === category ? "true" : "false"}">${category}</button>`).join("");
+      modelFilters.querySelectorAll("[data-category]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedCategory = button.dataset.category || "全部";
+          renderFilters(book);
+          renderModelCatalog(book);
+        });
+      });
+    };
+
+    const renderOutline = (book) => {
+      outline.innerHTML = book.chapters.map((chapter) => {
+        const models = curriculum.models.filter((item) => item.chapterId === chapter.id);
+        const openCount = models.filter((item) => item.status === "open").length;
+        const active = selectedChapterId === chapter.id;
+        const status = openCount ? `${openCount} 个实验已开放` : `${models.length} 个模型待开发`;
+        return `<button type="button" class="course-chapter ${openCount ? "has-lab" : "building"} ${active ? "active" : ""}" data-chapter="${chapter.id}" aria-pressed="${active ? "true" : "false"}">
+          <strong>${chapter.title}</strong>
+          <span>${models.length} 个模型 · ${status}</span>
+        </button>`;
+      }).join("");
+      outline.querySelectorAll("[data-chapter]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedChapterId = selectedChapterId === button.dataset.chapter ? "" : button.dataset.chapter;
+          renderOutline(book);
+          renderModelCatalog(book);
+        });
+      });
+    };
 
     const selectVolume = (volumeId) => {
       const book = courseBooks.find((item) => item.id === volumeId) || courseBooks[0];
+      selectedChapterId = "";
+      selectedCategory = "全部";
       const matchedCards = cards.filter((card) => (card.dataset.volumes || "").split(/\s+/).includes(book.id));
       const matchedChapters = new Set();
       matchedCards.forEach((card) => {
@@ -255,13 +267,9 @@
           : "本册暂未开放可视化实验，章节内容正在建设中。";
       }
       if (empty) empty.hidden = matchedCards.length > 0;
-      outline.innerHTML = book.chapters.map(([id, chapter]) => {
-        const hasLab = matchedChapters.has(id);
-        return `<div class="course-chapter ${hasLab ? "has-lab" : "building"}">
-          <strong>${chapter}</strong>
-          <span>${hasLab ? "可视化实验已开放" : "内容建设中"}</span>
-        </div>`;
-      }).join("");
+      renderOutline(book);
+      renderFilters(book);
+      renderModelCatalog(book);
       saveVolume(book.id);
     };
 

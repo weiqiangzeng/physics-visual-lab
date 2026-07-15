@@ -24,7 +24,7 @@
                 <button type="button" data-audience="teacher">教师演示</button>
               </div>
             </div>
-            <a class="start-link" href="./projectile.html" data-lesson-link="projectile.html">开始学习<span aria-hidden="true">→</span></a>
+            <a class="start-link" href="#modelCatalog">浏览模型目录<span aria-hidden="true">→</span></a>
           </div>
         </header>
 
@@ -54,11 +54,23 @@
           </div>
         </section>
 
+        <section class="model-section" aria-labelledby="modelTitle">
+          <div class="section-heading model-heading">
+            <div>
+              <span class="platform-kicker">高中物理模型目录</span>
+              <h2 id="modelTitle">必修第一册 · 全部模型</h2>
+            </div>
+            <p id="modelSummary">按章节和物理主题整理核心模型。</p>
+          </div>
+          <div id="modelFilters" class="model-filters" role="group" aria-label="物理主题分类"></div>
+          <div id="modelCatalog" class="model-catalog" aria-live="polite"></div>
+        </section>
+
         <section class="lesson-section" aria-labelledby="lessonTitle">
           <div class="section-heading lesson-heading">
             <div>
-              <span class="platform-kicker">本册可视化实验</span>
-              <h2 id="lessonTitle">必修第一册</h2>
+              <span class="platform-kicker">已开放可视化实验</span>
+              <h2 id="lessonTitle">必修第一册 · 可视化实验</h2>
             </div>
             <p id="volumeSummary">对应实验会显示在这里。</p>
           </div>
@@ -113,6 +125,7 @@
         </footer>
       </section>
     </main>
+    <script src="./curriculum-data.js?v=curriculum"></script>
     <script src="./platform.js?v=platform"></script>
   </body>
 </html>

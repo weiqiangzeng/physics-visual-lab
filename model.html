@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>高中物理模型</title>
+    <link rel="stylesheet" href="./styles.css?v=platform" />
+    <link rel="stylesheet" href="./platform.css?v=platform" />
+    <link rel="stylesheet" href="./model.css?v=curriculum" />
+  </head>
+  <body class="platform-home model-page">
+    <main class="app model-app">
+      <section class="stage model-stage">
+        <header class="model-header">
+          <a class="directory-link" href="./index.html">返回课程目录</a>
+          <div class="audience-control" role="group" aria-label="使用方式">
+            <span class="platform-kicker">使用方式</span>
+            <div class="segmented-control">
+              <button type="button" data-audience="student">学生自学</button>
+              <button type="button" data-audience="teacher">教师演示</button>
+            </div>
+          </div>
+        </header>
+
+        <div id="modelNotFound" class="model-not-found" hidden>
+          <span class="platform-kicker">模型内容</span>
+          <h1>没有找到这个物理模型</h1>
+          <p>请从课程目录重新选择章节或模型。</p>
+          <a class="start-link" href="./index.html">返回课程目录<span aria-hidden="true">→</span></a>
+        </div>
+
+        <article id="modelContent" hidden>
+          <header class="model-hero">
+            <div class="model-breadcrumb" id="modelBreadcrumb"></div>
+            <div class="model-hero-topline">
+              <span id="modelCategory" class="subject-tag"></span>
+              <span id="modelStatus" class="model-status"></span>
+            </div>
+            <h1 id="modelTitle"></h1>
+            <p id="modelSummary" class="model-lead"></p>
+            <div class="model-meta-line">
+              <span>可视化方式</span><strong id="modelVisual"></strong>
+            </div>
+            <a id="modelLabLink" class="start-link" href="#" hidden>进入可视化实验<span aria-hidden="true">→</span></a>
+          </header>
+
+          <div class="model-content">
+            <section class="model-content-section model-hook-section" aria-labelledby="modelHookTitle">
+              <span class="platform-kicker">现象与导入</span>
+              <h2 id="modelHookTitle">先观察，再建立模型</h2>
+              <p id="modelHook"></p>
+            </section>
+
+            <section class="model-content-section" aria-labelledby="modelDefinitionTitle">
+              <span class="platform-kicker">模型边界</span>
+              <h2 id="modelDefinitionTitle">这个模型描述什么</h2>
+              <p id="modelDefinition"></p>
+            </section>
+
+            <section class="model-content-section" aria-labelledby="modelRelationsTitle">
+              <span class="platform-kicker">核心关系</span>
+              <h2 id="modelRelationsTitle">需要看清的物理关系</h2>
+              <ul id="modelRelations" class="model-list"></ul>
+            </section>
+
+            <section class="model-content-section" aria-labelledby="modelExploreTitle">
+              <span class="platform-kicker">探究路径</span>
+              <h2 id="modelExploreTitle">建议如何观察</h2>
+              <ol id="modelExplore" class="model-list"></ol>
+            </section>
+
+            <section class="model-content-section model-misconception-section" aria-labelledby="modelMisconceptionTitle">
+              <span class="platform-kicker">概念检查</span>
+              <h2 id="modelMisconceptionTitle">常见误区</h2>
+              <p id="modelMisconceptions"></p>
+            </section>
+
+            <section class="model-content-section model-bottom-section" aria-labelledby="modelPrerequisiteTitle">
+              <div>
+                <span class="platform-kicker">学习准备</span>
+                <h2 id="modelPrerequisiteTitle">前置知识</h2>
+                <p id="modelPrerequisite"></p>
+              </div>
+              <div id="modelNextStep" class="model-next-step"></div>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="./curriculum-data.js?v=curriculum"></script>
+    <script src="./platform.js?v=platform"></script>
+    <script src="./model-page.js?v=curriculum"></script>
+  </body>
+</html>
