@@ -3,74 +3,105 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>物理可视化实验目录</title>
-    <link rel="stylesheet" href="./styles.css?v=20260702-directory" />
+    <title>物理可视化学习平台</title>
+    <link rel="stylesheet" href="./styles.css?v=platform" />
+    <link rel="stylesheet" href="./platform.css?v=platform" />
   </head>
-  <body>
+  <body class="platform-home">
     <main class="app">
       <section class="stage">
-        <div class="stage-head">
-          <div class="stage-title">
-            <h1>物理可视化实验目录</h1>
+        <header class="platform-hero">
+          <div class="hero-copy">
+            <span class="platform-kicker">高中物理学习空间</span>
+            <h1>物理可视化学习平台</h1>
+            <p>用可调参数、动态轨迹和关键状态，把公式背后的物理关系看清楚。</p>
           </div>
-        </div>
-        <p class="stage-subtitle">选择一个实验进入独立页面。</p>
+          <a class="start-link" href="./projectile.html" data-lesson-link="projectile.html">开始学习<span aria-hidden="true">→</span></a>
+        </header>
 
-        <div class="preset-bar">
-          <div class="preset-copy">
-            <span class="preset-label">电磁学</span>
-            <strong>带电粒子在电场与磁场中的运动</strong>
-            <p>重点看清：电场力、磁场力、恒力和漂移运动如何共同决定轨迹。</p>
+        <section class="route-panel" aria-labelledby="routeTitle">
+          <div class="section-heading">
+            <div>
+              <span class="platform-kicker">建议学习路线</span>
+              <h2 id="routeTitle">从运动描述到复合场</h2>
+            </div>
+            <div class="progress-summary" aria-live="polite">
+              <strong id="progressCount">0 / 5</strong>
+              <span>已完成实验</span>
+            </div>
           </div>
-          <div class="preset-buttons">
-            <a class="ghost-link" href="./charged-particle.html">进入实验</a>
+          <div class="route-steps" aria-label="学习顺序">
+            <span class="route-step active">运动分解</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+            <span class="route-step">方向与周期</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+            <span class="route-step">振动与波</span>
+            <span class="route-arrow" aria-hidden="true">→</span>
+            <span class="route-step">复合场</span>
           </div>
-        </div>
+          <div class="progress-track" aria-label="实验探索进度">
+            <span id="progressFill"></span>
+          </div>
+        </section>
 
-        <div class="preset-bar">
-          <div class="preset-copy">
-            <span class="preset-label">力学</span>
-            <strong>简谐振动可视化实验台</strong>
-            <p>重点看清：端点、平衡位置、相位圆和能量转换之间的对应关系。</p>
+        <section class="lesson-section" aria-labelledby="lessonTitle">
+          <div class="section-heading lesson-heading">
+            <div>
+              <span class="platform-kicker">实验地图</span>
+              <h2 id="lessonTitle">每个实验只解决几个关键问题</h2>
+            </div>
+            <p>先观察，再调参，最后用公式解释。</p>
           </div>
-          <div class="preset-buttons">
-            <a class="ghost-link" href="./oscillation.html">进入实验</a>
-          </div>
-        </div>
 
-        <div class="preset-bar">
-          <div class="preset-copy">
-            <span class="preset-label">波动</span>
-            <strong>波的叠加与驻波可视化实验台</strong>
-            <p>重点看清：入射波和反射波叠加后，节点与腹部为什么固定。</p>
-          </div>
-          <div class="preset-buttons">
-            <a class="ghost-link" href="./waves.html">进入实验</a>
-          </div>
-        </div>
+          <div class="experiment-grid">
+            <article class="experiment-card" data-lesson-card="projectile.html">
+              <div class="card-topline"><span class="subject-tag mechanics">力学</span><span class="lesson-number">01</span></div>
+              <h3>抛体运动分解</h3>
+              <p class="card-question">最高点时，物体还在运动吗？</p>
+              <p class="card-focus">看清 vx 保持不变、vy 在最高点为 0，以及速度方向如何改变。</p>
+              <a class="card-link" href="./projectile.html" data-lesson-link="projectile.html">进入学习<span aria-hidden="true">→</span></a>
+            </article>
 
-        <div class="preset-bar">
-          <div class="preset-copy">
-            <span class="preset-label">力学</span>
-            <strong>抛体运动分解可视化实验台</strong>
-            <p>重点看清：水平方向匀速、竖直方向匀变速，以及最高点 vy = 0。</p>
-          </div>
-          <div class="preset-buttons">
-            <a class="ghost-link" href="./projectile.html">进入实验</a>
-          </div>
-        </div>
+            <article class="experiment-card" data-lesson-card="circular.html">
+              <div class="card-topline"><span class="subject-tag mechanics">力学</span><span class="lesson-number">02</span></div>
+              <h3>圆周运动与向心力</h3>
+              <p class="card-question">速度不变，为什么仍然有加速度？</p>
+              <p class="card-focus">比较切向速度、径向加速度、半径、周期和向心力之间的关系。</p>
+              <a class="card-link" href="./circular.html" data-lesson-link="circular.html">进入学习<span aria-hidden="true">→</span></a>
+            </article>
 
-        <div class="preset-bar">
-          <div class="preset-copy">
-            <span class="preset-label">力学</span>
-            <strong>圆周运动与向心力可视化实验台</strong>
-            <p>重点看清：速度始终沿切线，加速度和向心力始终指向圆心。</p>
+            <article class="experiment-card" data-lesson-card="oscillation.html">
+              <div class="card-topline"><span class="subject-tag mechanics">力学</span><span class="lesson-number">03</span></div>
+              <h3>简谐振动</h3>
+              <p class="card-question">位移、速度、加速度什么时候达到最大？</p>
+              <p class="card-focus">把真实运动、时间图像、相位圆和动能势能放到同一时间轴上。</p>
+              <a class="card-link" href="./oscillation.html" data-lesson-link="oscillation.html">进入学习<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card" data-lesson-card="waves.html">
+              <div class="card-topline"><span class="subject-tag waves">波动</span><span class="lesson-number">04</span></div>
+              <h3>波的叠加与驻波</h3>
+              <p class="card-question">节点为什么始终不动，腹部为什么振幅最大？</p>
+              <p class="card-focus">分别观察入射波、反射波和合成波，建立叠加与驻波的对应关系。</p>
+              <a class="card-link" href="./waves.html" data-lesson-link="waves.html">进入学习<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured" data-lesson-card="charged-particle.html">
+              <div class="card-topline"><span class="subject-tag electromagnetism">电磁学</span><span class="lesson-number">05</span></div>
+              <h3>带电粒子在复合场中的运动</h3>
+              <p class="card-question">多个力共同作用时，轨迹由什么决定？</p>
+              <p class="card-focus">从电场力、磁场力和恒力出发，理解配速、漂移与圆周分运动。</p>
+              <a class="card-link" href="./charged-particle.html" data-lesson-link="charged-particle.html">进入学习<span aria-hidden="true">→</span></a>
+            </article>
           </div>
-          <div class="preset-buttons">
-            <a class="ghost-link" href="./circular.html">进入实验</a>
-          </div>
-        </div>
+        </section>
+
+        <footer class="platform-footer">
+          <span>覆盖：运动学 · 力学 · 振动与波 · 电磁学</span>
+          <span>适合课堂演示、课后复习和自主探究</span>
+        </footer>
       </section>
     </main>
+    <script src="./platform.js?v=platform"></script>
   </body>
 </html>

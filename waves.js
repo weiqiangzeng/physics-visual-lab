@@ -76,22 +76,22 @@ let animationFrame = 0;
 
 const modeConfigs = {
   combined: {
-    title: "分波 + 合成波",
+    title: "分波合成",
     goal: "观察两列波如何叠加形成驻波",
     prompt: "先分别看入射波和反射波，再看合成波中哪些点始终不动，哪些点振幅最大。",
     formula: "y = y₁ + y₂"
   },
   standing: {
-    title: "只看驻波",
+    title: "驻波结构",
     goal: "观察节点和腹部的位置是否会移动",
     prompt: "节点始终静止，腹部振幅最大；驻波不是波形整体向前传播。",
     formula: "y = 2A sin(kx) cos(ωt)"
   },
   interference: {
-    title: "相长 / 相消",
-    goal: "比较相长叠加和相消叠加",
-    prompt: "把时间停在特殊时刻，观察两列波同向时变大、反向时抵消。",
-    formula: "同向相加，反向相消"
+    title: "定点叠加",
+    goal: "在同一个位置比较两列波如何相加或抵消",
+    prompt: "看竖直探针处的 y₁、y₂ 和合位移 y：同向时相长，反向时相消。",
+    formula: "某点处：y = y₁ + y₂"
   }
 };
 
@@ -239,6 +239,50 @@ function drawMarkers() {
   });
 }
 
+function drawProbe(x, label, color) {
+  const base = worldToCanvas({ x, y: 0 });
+  const p1 = worldToCanvas({ x, y: yIncident(x) });
+  const p2 = worldToCanvas({ x, y: yReflected(x) });
+  const ps = worldToCanvas({ x, y: ySum(x) });
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  ctx.setLineDash([5, 6]);
+  ctx.beginPath();
+  ctx.moveTo(base.x, padding.top + 16);
+  ctx.lineTo(base.x, height - padding.bottom - 16);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  [
+    { point: p1, text: "y₁", fill: "#1f78b4" },
+    { point: p2, text: "y₂", fill: "#c96b29" },
+    { point: ps, text: "y", fill: "#0d7168" }
+  ].forEach((item, index) => {
+    ctx.fillStyle = item.fill;
+    ctx.beginPath();
+    ctx.arc(item.point.x, item.point.y, index === 2 ? 6 : 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = "700 12px Avenir Next, PingFang SC, sans-serif";
+    ctx.fillText(item.text, item.point.x + 8, item.point.y + 4);
+  });
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  const labelY = label.includes("腹部") ? padding.top + 16 : padding.top + 52;
+  ctx.beginPath();
+  ctx.roundRect(base.x - 42, labelY, 84, 28, 14);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.font = "700 12px Avenir Next, PingFang SC, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(label, base.x, labelY + 19);
+  ctx.restore();
+}
+
 function getCriticalState() {
   const x = state.wavelength / 4;
   const incident = yIncident(x);
@@ -277,6 +321,11 @@ function render() {
     drawWave(yReflected, "#c96b29", "y₂ 反射波", 2, [3, 6]);
   }
   drawWave(ySum, "#0d7168", "y 合成波", state.demoMode ? 4 : 3);
+
+  if (state.mode === "interference") {
+    drawProbe(state.wavelength / 4, "腹部相长", "#0d7168");
+    drawProbe(state.wavelength, "节点相消", "#7b3fa0");
+  }
 
   const p = worldToCanvas({ x: state.wavelength / 4, y: ySum(state.wavelength / 4) });
   ctx.fillStyle = "#121f24";

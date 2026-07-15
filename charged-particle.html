@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>带电粒子在电场与磁场中的运动虚拟实验台</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./platform.css?v=platform" />
   </head>
   <body>
     <main class="app">
@@ -16,12 +17,21 @@
               <span class="demo-badge" id="demoBadge">教学演示中</span>
             </div>
             <div class="actions">
+              <a class="ghost-link" href="./index.html">实验目录</a>
               <button id="startButton" class="primary" type="button">开始</button>
               <button id="pauseButton" type="button">暂停</button>
               <button id="resetButton" type="button">重置</button>
             </div>
           </div>
           <p class="stage-subtitle">用于演示带电粒子在电场、磁场及电磁复合场中的运动规律，并支持课堂探究、数据导出与演示录制。</p>
+          <section class="lesson-guide" aria-label="当前学习任务">
+            <div class="guide-main">
+              <span class="preset-label">学习任务</span>
+              <strong>先比较不同力的作用，再找到能让竖直合力接近 0 的配速。</strong>
+              <p>从电场力、磁场力和恒力的方向开始，观察速度变化如何改变轨迹；最后用 v = v配 + v余 解释漂移与圆周分运动。</p>
+            </div>
+            <div class="guide-formula">F = q(E + v × B) + F₀</div>
+          </section>
           <div class="preset-bar">
             <div class="preset-copy">
               <span class="preset-label">场景模式</span>
@@ -539,5 +549,6 @@
     </main>
 
     <script src="./script.js"></script>
+    <script src="./platform.js?v=platform"></script>
   </body>
 </html>

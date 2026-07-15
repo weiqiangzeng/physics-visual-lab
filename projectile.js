@@ -55,6 +55,15 @@ const refs = {
   demoBadge: document.getElementById("demoBadge")
 };
 
+refs.metricCards = [
+  refs.xMetric.parentElement,
+  refs.yMetric.parentElement,
+  refs.vxMetric.parentElement,
+  refs.vyMetric.parentElement,
+  refs.rangeMetric.parentElement,
+  refs.timeMetric.parentElement
+];
+
 const ctx = refs.canvas.getContext("2d");
 const dpr = window.devicePixelRatio || 1;
 const width = 980;
@@ -151,6 +160,19 @@ function drawArrow(from, vector, color, label, scale = 1) {
   ctx.font = "13px Avenir Next, PingFang SC, sans-serif";
   ctx.fillText(label, to.x + 8, to.y - 8);
   ctx.restore();
+}
+
+function getScreenVelocityVectors(point) {
+  const dt = 0.18;
+  const current = worldToCanvas(point);
+  const vxEnd = worldToCanvas({ x: point.x + point.vx * dt, y: point.y });
+  const vyEnd = worldToCanvas({ x: point.x, y: point.y + point.vy * dt });
+  const vEnd = worldToCanvas({ x: point.x + point.vx * dt, y: point.y + point.vy * dt });
+  return {
+    v: { x: vEnd.x - current.x, y: vEnd.y - current.y },
+    vx: { x: vxEnd.x - current.x, y: vxEnd.y - current.y },
+    vy: { x: vyEnd.x - current.x, y: vyEnd.y - current.y }
+  };
 }
 
 function drawLabelBox(text, x, y, color) {
@@ -259,16 +281,17 @@ function render() {
 
   const point = getPoint();
   const c = worldToCanvas(point);
+  const vectors = getScreenVelocityVectors(point);
   ctx.fillStyle = "#121f24";
   ctx.beginPath();
   ctx.arc(c.x, c.y, state.demoMode ? 9 : 7, 0, Math.PI * 2);
   ctx.fill();
 
-  const scale = state.demoMode ? 4.4 : 3.6;
-  drawArrow(c, { x: point.vx, y: -point.vy }, "#0d7168", "v", scale);
+  const scale = state.demoMode ? 1.18 : 1;
+  drawArrow(c, vectors.v, "#0d7168", "v", scale);
   if (state.showComponents) {
-    drawArrow(c, { x: point.vx, y: 0 }, "#1f78b4", "vx", scale);
-    drawArrow(c, { x: 0, y: -point.vy }, "#c96b29", "vy", scale);
+    drawArrow(c, vectors.vx, "#1f78b4", "vx", scale);
+    drawArrow(c, vectors.vy, "#c96b29", "vy", scale);
   }
   drawArrow({ x: c.x + 28, y: c.y - 18 }, { x: 0, y: 1 }, "#7b3fa0", "g", 36);
   syncReadouts();
@@ -298,6 +321,7 @@ function syncReadouts() {
   refs.landingCard.classList.toggle("active", critical.key === "landing");
   refs.criticalStateLabel.textContent = critical.label;
   refs.criticalStateNote.textContent = critical.note;
+  syncFocus(critical.key);
 }
 
 function syncInputs() {
@@ -325,6 +349,17 @@ function syncInputs() {
   refs.demoBadge.textContent = state.demoMode ? "教学演示中" : "";
 }
 
+function syncFocus(key) {
+  refs.metricCards.forEach((card) => card.classList.remove("focused"));
+  refs.modeFormula.classList.toggle("focused", key === "apex" || key === "landing");
+  const focusMap = {
+    launch: [refs.vxMetric.parentElement, refs.vyMetric.parentElement],
+    apex: [refs.vyMetric.parentElement, refs.vxMetric.parentElement],
+    landing: [refs.rangeMetric.parentElement, refs.timeMetric.parentElement, refs.yMetric.parentElement]
+  };
+  (focusMap[key] || []).forEach((card) => card.classList.add("focused"));
+}
+
 function pauseForObservation() {
   state.running = false;
   state.paused = false;
@@ -340,9 +375,16 @@ function setObservationTime(time) {
 
 function jumpTo(kind) {
   const { apexTime, flightTime } = getDerived();
-  if (kind === "apex") setObservationTime(apexTime);
-  else if (kind === "landing") setObservationTime(flightTime);
-  else setObservationTime(0);
+  if (kind === "apex") {
+    state.mode = "apex";
+    setObservationTime(apexTime);
+  } else if (kind === "landing") {
+    state.mode = "range";
+    setObservationTime(flightTime);
+  } else {
+    state.mode = "decompose";
+    setObservationTime(0);
+  }
 }
 
 function bindRange(range, number, key) {
@@ -387,9 +429,14 @@ refs.presetButtons.forEach((button) => {
   });
 });
 refs.startButton.addEventListener("click", () => {
+  const { flightTime } = getDerived();
+  if (state.time >= flightTime - 0.01) {
+    state.time = 0;
+  }
   state.running = true;
   state.paused = false;
   refs.pauseButton.textContent = "暂停";
+  syncInputs();
   syncReadouts();
 });
 refs.pauseButton.addEventListener("click", () => {

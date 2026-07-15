@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>抛体运动分解可视化实验台</title>
     <link rel="stylesheet" href="./waves.css?v=20260702-projectile" />
+    <link rel="stylesheet" href="./platform.css?v=platform" />
   </head>
   <body>
     <main class="app">
@@ -31,6 +32,23 @@
               <p id="modePrompt">拖动时间条到最高点，比较 vx、vy 和速度方向；再观察水平方向是否仍在前进。</p>
             </div>
             <div class="guide-formula" id="modeFormula">x = v₀cosθ · t</div>
+          </section>
+          <section class="teaching-route" aria-label="课堂观察路线">
+            <div>
+              <span class="preset-label">观察路线</span>
+              <ol>
+                <li>先看发射瞬间，把 v₀ 分解成 vx 和 vy。</li>
+                <li>点击最高点，确认 vy = 0 但 vx 仍存在。</li>
+                <li>再点击落地点，比较飞行时间和射程。</li>
+              </ol>
+            </div>
+            <div>
+              <span class="preset-label">典型问题</span>
+              <ul>
+                <li>最高点速度是不是 0？</li>
+                <li>为什么水平位移一直增加？</li>
+              </ul>
+            </div>
           </section>
 
           <div class="preset-bar">
@@ -147,6 +165,7 @@
       </section>
     </main>
 
-    <script src="./projectile.js?v=20260702"></script>
+    <script src="./projectile.js?v=20260702-velocityfix"></script>
+    <script src="./platform.js?v=platform"></script>
   </body>
 </html>

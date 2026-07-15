@@ -1,0 +1,392 @@
+:root {
+  --platform-paper: rgba(255, 255, 255, 0.78);
+  --platform-strong: #175d59;
+  --platform-blue: #2c6f9f;
+  --platform-border: rgba(18, 31, 36, 0.12);
+}
+
+.platform-home .stage {
+  padding: 0;
+  overflow: hidden;
+}
+
+.platform-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 34px 36px 30px;
+  border-bottom: 1px solid var(--platform-border);
+}
+
+.hero-copy {
+  max-width: 760px;
+}
+
+.platform-kicker {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.platform-hero h1 {
+  margin: 10px 0 10px;
+  font-size: 2.8rem;
+  line-height: 1.06;
+  letter-spacing: 0;
+}
+
+.platform-hero p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+.start-link,
+.card-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  color: var(--platform-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.start-link {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0 16px 0 18px;
+  border: 1px solid var(--platform-strong);
+  border-radius: 10px;
+  background: var(--platform-strong);
+  color: #f8fbf8;
+}
+
+.start-link span,
+.card-link span {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.route-panel,
+.lesson-section {
+  padding: 28px 36px 0;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.section-heading h2 {
+  margin: 8px 0 0;
+  font-size: 1.34rem;
+  line-height: 1.25;
+}
+
+.progress-summary {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.progress-summary strong {
+  color: var(--platform-strong);
+  font-size: 1.18rem;
+}
+
+.progress-summary span,
+.lesson-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.route-steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.route-step {
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.route-step.active {
+  border-color: var(--platform-strong);
+  color: var(--platform-strong);
+  font-weight: 700;
+}
+
+.route-arrow {
+  flex: 0 0 auto;
+  color: rgba(18, 31, 36, 0.35);
+}
+
+.progress-track {
+  height: 6px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(23, 93, 89, 0.12);
+}
+
+.progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--platform-strong);
+  transition: width 180ms ease;
+}
+
+.lesson-heading {
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+
+.experiment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.experiment-card {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--platform-border);
+  border-radius: 14px;
+  background: var(--platform-paper);
+}
+
+.experiment-card.featured {
+  border-color: rgba(23, 93, 89, 0.32);
+  background: rgba(23, 93, 89, 0.07);
+}
+
+.experiment-card.visited {
+  box-shadow: inset 4px 0 0 var(--platform-strong);
+}
+
+.card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.subject-tag,
+.lesson-number {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.subject-tag {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(18, 31, 36, 0.06);
+}
+
+.subject-tag.electromagnetism {
+  color: var(--platform-strong);
+  background: rgba(23, 93, 89, 0.12);
+}
+
+.subject-tag.waves {
+  color: var(--platform-blue);
+  background: rgba(44, 111, 159, 0.12);
+}
+
+.experiment-card h3 {
+  margin: 18px 0 8px;
+  font-size: 1.12rem;
+  line-height: 1.3;
+}
+
+.card-question {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.card-focus {
+  margin: 8px 0 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.card-link {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--platform-border);
+}
+
+.platform-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 30px 36px 0;
+  padding: 18px 0 24px;
+  border-top: 1px solid var(--platform-border);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.directory-link {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 8px;
+}
+
+.lesson-guide {
+  position: relative;
+}
+
+.task-panel {
+  margin-bottom: 16px;
+  border: 1px solid var(--platform-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+  overflow: hidden;
+}
+
+.task-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.task-summary::-webkit-details-marker {
+  display: none;
+}
+
+.task-summary::after {
+  content: "+";
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.task-panel[open] .task-summary::after {
+  content: "-";
+}
+
+.task-count {
+  margin-left: auto;
+  color: var(--platform-strong);
+  font-size: 0.88rem;
+}
+
+.task-body {
+  padding: 0 16px 14px;
+}
+
+.task-note {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.task-list {
+  display: grid;
+  gap: 8px;
+}
+
+.task-item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 9px 0;
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.task-item + .task-item {
+  border-top: 1px solid rgba(18, 31, 36, 0.08);
+}
+
+.task-item input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: var(--platform-strong);
+}
+
+.task-panel.complete {
+  border-color: rgba(23, 93, 89, 0.38);
+  background: rgba(23, 93, 89, 0.08);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid rgba(23, 93, 89, 0.32);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .platform-hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 26px 20px 24px;
+  }
+
+  .platform-hero h1 {
+    font-size: 2.15rem;
+  }
+
+  .start-link {
+    width: 100%;
+  }
+
+  .route-panel,
+  .lesson-section {
+    padding: 24px 20px 0;
+  }
+
+  .section-heading,
+  .lesson-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .progress-summary {
+    text-align: left;
+  }
+
+  .experiment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    margin: 26px 20px 0;
+  }
+}

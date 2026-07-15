@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>波的叠加与驻波可视化实验台</title>
     <link rel="stylesheet" href="./waves.css?v=20260702" />
+    <link rel="stylesheet" href="./platform.css?v=platform" />
   </head>
   <body>
     <main class="app">
@@ -32,6 +33,23 @@
             </div>
             <div class="guide-formula" id="modeFormula">y = y₁ + y₂</div>
           </section>
+          <section class="teaching-route" aria-label="课堂观察路线">
+            <div>
+              <span class="preset-label">观察路线</span>
+              <ol>
+                <li>先打开分波，分别看入射波和反射波的移动方向。</li>
+                <li>再只看合成波，找出始终不动的节点。</li>
+                <li>最后暂停在相长或相消时刻，比较两列波的位移方向。</li>
+              </ol>
+            </div>
+            <div>
+              <span class="preset-label">典型问题</span>
+              <ul>
+                <li>驻波是不是一列向前传播的波？</li>
+                <li>节点为什么一直不动？</li>
+              </ul>
+            </div>
+          </section>
 
           <div class="preset-bar">
             <div class="preset-copy">
@@ -39,9 +57,9 @@
               <strong id="presetTitle">分波 + 合成波</strong>
             </div>
             <div class="preset-buttons">
-              <button class="preset-button active" type="button" data-mode="combined">分波+合成</button>
-              <button class="preset-button" type="button" data-mode="standing">只看驻波</button>
-              <button class="preset-button" type="button" data-mode="interference">相长/相消</button>
+              <button class="preset-button active" type="button" data-mode="combined">分波合成</button>
+              <button class="preset-button" type="button" data-mode="standing">驻波结构</button>
+              <button class="preset-button" type="button" data-mode="interference">定点叠加</button>
             </div>
           </div>
 
@@ -254,6 +272,7 @@
       </section>
     </main>
 
-    <script src="./waves.js?v=20260702"></script>
+    <script src="./waves.js?v=20260702-probes"></script>
+    <script src="./platform.js?v=platform"></script>
   </body>
 </html>

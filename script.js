@@ -60,7 +60,7 @@ const SPEED_MATCH_DEFAULTS = {
     mass: 4.0,
     electric: 0,
     magnetic: -0.8,
-    speed: 8.0,
+    speed: 5.5,
     angle: 0,
     gravityScale: 25.6
   },
@@ -77,7 +77,7 @@ const SPEED_MATCH_DEFAULTS = {
     mass: 4.0,
     electric: 0,
     magnetic: -0.8,
-    speed: 8.0,
+    speed: 5.5,
     angle: 0,
     constantForceScale: -1.0
   }

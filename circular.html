@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>圆周运动与向心力可视化实验台</title>
     <link rel="stylesheet" href="./waves.css?v=20260702-circular" />
+    <link rel="stylesheet" href="./platform.css?v=platform" />
   </head>
   <body>
     <main class="app">
@@ -31,6 +32,23 @@
               <p id="modePrompt">暂停到任意位置，比较速度箭头和向心加速度箭头的方向关系。</p>
             </div>
             <div class="guide-formula" id="modeFormula">a_c = v² / r</div>
+          </section>
+          <section class="teaching-route" aria-label="课堂观察路线">
+            <div>
+              <span class="preset-label">观察路线</span>
+              <ol>
+                <li>先点击最右点、最高点、最左点，比较速度方向。</li>
+                <li>再看向心加速度，确认它始终指向圆心。</li>
+                <li>最后改变速度或半径，观察 a_c 和 F_c 如何变化。</li>
+              </ol>
+            </div>
+            <div>
+              <span class="preset-label">典型问题</span>
+              <ul>
+                <li>匀速圆周运动为什么仍有加速度？</li>
+                <li>速度变大时向心力怎样变化？</li>
+              </ul>
+            </div>
           </section>
 
           <div class="preset-bar">
@@ -148,5 +166,6 @@
     </main>
 
     <script src="./circular.js?v=20260702"></script>
+    <script src="./platform.js?v=platform"></script>
   </body>
 </html>
