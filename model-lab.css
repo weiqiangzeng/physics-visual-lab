@@ -66,8 +66,8 @@
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
-.model-lab .critical-card span,
-.model-lab .critical-now span {
+.model-lab .critical-card > span,
+.model-lab .critical-now > span {
   display: block;
   color: var(--muted);
   font-size: 0.78rem;

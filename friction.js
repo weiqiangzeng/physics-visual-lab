@@ -198,6 +198,7 @@ function frictionDrawGraph(derived) {
   frictionCtx.beginPath();
   frictionCtx.moveTo(mapX(0), mapY(0));
   frictionCtx.lineTo(mapX(derived.maxStatic), mapY(derived.maxStatic));
+  frictionCtx.lineTo(mapX(derived.maxStatic), mapY(derived.kinetic));
   frictionCtx.lineTo(mapX(maxForce), mapY(derived.kinetic));
   frictionCtx.stroke();
   frictionCtx.fillStyle = "#c96b29";

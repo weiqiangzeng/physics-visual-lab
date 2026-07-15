@@ -742,7 +742,10 @@
 .guide-formula .katex,
 .formula-panel .katex,
 .critical-card .katex {
+  display: inline-block;
   font-size: 1.02em;
+  white-space: nowrap;
+  vertical-align: baseline;
 }
 
 .guide-formula .katex,
