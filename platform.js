@@ -482,6 +482,20 @@
     updateTasks();
   }
 
+  function moveActionsToCanvas() {
+    const actions = document.querySelector(".actions");
+    const canvasWrap = document.querySelector(".canvas-wrap");
+    if (!actions || !canvasWrap || canvasWrap.querySelector(".canvas-action-dock")) return;
+    const buttons = Array.from(actions.querySelectorAll("button"));
+    if (!buttons.length) return;
+    const dock = document.createElement("div");
+    dock.className = "canvas-action-dock";
+    dock.setAttribute("role", "group");
+    dock.setAttribute("aria-label", "画面控制");
+    buttons.forEach((button) => dock.appendChild(button));
+    canvasWrap.prepend(dock);
+  }
+
   renderTaskPanel();
 
   const actions = document.querySelector(".actions");
@@ -492,4 +506,5 @@
     link.textContent = "实验目录";
     actions.prepend(link);
   }
+  moveActionsToCanvas();
 })();

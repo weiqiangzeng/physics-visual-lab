@@ -227,6 +227,8 @@ function newtonSyncReadouts() {
   newtonRefs.positionMetric.textContent = newtonFormat(newtonState.position, 2, "m");
   newtonRefs.overviewForce.textContent = newtonFormat(derived.netForce, 2, "N");
   newtonRefs.overviewAccel.textContent = newtonFormat(derived.acceleration, 2, "m/s²");
+  newtonRefs.startButton.textContent = newtonState.running ? "运行中" : "开始";
+  newtonRefs.startButton.classList.toggle("primary", !newtonState.running);
   newtonRefs.criticalStateLabel.textContent = critical.label;
   newtonRefs.criticalStateNote.textContent = critical.note;
   newtonRefs.criticalCards.forEach((card) => card.classList.toggle("active", card.dataset.jump === critical.key));

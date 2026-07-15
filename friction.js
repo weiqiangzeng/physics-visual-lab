@@ -236,6 +236,8 @@ function frictionSyncReadouts() {
   frictionRefs.stateMetric.textContent = critical.label;
   frictionRefs.overviewForce.textContent = frictionFormat(frictionState.force, 2, "N");
   frictionRefs.overviewState.textContent = critical.label;
+  frictionRefs.startButton.textContent = frictionState.running ? "增力中" : "逐渐增大外力";
+  frictionRefs.startButton.classList.toggle("primary", !frictionState.running);
   frictionRefs.criticalStateLabel.textContent = critical.label;
   frictionRefs.criticalStateNote.textContent = critical.note;
   frictionRefs.criticalCards.forEach((card) => card.classList.toggle("active", card.dataset.jump === critical.key));
