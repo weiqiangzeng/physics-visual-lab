@@ -33,9 +33,112 @@
       "用 v = v配 + v余 解释配速漂移与余速圆周运动。"
     ]
   };
+  const lessonPlans = {
+    "projectile.html": {
+      goal: "建立速度分解和独立运动的观念。",
+      prerequisite: "位移、速度、加速度的矢量方向。",
+      prompts: [
+        "先让学生预测最高点的速度，再暂停到最高点核对。",
+        "固定发射速度，改变角度，比较飞行时间和射程。",
+        "回到 vx、vy 读数，用分运动解释轨迹。"
+      ],
+      takeaway: "平抛或斜抛运动可以分解为水平方向和竖直方向的独立运动。"
+    },
+    "circular.html": {
+      goal: "区分速度方向和加速度方向，理解向心加速度。",
+      prerequisite: "速度方向、加速度定义和牛顿第二定律。",
+      prompts: [
+        "暂停在不同位置，让学生分别指出速度和加速度方向。",
+        "保持半径不变改变速度，观察向心加速度的变化。",
+        "改变半径，讨论周期、向心力和运动快慢。"
+      ],
+      takeaway: "匀速圆周运动的速率可以不变，但速度方向持续改变，所以仍有加速度。"
+    },
+    "oscillation.html": {
+      goal: "建立位移、速度、加速度和能量的相位关系。",
+      prerequisite: "周期运动、力与加速度、动能和势能。",
+      prompts: [
+        "先定位端点和平衡位置，让学生预测 v 和 a 的大小。",
+        "拖动时间条，对照相位圆和时间图像。",
+        "改变质量或劲度系数，观察周期变化并回到公式解释。"
+      ],
+      takeaway: "简谐运动中端点速度为零、加速度最大，平衡位置速度最大、加速度为零。"
+    },
+    "waves.html": {
+      goal: "区分波的传播和介质质点的振动，理解叠加与驻波。",
+      prerequisite: "周期、频率、波长和振动图像。",
+      prompts: [
+        "分别显示两列波，让学生判断传播方向。",
+        "切换合成波，寻找节点和腹部并比较振幅。",
+        "改变波长，观察节点间距是否随之改变。"
+      ],
+      takeaway: "驻波由相向传播的波叠加形成，节点不振动，腹部振幅最大。"
+    },
+    "charged-particle.html": {
+      goal: "比较电场力、磁场力和恒力，建立复合场中的受力分析。",
+      prerequisite: "牛顿第二定律、电场力、洛伦兹力和速度分解。",
+      prompts: [
+        "先比较仅电场和仅磁场，明确两种力对速率和方向的影响。",
+        "进入配速法，先观察偏转，再寻找竖直合力接近零的速度。",
+        "用 v = v配 + v余 解释漂移与圆周分运动。"
+      ],
+      takeaway: "复合场轨迹取决于各力的方向和大小，配速只消除特定方向的合力。"
+    }
+  };
   const storageKey = "physics-visual-lab-progress-v1";
+  const audienceStorageKey = "physics-visual-lab-audience-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
+
+  function readAudience() {
+    try {
+      return window.localStorage.getItem(audienceStorageKey) === "teacher" ? "teacher" : "student";
+    } catch {
+      return "student";
+    }
+  }
+
+  function saveAudience(audience) {
+    try {
+      window.localStorage.setItem(audienceStorageKey, audience);
+    } catch {
+      // Audience mode is a preference, never a requirement for using an experiment.
+    }
+  }
+
+  function applyAudience(audience) {
+    document.body.dataset.audience = audience;
+    const heroDescription = document.getElementById("heroDescription");
+    if (heroDescription) {
+      heroDescription.textContent = audience === "teacher"
+        ? "用演示路线、关键问题和动态现象，组织一节看得见物理关系的新课。"
+        : "用可调参数、动态轨迹和关键状态，把公式背后的物理关系看清楚。";
+    }
+    document.querySelectorAll("[data-audience]").forEach((control) => {
+      control.classList.toggle("active", control.dataset.audience === audience);
+      control.setAttribute("aria-pressed", control.dataset.audience === audience ? "true" : "false");
+    });
+    document.querySelectorAll("[data-audience-content]").forEach((content) => {
+      content.hidden = content.dataset.audienceContent !== audience;
+    });
+    document.querySelectorAll(".task-summary").forEach((summary) => {
+      const label = summary.querySelector("span");
+      const count = summary.querySelector(".task-count");
+      if (label) label.textContent = audience === "teacher" ? "课堂演示" : "学习任务";
+      if (count) count.hidden = audience === "teacher";
+    });
+  }
+
+  const audience = readAudience();
+  document.querySelectorAll("[data-audience]").forEach((control) => {
+    control.addEventListener("click", () => {
+      const nextAudience = control.dataset.audience;
+      if (!nextAudience) return;
+      saveAudience(nextAudience);
+      applyAudience(nextAudience);
+    });
+  });
+  applyAudience(audience);
 
   function readProgress() {
     try {
@@ -100,8 +203,9 @@
 
   function renderTaskPanel() {
     const tasks = lessonTasks[currentPage];
+    const plan = lessonPlans[currentPage];
     const stage = document.querySelector(".stage");
-    if (!tasks || !stage || document.querySelector(".task-panel")) return;
+    if (!tasks || !plan || !stage || document.querySelector(".task-panel")) return;
 
     const savedTasks = progress.tasks[currentPage] || [];
     const panel = document.createElement("details");
@@ -113,8 +217,26 @@
         <strong class="task-count">0 / ${tasks.length}</strong>
       </summary>
       <div class="task-body">
-        <p class="task-note">完成观察、操作和解释后，再把本实验标记为完成。</p>
-        <div class="task-list"></div>
+        <div class="lesson-meta">
+          <div><span>本课目标</span><strong>${plan.goal}</strong></div>
+          <div><span>前置知识</span><strong>${plan.prerequisite}</strong></div>
+        </div>
+        <div class="audience-content" data-audience-content="student">
+          <p class="task-note">完成观察、操作和解释后，再把本实验标记为完成。</p>
+          <div class="task-list"></div>
+        </div>
+        <div class="audience-content teacher-content" data-audience-content="teacher">
+          <p class="task-note">按以下顺序组织课堂演示，重点让学生先作出判断，再用读数和轨迹核对。</p>
+          <ol class="teacher-prompts">${plan.prompts.map((prompt) => `<li>${prompt}</li>`).join("")}</ol>
+          <div class="takeaway"><span>本课结论</span><strong>${plan.takeaway}</strong></div>
+        </div>
+        <div class="audience-switch" role="group" aria-label="学习方式">
+          <span class="platform-kicker">学习方式</span>
+          <div class="segmented-control">
+            <button type="button" data-audience="student">学生自学</button>
+            <button type="button" data-audience="teacher">教师演示</button>
+          </div>
+        </div>
       </div>`;
 
     const guide = stage.querySelector(".lesson-guide");
@@ -144,6 +266,15 @@
     };
 
     panel.querySelectorAll("input[type=checkbox]").forEach((input) => input.addEventListener("change", updateTasks));
+    panel.querySelectorAll("[data-audience]").forEach((control) => {
+      control.addEventListener("click", () => {
+        const nextAudience = control.dataset.audience;
+        if (!nextAudience) return;
+        saveAudience(nextAudience);
+        applyAudience(nextAudience);
+      });
+    });
+    applyAudience(audience);
     updateTasks();
   }
 
