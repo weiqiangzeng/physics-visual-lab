@@ -54,7 +54,7 @@
   const lessonPlans = {
     "motion-graphs.html": {
       goal: "建立 x-t、v-t 图像与运动状态之间的对应关系。",
-      prerequisite: "位置、速度、加速度和函数图像的斜率与面积。",
+      prerequisite: "位置可以用数轴表示，时间会不断向前推进；速度表示运动快慢，正负号可以表示方向。斜率和面积的含义不用提前背，实验会结合图像一步步看出来。",
       prompts: [
         "先隐藏图像，只看运动小车，让学生判断运动方向。",
         "显示 x-t 图像，追问某时刻曲线斜率对应哪个物理量。",
@@ -64,7 +64,7 @@
     },
     "friction.html": {
       goal: "区分静摩擦力的自适应性、最大静摩擦力和滑动摩擦力。",
-      prerequisite: "受力分析、平衡条件、牛顿第二定律和正压力。",
+      prerequisite: "知道力可以改变运动状态，物体静止时合力也可能为零；两种摩擦力的区别会通过外力变化直接观察。",
       prompts: [
         "先从零开始增大外力，让学生预测静摩擦力是否变化。",
         "暂停在临界点，比较外力、静摩擦力和最大静摩擦力。",
@@ -74,7 +74,7 @@
     },
     "newton-laws.html": {
       goal: "建立合力、质量和加速度的定量关系。",
-      prerequisite: "受力图、合力、速度和加速度。",
+      prerequisite: "知道力会改变运动状态，质量不同的物体变化快慢可能不同；公式不必提前背，实验会直接比较。",
       prompts: [
         "先只看受力箭头，让学生指出合力方向。",
         "固定质量改变合力，观察 a-F 图像是否通过原点。",
@@ -84,7 +84,7 @@
     },
     "projectile.html": {
       goal: "建立速度分解和独立运动的观念。",
-      prerequisite: "位移、速度、加速度的矢量方向。",
+      prerequisite: "知道速度有大小和方向，会把一个速度分成水平、竖直两个方向；两个方向怎样共同决定轨迹，会在实验中展开。",
       prompts: [
         "先让学生预测最高点的速度，再暂停到最高点核对。",
         "固定发射速度，改变角度，比较飞行时间和射程。",
@@ -94,7 +94,7 @@
     },
     "circular.html": {
       goal: "区分速度方向和加速度方向，理解向心加速度。",
-      prerequisite: "速度方向、加速度定义和牛顿第二定律。",
+      prerequisite: "知道速度方向改变也算速度改变；为什么需要指向圆心的加速度，会结合圆轨道和箭头观察。",
       prompts: [
         "暂停在不同位置，让学生分别指出速度和加速度方向。",
         "保持半径不变改变速度，观察向心加速度的变化。",
@@ -104,7 +104,7 @@
     },
     "oscillation.html": {
       goal: "建立位移、速度、加速度和能量的相位关系。",
-      prerequisite: "周期运动、力与加速度、动能和势能。",
+      prerequisite: "知道物体会在平衡位置附近往复运动，周期表示重复一次所需的时间；位移、速度和加速度的关系会在相位图中展示。",
       prompts: [
         "先定位端点和平衡位置，让学生预测 v 和 a 的大小。",
         "拖动时间条，对照相位圆和时间图像。",
@@ -114,7 +114,7 @@
     },
     "waves.html": {
       goal: "区分波的传播和介质质点的振动，理解叠加与驻波。",
-      prerequisite: "周期、频率、波长和振动图像。",
+      prerequisite: "知道波相遇后可以叠加，叠加后还会继续传播；相位相同或相反时图样如何变化，会用两列波观察。",
       prompts: [
         "分别显示两列波，让学生判断传播方向。",
         "切换合成波，寻找节点和腹部并比较振幅。",
@@ -124,7 +124,7 @@
     },
     "charged-particle.html": {
       goal: "比较电场力、磁场力和恒力，建立复合场中的受力分析。",
-      prerequisite: "牛顿第二定律、电场力、洛伦兹力和速度分解。",
+      prerequisite: "知道电场力和磁场力都可能改变带电粒子的运动；两种力什么时候能相互抵消，会跟踪粒子轨迹。",
       prompts: [
         "先比较仅电场和仅磁场，明确两种力对速率和方向的影响。",
         "进入配速法，先观察偏转，再寻找竖直合力接近零的速度。",
@@ -244,7 +244,9 @@
       control.setAttribute("aria-pressed", control.dataset.audience === audience ? "true" : "false");
     });
     document.querySelectorAll("[data-audience-content]").forEach((content) => {
-      content.hidden = content.dataset.audienceContent !== audience;
+      const active = content.dataset.audienceContent === audience;
+      content.hidden = !active;
+      content.style.display = active ? "" : "none";
     });
     document.querySelectorAll(".task-summary").forEach((summary) => {
       const label = summary.querySelector("span");
@@ -492,7 +494,7 @@
         </div>
        <div class="lesson-meta">
           <div><span>本课目标</span><strong>${plan.goal}</strong></div>
-          <div><span>前置知识</span><strong>${plan.prerequisite}</strong></div>
+          <div><span>开始前，你只需要知道</span><strong>${plan.prerequisite}</strong></div>
        </div>
        <div class="audience-content" data-audience-content="student">
          <div class="task-list"></div>
