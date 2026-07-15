@@ -55,9 +55,9 @@ newtonRefs.canvas.height = newtonHeight * newtonDpr;
 newtonCtx.scale(newtonDpr, newtonDpr);
 
 const newtonModes = {
-  force: { title: "改变合力", goal: "改变合力，观察加速度", prompt: "保持质量不变，逐渐增大外力，比较合力和加速度的变化。", formula: "a = F合 / m" },
-  mass: { title: "改变质量", goal: "改变质量，观察加速度", prompt: "保持合力不变，增加质量，观察相同时间内速度变化如何减小。", formula: "a ∝ 1/m" },
-  balance: { title: "合力为零", goal: "理解 a = 0 的运动状态", prompt: "把外力和阻力调成相等，观察物体仍可保持原有速度。", formula: "F合 = 0 → a = 0" }
+  force: { title: "改变合力", goal: "改变合力，观察加速度", prompt: "保持质量不变，逐渐增大外力，比较合力和加速度的变化。", formula: "\\(a = \\frac{F_{\\mathrm{合}}}{m}\\)" },
+  mass: { title: "改变质量", goal: "改变质量，观察加速度", prompt: "保持合力不变，增加质量，观察相同时间内速度变化如何减小。", formula: "\\(a \\propto \\frac{1}{m}\\)" },
+  balance: { title: "合力为零", goal: "理解 a = 0 的运动状态", prompt: "把外力和阻力调成相等，观察物体仍可保持原有速度。", formula: "\\(F_{\\mathrm{合}} = 0 \\Rightarrow a = 0\\)" }
 };
 
 let newtonLastFrame = null;
@@ -249,6 +249,7 @@ function newtonSyncInputs() {
   newtonRefs.modeGoal.textContent = config.goal;
   newtonRefs.modePrompt.textContent = config.prompt;
   newtonRefs.modeFormula.textContent = config.formula;
+  window.physicsTypesetMath?.();
   newtonRefs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === newtonState.mode));
 }
 

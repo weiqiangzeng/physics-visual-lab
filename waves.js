@@ -79,19 +79,19 @@ const modeConfigs = {
     title: "分波合成",
     goal: "观察两列波如何叠加形成驻波",
     prompt: "先分别看入射波和反射波，再看合成波中哪些点始终不动，哪些点振幅最大。",
-    formula: "y = y₁ + y₂"
+    formula: "\\(y = y_1 + y_2\\)"
   },
   standing: {
     title: "驻波结构",
     goal: "观察节点和腹部的位置是否会移动",
     prompt: "节点始终静止，腹部振幅最大；驻波不是波形整体向前传播。",
-    formula: "y = 2A sin(kx) cos(ωt)"
+    formula: "\\(y = 2A\\sin(kx)\\cos(\\omega t)\\)"
   },
   interference: {
     title: "定点叠加",
     goal: "在同一个位置比较两列波如何相加或抵消",
     prompt: "看竖直探针处的 y₁、y₂ 和合位移 y：同向时相长，反向时相消。",
-    formula: "某点处：y = y₁ + y₂"
+    formula: "某点处：\\(y = y_1 + y_2\\)"
   }
 };
 
@@ -385,6 +385,7 @@ function syncInputs() {
   refs.modeGoal.textContent = modeConfigs[state.mode].goal;
   refs.modePrompt.textContent = modeConfigs[state.mode].prompt;
   refs.modeFormula.textContent = modeConfigs[state.mode].formula;
+  window.physicsTypesetMath?.();
   refs.presetButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.mode === state.mode);
   });

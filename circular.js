@@ -72,19 +72,19 @@ const modeConfigs = {
     title: "方向关系",
     goal: "观察速度切向、加速度指向圆心",
     prompt: "暂停到任意位置，速度箭头总沿切线，加速度箭头总指向圆心。",
-    formula: "a_c = v² / r"
+    formula: "\\(a_c = \\frac{v^2}{r}\\)"
   },
   force: {
     title: "向心力",
     goal: "比较速度、半径和质量怎样影响向心力",
     prompt: "速度加倍时向心力变为四倍；半径越小，保持同样速度需要的向心力越大。",
-    formula: "F_c = mv² / r"
+    formula: "\\(F_c = \\frac{mv^2}{r}\\)"
   },
   period: {
     title: "周期频率",
     goal: "观察转一圈所需时间",
     prompt: "速度越大周期越短；半径越大，同样速度下一圈路径更长。",
-    formula: "T = 2πr / v"
+    formula: "\\(T = \\frac{2\\pi r}{v}\\)"
   }
 };
 
@@ -299,6 +299,7 @@ function syncInputs() {
   refs.modeGoal.textContent = modeConfigs[state.mode].goal;
   refs.modePrompt.textContent = modeConfigs[state.mode].prompt;
   refs.modeFormula.textContent = modeConfigs[state.mode].formula;
+  window.physicsTypesetMath?.();
   refs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === state.mode));
   document.body.classList.toggle("demo-mode", state.demoMode);
   refs.demoBadge.textContent = state.demoMode ? "教学演示中" : "";

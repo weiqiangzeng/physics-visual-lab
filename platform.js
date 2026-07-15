@@ -11,33 +11,33 @@
   ];
   const lessonTasks = {
     "motion-graphs.html": [
-      "切换匀速和匀变速，比较 x-t 图像的斜率。",
-      "拖动同一时刻的竖线，对照 x-t 和 v-t 图像上的点。",
-      "观察 v-t 图像与时间轴围成的面积，说明它为什么表示位移。"
+      "切换匀速和匀变速，比较 \\(x-t\\) 图像的斜率。",
+      "拖动同一时刻的竖线，对照 \\(x-t\\) 和 \\(v-t\\) 图像上的点。",
+      "观察 \\(v-t\\) 图像与时间轴围成的面积，说明它为什么表示位移。"
     ],
     "friction.html": [
-      "逐渐增大外力，记录物体仍然静止时摩擦力的变化。",
-      "定位最大静摩擦力，判断何时开始发生相对滑动。",
-      "改变质量或摩擦因数，比较最大静摩擦力和滑动摩擦力。"
+      "逐渐增大外力，记录物体仍然静止时 \\(f_{\\mathrm{静}}\\) 的变化。",
+      "定位 \\(f_{\\mathrm{max}}\\)，判断何时开始发生相对滑动。",
+      "改变质量或摩擦因数，比较 \\(f_{\\mathrm{max}}\\) 和 \\(f_{\\mathrm{滑}}\\)。"
     ],
     "newton-laws.html": [
-      "保持质量不变，改变合力，观察加速度如何变化。",
+      "保持质量不变，改变 \\(F_{\\mathrm{合}}\\)，观察加速度如何变化。",
       "保持合力不变，改变质量，比较相同时间内速度的变化。",
-      "把合力调为零，判断物体可以保持什么运动状态。"
+      "把 \\(F_{\\mathrm{合}}\\) 调为零，判断物体可以保持什么运动状态。"
     ],
     "projectile.html": [
-      "定位最高点，确认 vy = 0 但速度并不为 0。",
+      "定位最高点，确认 \\(v_y = 0\\) 但速度并不为 0。",
       "改变发射角，比较飞行时间和水平射程。",
-      "用 vx、vy 说明水平方向和竖直方向为什么可以分开研究。"
+      "用 \\(v_x\\)、\\(v_y\\) 说明水平方向和竖直方向为什么可以分开研究。"
     ],
     "circular.html": [
       "定位三个关键位置，确认速度沿切线、加速度指向圆心。",
-      "改变线速度，观察向心加速度如何变化。",
-      "改变半径，比较向心力、周期和速度方向的变化。"
+      "改变线速度，观察 \\(a_c\\) 如何变化。",
+      "改变半径，比较 \\(F_c\\)、周期和速度方向的变化。"
     ],
     "oscillation.html": [
       "定位端点和平衡位置，比较速度与加速度的大小。",
-      "在时间图像和相位圆中追踪 x、v、a 的相位关系。",
+      "在时间图像和相位圆中追踪 \\(x\\)、\\(v\\)、\\(a\\) 的相位关系。",
       "改变质量或劲度系数，观察周期如何变化。"
     ],
     "waves.html": [
@@ -48,7 +48,7 @@
     "charged-particle.html": [
       "比较仅电场和仅磁场，观察电场力与磁场力对运动的不同作用。",
       "进入配速法，把速度调到竖直合力接近 0。",
-      "用 v = v配 + v余 解释配速漂移与余速圆周运动。"
+      "用 \\(v = v_{\\mathrm{配}} + v_{\\mathrm{余}}\\) 解释配速漂移与余速圆周运动。"
     ]
   };
   const lessonPlans = {
@@ -60,7 +60,7 @@
         "显示 x-t 图像，追问某时刻曲线斜率对应哪个物理量。",
         "显示 v-t 图像，圈出面积并用位移解释正负。"
       ],
-      takeaway: "x-t 图像的斜率表示速度，v-t 图像的斜率表示加速度，v-t 图像的有向面积表示位移。"
+      takeaway: "\\(x-t\\) 图像的斜率表示速度，\\(v-t\\) 图像的斜率表示加速度，\\(v-t\\) 图像的有向面积表示位移。"
     },
     "friction.html": {
       goal: "区分静摩擦力的自适应性、最大静摩擦力和滑动摩擦力。",
@@ -70,7 +70,7 @@
         "暂停在临界点，比较外力、静摩擦力和最大静摩擦力。",
         "继续增大外力，观察滑动后摩擦力与加速度的变化。"
       ],
-      takeaway: "静摩擦力由运动趋势决定且不超过最大值；滑动后摩擦力近似为 μkN。"
+      takeaway: "静摩擦力由运动趋势决定且不超过最大值；滑动后 \\(f_{\\mathrm{滑}} \\approx \\mu_k N\\)。"
     },
     "newton-laws.html": {
       goal: "建立合力、质量和加速度的定量关系。",
@@ -80,7 +80,7 @@
         "固定质量改变合力，观察 a-F 图像是否通过原点。",
         "把合力调为零，区分加速度为零和速度为零。"
       ],
-      takeaway: "加速度由合外力和质量共同决定；合力为零时物体可以静止，也可以匀速直线运动。"
+      takeaway: "加速度由合外力和质量共同决定；\\(F_{\\mathrm{合}} = 0\\) 时物体可以静止，也可以匀速直线运动。"
     },
     "projectile.html": {
       goal: "建立速度分解和独立运动的观念。",
@@ -140,6 +140,47 @@
   const volumeStorageKey = "physics-visual-lab-volume-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
+  let mathTypesetSource = "";
+
+  function loadMathJax() {
+    window.MathJax = window.MathJax || {
+      tex: {
+        inlineMath: [["\\(", "\\)"], ["$", "$"]]
+      },
+      options: {
+        skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+      }
+    };
+    if (window.MathJax.typesetPromise) return Promise.resolve();
+    return new Promise((resolve) => {
+      let script = document.querySelector("script[data-mathjax]");
+      if (!script) {
+        script = document.createElement("script");
+        script.async = true;
+        script.dataset.mathjax = "true";
+        script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        document.head.appendChild(script);
+      }
+      script.addEventListener("load", resolve, { once: true });
+      script.addEventListener("error", resolve, { once: true });
+    });
+  }
+
+  function typesetMath() {
+    const targets = Array.from(document.querySelectorAll(".task-panel, .guide-formula, .formula-panel"));
+    if (!targets.length) return;
+    const source = targets.map((target) => target.textContent).join("\n");
+    if (source === mathTypesetSource) return;
+    mathTypesetSource = source;
+    loadMathJax().then(() => {
+      if (window.MathJax?.typesetClear) window.MathJax.typesetClear(targets);
+      if (window.MathJax?.typesetPromise) return window.MathJax.typesetPromise(targets);
+      return null;
+    }).catch(() => {
+      // Formula text remains readable if the external typesetter is unavailable.
+    });
+  }
+  window.physicsTypesetMath = typesetMath;
 
   function readAudience() {
     try {
@@ -402,6 +443,7 @@
       if (progress.completed[lesson]) card.classList.add("completed");
     });
     renderCourseNavigation();
+    typesetMath();
     return;
   }
 
@@ -416,30 +458,33 @@
     panel.className = "task-panel";
     panel.open = true;
     panel.innerHTML = `
-      <summary class="task-summary">
-        <span>学习任务</span>
-        <strong class="task-count">0 / ${tasks.length}</strong>
-      </summary>
-      <div class="task-body">
-        <div class="lesson-meta">
+     <summary class="task-summary">
+       <span>学习任务</span>
+        <span class="task-summary-note">完成三个关键观察</span>
+       <strong class="task-count">0 / ${tasks.length}</strong>
+     </summary>
+     <div class="task-body">
+        <div class="task-body-head">
+          <p class="task-note">先观察现象，再用读数、图像和公式解释。</p>
+          <div class="audience-switch" role="group" aria-label="学习方式">
+            <span class="platform-kicker">学习方式</span>
+            <div class="segmented-control">
+              <button type="button" data-audience="student">学生自学</button>
+              <button type="button" data-audience="teacher">教师演示</button>
+            </div>
+          </div>
+        </div>
+       <div class="lesson-meta">
           <div><span>本课目标</span><strong>${plan.goal}</strong></div>
           <div><span>前置知识</span><strong>${plan.prerequisite}</strong></div>
-        </div>
-        <div class="audience-content" data-audience-content="student">
-          <p class="task-note">完成观察、操作和解释后，再把本实验标记为完成。</p>
-          <div class="task-list"></div>
-        </div>
-        <div class="audience-content teacher-content" data-audience-content="teacher">
-          <p class="task-note">按以下顺序组织课堂演示，重点让学生先作出判断，再用读数和轨迹核对。</p>
+       </div>
+       <div class="audience-content" data-audience-content="student">
+         <div class="task-list"></div>
+       </div>
+       <div class="audience-content teacher-content" data-audience-content="teacher">
+          <p class="task-note">按以下顺序组织演示，让学生先作出判断，再用读数和轨迹核对。</p>
           <ol class="teacher-prompts">${plan.prompts.map((prompt) => `<li>${prompt}</li>`).join("")}</ol>
           <div class="takeaway"><span>本课结论</span><strong>${plan.takeaway}</strong></div>
-        </div>
-        <div class="audience-switch" role="group" aria-label="学习方式">
-          <span class="platform-kicker">学习方式</span>
-          <div class="segmented-control">
-            <button type="button" data-audience="student">学生自学</button>
-            <button type="button" data-audience="teacher">教师演示</button>
-          </div>
         </div>
       </div>`;
 
@@ -478,8 +523,9 @@
         applyAudience(nextAudience);
       });
     });
-    applyAudience(audience);
-    updateTasks();
+   applyAudience(audience);
+   updateTasks();
+    typesetMath();
   }
 
   function moveActionsToCanvas() {
@@ -505,6 +551,7 @@
     link.href = "./index.html";
     link.textContent = "实验目录";
     actions.prepend(link);
-  }
-  moveActionsToCanvas();
+ }
+ moveActionsToCanvas();
+  typesetMath();
 })();

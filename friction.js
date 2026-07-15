@@ -57,9 +57,9 @@ frictionRefs.canvas.height = frictionHeight * frictionDpr;
 frictionCtx.scale(frictionDpr, frictionDpr);
 
 const frictionModes = {
-  increase: { title: "逐渐增大外力", goal: "找到最大静摩擦力", prompt: "让外力从 0 增大，比较外力、摩擦力和加速度的读数。", formula: "0 ≤ f静 ≤ μsN" },
-  threshold: { title: "临界状态", goal: "定位开始滑动的瞬间", prompt: "把目标外力调到最大静摩擦力附近，观察物体即将运动的状态。", formula: "fmax = μsN" },
-  slide: { title: "滑动后比较", goal: "比较静摩擦力与滑动摩擦力", prompt: "让外力超过临界值，观察滑动摩擦力不再随外力增加。", formula: "f滑 = μkN" }
+  increase: { title: "逐渐增大外力", goal: "找到最大静摩擦力", prompt: "让外力从 0 增大，比较外力、摩擦力和加速度的读数。", formula: "\\(0 \\le f_{\\mathrm{静}} \\le \\mu_s N\\)" },
+  threshold: { title: "临界状态", goal: "定位开始滑动的瞬间", prompt: "把目标外力调到最大静摩擦力附近，观察物体即将运动的状态。", formula: "\\(f_{\\mathrm{max}} = \\mu_s N\\)" },
+  slide: { title: "滑动后比较", goal: "比较静摩擦力与滑动摩擦力", prompt: "让外力超过临界值，观察滑动摩擦力不再随外力增加。", formula: "\\(f_{\\mathrm{滑}} = \\mu_k N\\)" }
 };
 
 let frictionLastFrame = null;
@@ -260,6 +260,7 @@ function frictionSyncInputs() {
   frictionRefs.modeGoal.textContent = config.goal;
   frictionRefs.modePrompt.textContent = config.prompt;
   frictionRefs.modeFormula.textContent = config.formula;
+  window.physicsTypesetMath?.();
   frictionRefs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === frictionState.mode));
 }
 

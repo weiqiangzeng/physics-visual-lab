@@ -55,9 +55,9 @@ motionRefs.canvas.height = motionHeight * motionDpr;
 motionCtx.scale(motionDpr, motionDpr);
 
 const motionModes = {
-  uniform: { title: "匀速运动", goal: "观察 x-t 图像的斜率", prompt: "速度保持不变，x-t 图像是直线，v-t 图像与时间轴平行。", formula: "v = 常量", initialSpeed: 2, acceleration: 0 },
-  accelerate: { title: "匀变速运动", goal: "观察斜率和面积的含义", prompt: "x-t 图像逐渐变陡，v-t 图像的斜率就是加速度。", formula: "v = v₀ + at", initialSpeed: 2, acceleration: 1 },
-  brake: { title: "减速到停", goal: "观察速度变号和运动方向", prompt: "先前进后停下，再继续观察速度变号后位置的变化。", formula: "x = v₀t + 1/2at²", initialSpeed: 4, acceleration: -1 }
+  uniform: { title: "匀速运动", goal: "观察 x-t 图像的斜率", prompt: "速度保持不变，x-t 图像是直线，v-t 图像与时间轴平行。", formula: "\\(v = \\mathrm{常量}\\)", initialSpeed: 2, acceleration: 0 },
+  accelerate: { title: "匀变速运动", goal: "观察斜率和面积的含义", prompt: "x-t 图像逐渐变陡，v-t 图像的斜率就是加速度。", formula: "\\(v = v_0 + at\\)", initialSpeed: 2, acceleration: 1 },
+  brake: { title: "减速到停", goal: "观察速度变号和运动方向", prompt: "先前进后停下，再继续观察速度变号后位置的变化。", formula: "\\(x = v_0t + \\frac{1}{2}at^2\\)", initialSpeed: 4, acceleration: -1 }
 };
 
 let motionLastFrame = null;
@@ -277,6 +277,7 @@ function motionSyncInputs() {
   motionRefs.modeGoal.textContent = config.goal;
   motionRefs.modePrompt.textContent = config.prompt;
   motionRefs.modeFormula.textContent = config.formula;
+  window.physicsTypesetMath?.();
   motionRefs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === motionState.mode));
 }
 

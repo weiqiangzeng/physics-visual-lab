@@ -81,19 +81,19 @@ const modeConfigs = {
     title: "运动分解",
     goal: "观察抛体运动如何分解成两个方向",
     prompt: "水平方向速度保持不变，竖直方向速度被重力连续改变。",
-    formula: "x = v₀cosθ · t"
+    formula: "\\(x = v_0 \\cos\\theta \\cdot t\\)"
   },
   apex: {
     title: "最高点",
     goal: "观察最高点处竖直速度为 0",
     prompt: "最高点不是静止点，物体仍有水平速度，所以还会继续向前运动。",
-    formula: "vᵧ = 0"
+    formula: "\\(v_y = 0\\)"
   },
   range: {
     title: "射程",
     goal: "比较角度和初速度如何影响射程",
     prompt: "在同一高度落回地面时，飞行时间和水平速度共同决定射程。",
-    formula: "R = v₀² sin2θ / g"
+    formula: "\\(R = \\frac{v_0^2 \\sin 2\\theta}{g}\\)"
   }
 };
 
@@ -344,6 +344,7 @@ function syncInputs() {
   refs.modeGoal.textContent = modeConfigs[state.mode].goal;
   refs.modePrompt.textContent = modeConfigs[state.mode].prompt;
   refs.modeFormula.textContent = modeConfigs[state.mode].formula;
+  window.physicsTypesetMath?.();
   refs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === state.mode));
   document.body.classList.toggle("demo-mode", state.demoMode);
   refs.demoBadge.textContent = state.demoMode ? "教学演示中" : "";
