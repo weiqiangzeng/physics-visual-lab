@@ -1555,7 +1555,7 @@ refs.exportPngButton.addEventListener("click", () => {
 
 refs.exportCsvButton.addEventListener("click", () => {
   const header = [
-    "# charged-particle-lab export",
+    "# physics-visual-lab export",
     `# mode,${state.mode}`,
     `# charge_e,${state.charge}`,
     `# mass_1e-27kg,${state.mass}`,
