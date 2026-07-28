@@ -133,7 +133,10 @@
       takeaway: "复合场轨迹取决于各力的方向和大小，配速只消除特定方向的合力。"
     }
   };
-  const curriculum = window.physicsCurriculum || { books: [], models: [], categories: ["全部"], statusLabels: {} };
+  const curriculumSource = window.physicsCurriculum || { books: [], models: [], categories: ["全部"], statusLabels: {} };
+  const curriculum = window.physicsPlatformProtocol
+    ? window.physicsPlatformProtocol.normalizeCurriculum(curriculumSource)
+    : curriculumSource;
   const courseBooks = curriculum.books;
   const storageKey = "physics-visual-lab-progress-v1";
   const audienceStorageKey = "physics-visual-lab-audience-v1";

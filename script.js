@@ -111,6 +111,7 @@ const refs = {
   electricHint: document.getElementById("electricHint"),
   magneticHint: document.getElementById("magneticHint"),
   metricsModeTitle: document.getElementById("metricsModeTitle"),
+  overviewTime: document.getElementById("overviewTime"),
   electricForceMetric: document.getElementById("electricForceMetric"),
   magneticForceMetric: document.getElementById("magneticForceMetric"),
   speedMetric: document.getElementById("speedMetric"),
@@ -218,7 +219,9 @@ function formatSignedFixed(value, digits) {
 }
 
 function setLockButtonState(button, locked) {
-  button.textContent = locked ? "已锁" : "解锁";
+  button.textContent = locked ? "已锁定" : "锁定";
+  button.title = locked ? "点击解除参数锁定" : "点击锁定参数，避免调参时误触";
+  button.setAttribute("aria-label", locked ? "解除参数锁定" : "锁定参数");
   button.classList.toggle("active", locked);
 }
 
@@ -593,6 +596,7 @@ function syncReadouts() {
   refs.metricsModeTitle.textContent = modeConfigs[state.mode].title;
   refs.overviewMode.textContent = modeConfigs[state.mode].title;
   refs.overviewSpeed.textContent = `${state.timeScale}x`;
+  refs.overviewTime.textContent = `t = ${state.simulationTime.toFixed(2)} μs`;
   refs.startButton.textContent = state.running ? "运行中" : "开始";
   refs.startButton.classList.toggle("primary", !state.running);
   setLockButtonState(refs.lockChargeButton, state.locks.charge);

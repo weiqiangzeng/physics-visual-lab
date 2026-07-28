@@ -1,5 +1,6 @@
 (function () {
   const model = (data) => ({
+    schemaVersion: 1,
     status: "planned",
     visual: "关系图与动态示意",
     ...data
@@ -979,6 +980,7 @@
   });
 
   window.physicsCurriculum = {
+    schemaVersion: 1,
     books,
     models,
     directoryModels: models.filter((item) => item.featured),
