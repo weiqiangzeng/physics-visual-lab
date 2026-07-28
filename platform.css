@@ -556,6 +556,53 @@
   position: relative;
 }
 
+.teaching-route.compact-guidance {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(220px, 0.75fr);
+  gap: 12px;
+  margin: -4px 0 16px;
+}
+
+.compact-guidance > summary {
+  grid-column: 1 / -1;
+  padding: 10px 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+  list-style: none;
+}
+
+.compact-guidance > summary::-webkit-details-marker {
+  display: none;
+}
+
+.compact-guidance > summary::after {
+  content: "+";
+  float: right;
+  font-size: 1rem;
+}
+
+.compact-guidance[open] > summary::after {
+  content: "-";
+}
+
+.compact-guidance > div {
+  padding: 12px 14px;
+  border: 1px solid rgba(19, 31, 35, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.compact-guidance ol,
+.compact-guidance ul {
+  margin: 8px 0 0;
+  padding-left: 1.2em;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .task-panel {
   margin: 20px 0 24px;
   border-top: 1px solid var(--platform-border);
@@ -863,5 +910,13 @@ summary:focus-visible {
     padding: 10px;
     border-bottom: 1px solid rgba(19, 31, 35, 0.08);
     background: rgba(255, 255, 255, 0.72);
+  }
+
+  .teaching-route.compact-guidance {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-guidance > summary {
+    grid-column: auto;
   }
 }

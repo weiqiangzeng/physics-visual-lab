@@ -23,7 +23,7 @@
               <button id="resetButton" type="button">重置</button>
             </div>
           </div>
-          <p class="stage-subtitle">把弹簧振子的真实运动、位移图像、速度图像、相位参考圆和能量转换放在同一时间轴上观察。</p>
+          <p class="stage-subtitle">同步观察位移、速度、加速度和能量。</p>
 
           <section class="lesson-guide" aria-label="当前观察任务">
             <div class="guide-main">
@@ -33,7 +33,7 @@
             </div>
             <div class="guide-formula" id="modeFormula">\(x = A\cos(\omega t + \varphi)\)</div>
           </section>
-          <section class="teaching-route" aria-label="课堂观察路线">
+          <details class="teaching-route compact-guidance" aria-label="观察提示"><summary>展开观察提示</summary>
             <div>
               <span class="preset-label">观察路线</span>
               <ol>
@@ -49,7 +49,7 @@
                 <li>端点速度为 0，为什么加速度最大？</li>
               </ul>
             </div>
-          </section>
+          </details>
 
           <div class="canvas-wrap main-canvas">
             <canvas id="motionCanvas" width="980" height="390" aria-label="弹簧振子运动"></canvas>

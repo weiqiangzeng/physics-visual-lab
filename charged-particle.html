@@ -23,12 +23,12 @@
               <button id="resetButton" type="button">重置</button>
             </div>
           </div>
-          <p class="stage-subtitle">用于演示带电粒子在电场、磁场及电磁复合场中的运动规律，并支持课堂探究、数据导出与演示录制。</p>
+          <p class="stage-subtitle">观察带电粒子在电场、磁场和复合场中的轨迹。</p>
           <section class="lesson-guide" aria-label="当前学习任务">
             <div class="guide-main">
               <span class="preset-label">学习任务</span>
               <strong>先比较不同力的作用，再找到能让竖直合力接近 0 的配速。</strong>
-              <p>从电场力、磁场力和恒力的方向开始，观察速度变化如何改变轨迹；最后用 v = v配 + v余 解释漂移与圆周分运动。</p>
+              <p>比较电场力、磁场力和恒力对轨迹的影响。</p>
             </div>
             <div class="guide-formula">\(F = q(E + \boldsymbol{v} \times \boldsymbol{B}) + F_0\)</div>
           </section>
@@ -49,7 +49,7 @@
               <span class="preset-label">配速反馈</span>
               <strong id="matchStatus">待配平</strong>
             </div>
-            <p class="match-message" id="matchMessage">先构造一个配速 v配，使洛伦兹力与其他恒力平衡；再把实际轨迹理解成漂移与圆周分运动的叠加。</p>
+            <p class="match-message" id="matchMessage">调节速度，观察配速、漂移和圆周分运动。</p>
           </div>
           <div class="canvas-wrap">
             <canvas id="simCanvas" width="980" height="640" aria-label="带电粒子运动轨迹"></canvas>
@@ -341,7 +341,7 @@
                         <strong id="targetSpeedMetric">--</strong>
                       </article>
                     </div>
-                    <p class="metrics-note" id="metricsNote">当前显示的是单粒子在所选场景下的瞬时物理量。</p>
+                    <p class="metrics-note" id="metricsNote">显示当前瞬时物理量。</p>
                   </section>
                 </div>
               </details>
@@ -355,7 +355,7 @@
                       <strong id="equationTitle">当前轨迹</strong>
                     </div>
                     <div class="equation-body">
-                      <p class="equation-note" id="equationNote">根据当前场景自动切换对应的参数方程。</p>
+                      <p class="equation-note" id="equationNote">当前场景的参数方程。</p>
                       <div class="equation-lines" id="equationLines"></div>
                     </div>
                   </section>
