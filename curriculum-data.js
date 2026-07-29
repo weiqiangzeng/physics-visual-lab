@@ -411,7 +411,9 @@
       relations: ["I = q/t", "U = IR", "R = ρL/S"],
       explore: ["扫过电压，绘制定值电阻和灯泡的 U-I 图像。", "改变导线长度和横截面积，观察电阻变化。"],
       misconceptions: "电阻是元件属性，不是电流消耗掉的东西；欧姆定律不是所有元件的普遍关系。",
-      prerequisite: "知道电流表示电荷的定向移动，电压会推动电荷移动；电阻如何影响电流，会通过电路和图像比较。"
+      prerequisite: "知道电流表示电荷的定向移动，电压会推动电荷移动；电阻如何影响电流，会通过电路和图像比较。",
+      status: "open",
+      lab: "ohm-law.html"
     }),
     model({
       id: "series-parallel-circuit",

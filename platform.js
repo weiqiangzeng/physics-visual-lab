@@ -313,110 +313,14 @@
   function renderCourseNavigation() {
     if (!isHome) return;
     const tabs = Array.from(document.querySelectorAll("[data-volume]"));
-    const outline = document.getElementById("courseOutline");
     const title = document.getElementById("courseTitle");
-    const courseSummary = document.getElementById("courseSummary");
-    const lessonTitle = document.getElementById("lessonTitle");
-    const volumeSummary = document.getElementById("volumeSummary");
     const empty = document.getElementById("volumeEmpty");
     const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
-    const modelTitle = document.getElementById("modelTitle");
-    const modelSummary = document.getElementById("modelSummary");
-    const modelSelectionNote = document.getElementById("modelSelectionNote");
-    const modelFilters = document.getElementById("modelFilters");
-    const modelCatalog = document.getElementById("modelCatalog");
-    if (!tabs.length || !outline || !modelCatalog) return;
-
-    let selectedChapterId = "";
-    let selectedCategory = "全部";
-    const directoryModels = curriculum.directoryModels || curriculum.models;
-
-    const chapterModels = (book) => directoryModels.filter((item) => book.chapters.some((chapter) => chapter.id === item.chapterId));
-
-    const renderModelCatalog = (book) => {
-      const models = chapterModels(book).filter((item) => {
-        const chapterMatch = !selectedChapterId || item.chapterId === selectedChapterId;
-        const categoryMatch = selectedCategory === "全部" || item.category === selectedCategory;
-        return chapterMatch && categoryMatch;
-      });
-      const chaptersById = new Map(book.chapters.map((chapter) => [chapter.id, chapter.title]));
-      const openCount = models.filter((item) => item.status === "open").length;
-      if (modelTitle) {
-        const scope = selectedChapterId ? chaptersById.get(selectedChapterId) : `${book.title} · 全部模型`;
-        modelTitle.textContent = scope || `${book.title} · 全部模型`;
-      }
-      if (modelSummary) {
-        modelSummary.textContent = `精选 ${models.length} 个模型 · ${openCount} 个可视化实验已开放。`;
-      }
-      if (modelSelectionNote) modelSelectionNote.textContent = curriculum.selectionNote || "只展示适合通过动态关系帮助理解的核心模型。";
-      if (!models.length) {
-        modelCatalog.innerHTML = '<p class="catalog-empty">当前筛选下暂无模型。</p>';
-        return;
-      }
-      modelCatalog.innerHTML = models.map((item) => `
-        <article class="model-card ${item.status === "open" ? "is-open" : "is-planned"}">
-          <div class="model-card-topline">
-            <span class="subject-tag">${item.category}</span>
-            <span class="model-status">${curriculum.statusLabels[item.status] || item.status}</span>
-          </div>
-          <h3>${item.title}</h3>
-          <p>${item.summary}</p>
-          <div class="model-card-meta">
-            <span>${chaptersById.get(item.chapterId) || "高中物理"}</span>
-            <span>${item.visual}</span>
-          </div>
-          <a class="card-link" href="./model.html?id=${encodeURIComponent(item.id)}">查看模型内容<span aria-hidden="true">→</span></a>
-        </article>`).join("");
-    };
-
-    const renderFilters = (book) => {
-      const available = new Set(chapterModels(book).map((item) => item.category));
-      const categories = curriculum.categories.filter((category) => category === "全部" || available.has(category));
-      if (!modelFilters) return;
-      modelFilters.innerHTML = categories.map((category) => `
-        <button type="button" class="model-filter ${selectedCategory === category ? "active" : ""}" data-category="${category}" aria-pressed="${selectedCategory === category ? "true" : "false"}">${category}</button>`).join("");
-      modelFilters.querySelectorAll("[data-category]").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedCategory = button.dataset.category || "全部";
-          renderFilters(book);
-          renderModelCatalog(book);
-        });
-      });
-    };
-
-    const renderOutline = (book) => {
-      outline.innerHTML = book.chapters.map((chapter) => {
-        const models = directoryModels.filter((item) => item.chapterId === chapter.id);
-        const openCount = models.filter((item) => item.status === "open").length;
-        const active = selectedChapterId === chapter.id;
-        const status = openCount
-          ? `${openCount} 个实验已开放`
-          : models.length
-            ? `${models.length} 个模型待开发`
-            : "本章暂不单列可视化模型";
-        return `<button type="button" class="course-chapter ${openCount ? "has-lab" : "building"} ${active ? "active" : ""}" data-chapter="${chapter.id}" aria-pressed="${active ? "true" : "false"}">
-          <strong>${chapter.title}</strong>
-          <span>${models.length} 个模型 · ${status}</span>
-        </button>`;
-      }).join("");
-      outline.querySelectorAll("[data-chapter]").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectedChapterId = selectedChapterId === button.dataset.chapter ? "" : button.dataset.chapter;
-          renderOutline(book);
-          renderModelCatalog(book);
-        });
-      });
-    };
+    if (!tabs.length) return;
 
     const selectVolume = (volumeId) => {
       const book = courseBooks.find((item) => item.id === volumeId) || courseBooks[0];
-      selectedChapterId = "";
-      selectedCategory = "全部";
       const matchedCards = cards.filter((card) => (card.dataset.volumes || "").split(/\s+/).includes(book.id));
-      const matchedChapters = new Set();
-      matchedCards.forEach((card) => {
-        (card.dataset.chapters || "").split(/\s+/).forEach((chapter) => matchedChapters.add(chapter));
-      });
 
       tabs.forEach((tab) => {
         const active = tab.dataset.volume === book.id;
@@ -427,17 +331,7 @@
         card.hidden = !(card.dataset.volumes || "").split(/\s+/).includes(book.id);
       });
       if (title) title.textContent = book.title;
-      if (courseSummary) courseSummary.textContent = book.summary;
-      if (lessonTitle) lessonTitle.textContent = `${book.title} · 可视化实验`;
-      if (volumeSummary) {
-        volumeSummary.textContent = matchedCards.length
-          ? `本册已有 ${matchedCards.length} 个可视化实验，先观察现象，再回到章节概念。`
-          : "本册暂未开放可视化实验，章节内容正在建设中。";
-      }
       if (empty) empty.hidden = matchedCards.length > 0;
-      renderOutline(book);
-      renderFilters(book);
-      renderModelCatalog(book);
       saveVolume(book.id);
     };
 
@@ -613,8 +507,6 @@
     buttons.forEach((button) => dock.appendChild(button));
     canvasWrap.prepend(dock);
   }
-
-  renderTaskPanel();
 
   const actions = document.querySelector(".actions");
   if (actions && !actions.querySelector('a[href="./index.html"]')) {

@@ -92,6 +92,47 @@
   line-height: 1.6;
 }
 
+.compact-home-hero {
+  align-items: center;
+  min-height: 164px;
+}
+
+.simple-catalog {
+  padding-bottom: 34px;
+}
+
+.simple-catalog .section-heading {
+  align-items: baseline;
+}
+
+.simple-catalog .experiment-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 22px;
+}
+
+.simple-catalog .experiment-card {
+  min-height: 172px;
+  padding: 16px;
+}
+
+.simple-catalog .experiment-card h3 {
+  margin: 16px 0 7px;
+}
+
+.chapter-tag {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.simple-catalog .card-focus {
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-family: "Times New Roman", "Cambria Math", serif;
+  font-size: 0.92rem;
+}
+
 .start-link,
 .card-link {
   display: inline-flex;
