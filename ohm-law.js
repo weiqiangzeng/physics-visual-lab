@@ -1,39 +1,94 @@
 const ohmState = {
-  voltage: 6,
-  resistance: 3,
-  running: false,
-  phase: 0
+  mode: "voltage",
+  commonValue: 6,
+  compareValue: 6
+};
+
+const ohmModeConfig = {
+  voltage: {
+    title: "保持电阻相同",
+    badge: "I 同比变化",
+    baseline: "Uₐ = 3.00 V",
+    commonLabel: "共同电阻",
+    commonMath: "\\(R / \\Omega\\)",
+    commonUnit: "Ω",
+    commonMin: 1,
+    commonMax: 12,
+    compareLabel: "电路 B 电压",
+    compareMath: "\\(U_B / \\mathrm{V}\\)",
+    compareUnit: "V",
+    compareMin: 0,
+    compareMax: 12,
+    changedRatioLabel: "电压倍数",
+    conclusion: "电阻相同时，电流随电压同比例变化。",
+    formula: "\\(R\\text{ 相同}:\\ \\frac{I_B}{I_A}=\\frac{U_B}{U_A}\\)"
+  },
+  resistance: {
+    title: "保持电压相同",
+    badge: "I 反比变化",
+    baseline: "Rₐ = 3.00 Ω",
+    commonLabel: "共同电压",
+    commonMath: "\\(U / \\mathrm{V}\\)",
+    commonUnit: "V",
+    commonMin: 1,
+    commonMax: 12,
+    compareLabel: "电路 B 电阻",
+    compareMath: "\\(R_B / \\Omega\\)",
+    compareUnit: "Ω",
+    compareMin: 1,
+    compareMax: 12,
+    changedRatioLabel: "电阻倍数",
+    conclusion: "电压相同时，电流随电阻增大而减小。",
+    formula: "\\(U\\text{ 相同}:\\ \\frac{I_B}{I_A}=\\frac{R_A}{R_B}\\)"
+  }
 };
 
 const ohmRefs = {
   canvas: document.getElementById("ohmCanvas"),
-  startButton: document.getElementById("startButton"),
-  pauseButton: document.getElementById("pauseButton"),
   resetButton: document.getElementById("resetButton"),
-  voltageInput: document.getElementById("voltageInput"),
-  voltageNumber: document.getElementById("voltageNumber"),
-  resistanceInput: document.getElementById("resistanceInput"),
-  resistanceNumber: document.getElementById("resistanceNumber"),
-  voltageValue: document.getElementById("voltageValue"),
-  resistanceValue: document.getElementById("resistanceValue"),
-  voltageMetric: document.getElementById("voltageMetric"),
-  resistanceMetric: document.getElementById("resistanceMetric"),
-  currentMetric: document.getElementById("currentMetric"),
-  powerMetric: document.getElementById("powerMetric"),
-  overviewCurrent: document.getElementById("overviewCurrent")
+  modeButtons: Array.from(document.querySelectorAll("[data-mode]")),
+  controlTitle: document.getElementById("controlTitle"),
+  overviewRelation: document.getElementById("overviewRelation"),
+  baselineText: document.getElementById("baselineText"),
+  commonLabel: document.getElementById("commonLabel"),
+  commonMath: document.getElementById("commonMath"),
+  commonValue: document.getElementById("commonValue"),
+  commonInput: document.getElementById("commonInput"),
+  commonNumber: document.getElementById("commonNumber"),
+  commonUnit: document.getElementById("commonUnit"),
+  compareLabel: document.getElementById("compareLabel"),
+  compareMath: document.getElementById("compareMath"),
+  compareValue: document.getElementById("compareValue"),
+  compareInput: document.getElementById("compareInput"),
+  compareNumber: document.getElementById("compareNumber"),
+  compareUnit: document.getElementById("compareUnit"),
+  changedRatioLabel: document.getElementById("changedRatioLabel"),
+  changedRatio: document.getElementById("changedRatio"),
+  currentRatio: document.getElementById("currentRatio"),
+  conclusionText: document.getElementById("conclusionText"),
+  circuitAMetric: document.getElementById("circuitAMetric"),
+  circuitBMetric: document.getElementById("circuitBMetric"),
+  relationFormula: document.getElementById("relationFormula")
 };
 
 const ohmCtx = ohmRefs.canvas.getContext("2d");
-const ohmWidth = 980;
-const ohmHeight = 540;
 const ohmDpr = window.devicePixelRatio || 1;
-ohmRefs.canvas.width = ohmWidth * ohmDpr;
-ohmRefs.canvas.height = ohmHeight * ohmDpr;
-ohmCtx.scale(ohmDpr, ohmDpr);
+let ohmWidth = 980;
+let ohmHeight = 520;
+let ohmCompact = false;
+let ohmCanvasMode = null;
+let ohmRenderedMode = null;
 
-function ohmValues() {
-  const current = ohmState.voltage / ohmState.resistance;
-  return { current, power: ohmState.voltage * current };
+function ohmConfigureCanvas() {
+  const compact = window.matchMedia("(max-width: 760px)").matches;
+  if (compact === ohmCanvasMode) return;
+  ohmCanvasMode = compact;
+  ohmCompact = compact;
+  ohmWidth = compact ? 440 : 980;
+  ohmHeight = compact ? 940 : 520;
+  ohmRefs.canvas.width = ohmWidth * ohmDpr;
+  ohmRefs.canvas.height = ohmHeight * ohmDpr;
+  ohmCtx.setTransform(ohmDpr, 0, 0, ohmDpr, 0, 0);
 }
 
 function ohmClamp(value, min, max) {
@@ -44,7 +99,7 @@ function ohmFormat(value, unit) {
   return `${value.toFixed(2)} ${unit}`;
 }
 
-function ohmLine(x1, y1, x2, y2, color = "#1a2b31", width = 2) {
+function ohmLine(x1, y1, x2, y2, color = "#315057", width = 2) {
   ohmCtx.strokeStyle = color;
   ohmCtx.lineWidth = width;
   ohmCtx.beginPath();
@@ -53,187 +108,199 @@ function ohmLine(x1, y1, x2, y2, color = "#1a2b31", width = 2) {
   ohmCtx.stroke();
 }
 
-function ohmText(text, x, y, size = 13, color = "#607075", weight = "400") {
+function ohmText(text, x, y, size = 13, color = "#607075", weight = "400", align = "left") {
   ohmCtx.fillStyle = color;
   ohmCtx.font = `${weight} ${size}px Avenir Next, PingFang SC, sans-serif`;
+  ohmCtx.textAlign = align;
   ohmCtx.fillText(text, x, y);
+  ohmCtx.textAlign = "left";
 }
 
-function ohmArrow(x1, y1, x2, y2, color) {
-  ohmLine(x1, y1, x2, y2, color, 2.5);
-  const angle = Math.atan2(y2 - y1, x2 - x1);
-  ohmCtx.fillStyle = color;
-  ohmCtx.beginPath();
-  ohmCtx.moveTo(x2, y2);
-  ohmCtx.lineTo(x2 - 9 * Math.cos(angle - Math.PI / 6), y2 - 9 * Math.sin(angle - Math.PI / 6));
-  ohmCtx.lineTo(x2 - 9 * Math.cos(angle + Math.PI / 6), y2 - 9 * Math.sin(angle + Math.PI / 6));
-  ohmCtx.closePath();
-  ohmCtx.fill();
+function ohmNiceScale(value) {
+  const target = Math.max(value * 1.12, 0.2);
+  const exponent = 10 ** Math.floor(Math.log10(target));
+  const normalized = target / exponent;
+  const factor = [1, 2, 2.5, 5, 10].find((item) => item >= normalized) || 10;
+  return factor * exponent;
 }
 
-function ohmCircuitPoint(distance) {
-  const left = 105;
-  const top = 130;
-  const right = 455;
-  const bottom = 370;
-  const segments = [right - left, bottom - top, right - left, bottom - top];
-  const perimeter = segments.reduce((sum, item) => sum + item, 0);
-  let remaining = ((distance % perimeter) + perimeter) % perimeter;
-  if (remaining <= segments[0]) return { x: left + remaining, y: top };
-  remaining -= segments[0];
-  if (remaining <= segments[1]) return { x: right, y: top + remaining };
-  remaining -= segments[1];
-  if (remaining <= segments[2]) return { x: right - remaining, y: bottom };
-  remaining -= segments[2];
-  return { x: left, y: bottom - remaining };
+function ohmDrawBattery(x, y) {
+  ohmLine(x - 20, y, x + 20, y, "#7b3fa0", 4);
+  ohmLine(x - 11, y + 30, x + 11, y + 30, "#7b3fa0", 2);
+  ohmText("+", x + 27, y + 5, 14, "#7b3fa0", "700");
+  ohmText("−", x + 27, y + 36, 14, "#7b3fa0", "700");
 }
 
-function ohmDrawCircuit(values) {
-  const left = 105;
-  const top = 130;
-  const right = 455;
-  const bottom = 370;
-  const wire = "#315057";
-  ohmLine(left, top, 250, top, wire, 3);
-  ohmLine(360, top, right, top, wire, 3);
-  ohmLine(right, top, right, bottom, wire, 3);
-  ohmLine(right, bottom, left, bottom, wire, 3);
-  ohmLine(left, bottom, left, 290, wire, 3);
-  ohmLine(left, 210, left, top, wire, 3);
-
-  ohmCtx.strokeStyle = "#147d73";
-  ohmCtx.lineWidth = 3;
-  ohmCtx.strokeRect(250, 108, 110, 44);
-  ohmText("R", 299, 137, 17, "#147d73", "700");
-  ohmText(`${ohmState.resistance.toFixed(1)} Ω`, 271, 90, 13, "#607075");
-
+function ohmDrawAmmeterSymbol(x, y) {
   ohmCtx.strokeStyle = "#1f78b4";
-  ohmCtx.lineWidth = 3;
+  ohmCtx.lineWidth = 2.5;
   ohmCtx.beginPath();
-  ohmCtx.arc(right, 250, 38, 0, Math.PI * 2);
+  ohmCtx.arc(x, y, 25, 0, Math.PI * 2);
   ohmCtx.stroke();
-  ohmText("A", right - 7, 257, 20, "#1f78b4", "700");
-  ohmText("电流表", right - 25, 306, 13);
-
-  ohmLine(left - 20, 230, left + 20, 230, "#7b3fa0", 4);
-  ohmLine(left - 11, 270, left + 11, 270, "#7b3fa0", 2);
-  ohmText("U", left - 6, 258, 16, "#7b3fa0", "700");
-  ohmText(`${ohmState.voltage.toFixed(1)} V`, left - 26, 306, 13);
-
-  const flowColor = values.current > 0 ? "#c96b29" : "#a4afb2";
-  ohmArrow(150, 106, 210, 106, flowColor);
-  ohmText("约定电流方向", 106, 82, 12, "#607075");
-  if (values.current > 0) {
-    const count = 7;
-    for (let index = 0; index < count; index += 1) {
-      const point = ohmCircuitPoint(ohmState.phase * 260 * Math.min(values.current, 3) + index * 145);
-      ohmCtx.fillStyle = "#c96b29";
-      ohmCtx.beginPath();
-      ohmCtx.arc(point.x, point.y, 4.5, 0, Math.PI * 2);
-      ohmCtx.fill();
-    }
-  }
-  ohmText("电路图", 105, 432, 15, "#1a2b31", "700");
-  ohmText("动画只表示约定电流方向；读数由 U、R 实时计算。", 105, 456, 12);
+  ohmText("A", x, y + 7, 18, "#1f78b4", "700", "center");
 }
 
-function ohmNiceCeil(value) {
-  const base = 10 ** Math.floor(Math.log10(Math.max(value, 0.01)));
-  return Math.ceil(value / base) * base;
-}
+function ohmDrawGauge(cx, cy, radius, current, scaleMax) {
+  ohmCtx.strokeStyle = "rgba(49,80,87,.28)";
+  ohmCtx.lineWidth = 2;
+  ohmCtx.beginPath();
+  ohmCtx.arc(cx, cy, radius, Math.PI, Math.PI * 2);
+  ohmCtx.stroke();
 
-function ohmDrawGraph(values) {
-  const x = 570;
-  const y = 92;
-  const graphWidth = 330;
-  const graphHeight = 330;
-  const xMax = 12;
-  const yMax = ohmNiceCeil(12 / ohmState.resistance * 1.18);
-  const mapX = (voltage) => x + (voltage / xMax) * graphWidth;
-  const mapY = (current) => y + graphHeight - (current / yMax) * graphHeight;
-
-  for (let index = 0; index <= 6; index += 1) {
-    const px = x + (index / 6) * graphWidth;
-    const py = y + graphHeight - (index / 6) * graphHeight;
-    ohmLine(px, y, px, y + graphHeight, "rgba(26,43,49,.07)", 1);
-    ohmLine(x, py, x + graphWidth, py, "rgba(26,43,49,.07)", 1);
-    ohmText((xMax * index / 6).toFixed(index === 0 ? 0 : 1), px - 8, y + graphHeight + 20, 11);
-    ohmText((yMax * index / 6).toFixed(2), x - 43, py + 4, 11);
+  for (let index = 0; index <= 5; index += 1) {
+    const ratio = index / 5;
+    const angle = Math.PI + ratio * Math.PI;
+    const outerX = cx + Math.cos(angle) * radius;
+    const outerY = cy + Math.sin(angle) * radius;
+    const innerX = cx + Math.cos(angle) * (radius - 11);
+    const innerY = cy + Math.sin(angle) * (radius - 11);
+    ohmLine(innerX, innerY, outerX, outerY, "#607075", 1.5);
+    ohmText((scaleMax * ratio).toFixed(scaleMax < 1 ? 2 : 1), cx + Math.cos(angle) * (radius - 28), cy + Math.sin(angle) * (radius - 28) + 4, 10, "#607075", "400", "center");
   }
-  ohmLine(x, y, x, y + graphHeight, "#50636a", 1.5);
-  ohmLine(x, y + graphHeight, x + graphWidth, y + graphHeight, "#50636a", 1.5);
-  ohmText("I / A", x, y - 15, 14, "#1a2b31", "700");
-  ohmText("U / V", x + graphWidth - 34, y + graphHeight + 42, 14, "#1a2b31", "700");
-  ohmText("I-U 图像（当前 R）", x, y - 44, 15, "#1a2b31", "700");
 
-  ohmLine(mapX(0), mapY(0), mapX(xMax), mapY(xMax / ohmState.resistance), "#147d73", 3);
-  ohmCtx.setLineDash([5, 5]);
-  ohmLine(mapX(ohmState.voltage), y + graphHeight, mapX(ohmState.voltage), mapY(values.current), "rgba(31,120,180,.75)", 1.5);
-  ohmLine(x, mapY(values.current), mapX(ohmState.voltage), mapY(values.current), "rgba(31,120,180,.75)", 1.5);
-  ohmCtx.setLineDash([]);
+  const normalized = ohmClamp(current / scaleMax, 0, 1);
+  const needleAngle = Math.PI + normalized * Math.PI;
+  ohmLine(cx, cy, cx + Math.cos(needleAngle) * (radius - 18), cy + Math.sin(needleAngle) * (radius - 18), "#c96b29", 3);
   ohmCtx.fillStyle = "#c96b29";
   ohmCtx.beginPath();
-  ohmCtx.arc(mapX(ohmState.voltage), mapY(values.current), 6.5, 0, Math.PI * 2);
+  ohmCtx.arc(cx, cy, 6, 0, Math.PI * 2);
   ohmCtx.fill();
-  ohmText(`(${ohmState.voltage.toFixed(1)} V, ${values.current.toFixed(2)} A)`, x + 12, y + graphHeight + 68, 12, "#607075");
+  ohmText(`${current.toFixed(2)} A`, cx, cy + 27, 16, "#1a2b31", "700", "center");
+}
+
+function ohmDrawCircuitPanel(x, panelY, label, circuit, scaleMax, changedKey) {
+  const panelWidth = 420;
+  const panelHeight = 410;
+  ohmCtx.fillStyle = label === "A" ? "rgba(31,120,180,.045)" : "rgba(13,113,104,.055)";
+  ohmCtx.strokeStyle = label === "A" ? "rgba(31,120,180,.24)" : "rgba(13,113,104,.28)";
+  ohmCtx.lineWidth = 1.5;
+  ohmCtx.fillRect(x, panelY, panelWidth, panelHeight);
+  ohmCtx.strokeRect(x, panelY, panelWidth, panelHeight);
+
+  ohmText(`电路 ${label}`, x + 24, panelY + 35, 18, "#1a2b31", "700");
+  const voltageColor = changedKey === "voltage" ? "#7b3fa0" : "#607075";
+  const resistanceColor = changedKey === "resistance" ? "#147d73" : "#607075";
+  ohmText(`U = ${circuit.voltage.toFixed(2)} V`, x + 24, panelY + 62, 13, voltageColor, "700");
+  ohmText(`R = ${circuit.resistance.toFixed(2)} Ω`, x + 210, panelY + 62, 13, resistanceColor, "700");
+
+  const left = x + 62;
+  const right = x + 358;
+  const top = panelY + 106;
+  const bottom = panelY + 191;
+  ohmLine(left, top, x + 166, top);
+  ohmCtx.strokeStyle = "#147d73";
+  ohmCtx.lineWidth = 2.5;
+  ohmCtx.strokeRect(x + 166, top - 18, 88, 36);
+  ohmText("R", x + 210, top + 6, 15, "#147d73", "700", "center");
+  ohmLine(x + 254, top, right - 25, top);
+  ohmDrawAmmeterSymbol(right, top);
+  ohmLine(right + 25, top, right + 25, bottom);
+  ohmLine(right + 25, bottom, left, bottom);
+  ohmLine(left, bottom, left, top + 55);
+  ohmLine(left, top + 25, left, top);
+  ohmDrawBattery(left, top + 25);
+
+  ohmText("同一量程电流表", x + panelWidth / 2, panelY + 239, 12, "#607075", "400", "center");
+  ohmDrawGauge(x + panelWidth / 2, panelY + 348, 82, circuit.current, scaleMax);
 }
 
 function ohmDraw() {
-  const values = ohmValues();
+  ohmConfigureCanvas();
+  const result = OhmLawModel.calculate(ohmState.mode, ohmState.commonValue, ohmState.compareValue);
+  const config = ohmModeConfig[ohmState.mode];
+  const possibleMax = ohmState.mode === "voltage"
+    ? config.compareMax / ohmState.commonValue
+    : ohmState.commonValue / config.compareMin;
+  const scaleMax = ohmNiceScale(Math.max(result.a.current, result.b.current, possibleMax));
+
   ohmCtx.clearRect(0, 0, ohmWidth, ohmHeight);
   ohmCtx.fillStyle = "#fbfcfa";
   ohmCtx.fillRect(0, 0, ohmWidth, ohmHeight);
-  ohmDrawCircuit(values);
-  ohmDrawGraph(values);
+  ohmText(`两只电流表共用 0–${scaleMax.toFixed(scaleMax < 1 ? 2 : 1)} A 量程`, ohmWidth / 2, 34, 13, "#607075", "600", "center");
+  if (ohmCompact) {
+    ohmDrawCircuitPanel(10, 48, "A", result.a, scaleMax, ohmState.mode);
+    ohmDrawCircuitPanel(10, 488, "B", result.b, scaleMax, ohmState.mode);
+  } else {
+    ohmDrawCircuitPanel(40, 64, "A", result.a, scaleMax, ohmState.mode);
+    ohmDrawCircuitPanel(520, 64, "B", result.b, scaleMax, ohmState.mode);
+  }
+}
+
+function ohmApplyInputConfig(input, numberInput, min, max, value) {
+  [input, numberInput].forEach((element) => {
+    element.min = min;
+    element.max = max;
+    element.step = 0.1;
+    element.value = value;
+  });
 }
 
 function ohmSync() {
-  const values = ohmValues();
-  ohmRefs.voltageInput.value = ohmState.voltage;
-  ohmRefs.voltageNumber.value = ohmState.voltage;
-  ohmRefs.resistanceInput.value = ohmState.resistance;
-  ohmRefs.resistanceNumber.value = ohmState.resistance;
-  ohmRefs.voltageValue.textContent = ohmFormat(ohmState.voltage, "V");
-  ohmRefs.resistanceValue.textContent = ohmFormat(ohmState.resistance, "Ω");
-  ohmRefs.voltageMetric.textContent = ohmFormat(ohmState.voltage, "V");
-  ohmRefs.resistanceMetric.textContent = ohmFormat(ohmState.resistance, "Ω");
-  ohmRefs.currentMetric.textContent = ohmFormat(values.current, "A");
-  ohmRefs.powerMetric.textContent = ohmFormat(values.power, "W");
-  ohmRefs.overviewCurrent.textContent = ohmFormat(values.current, "A");
-  ohmRefs.startButton.textContent = ohmState.running ? "运行中" : "开始";
+  const config = ohmModeConfig[ohmState.mode];
+  const result = OhmLawModel.calculate(ohmState.mode, ohmState.commonValue, ohmState.compareValue);
+
+  if (ohmRenderedMode !== ohmState.mode) {
+    ohmRenderedMode = ohmState.mode;
+    ohmRefs.modeButtons.forEach((button) => {
+      const active = button.dataset.mode === ohmState.mode;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    ohmRefs.controlTitle.textContent = config.title;
+    ohmRefs.overviewRelation.textContent = config.badge;
+    ohmRefs.baselineText.textContent = config.baseline;
+    ohmRefs.commonLabel.textContent = config.commonLabel;
+    ohmRefs.commonMath.textContent = config.commonMath;
+    ohmRefs.commonUnit.textContent = config.commonUnit;
+    ohmRefs.compareLabel.textContent = config.compareLabel;
+    ohmRefs.compareMath.textContent = config.compareMath;
+    ohmRefs.compareUnit.textContent = config.compareUnit;
+    ohmRefs.changedRatioLabel.textContent = config.changedRatioLabel;
+    ohmRefs.conclusionText.textContent = config.conclusion;
+    ohmRefs.relationFormula.textContent = config.formula;
+    if (window.physicsTypesetMath) window.physicsTypesetMath();
+  }
+  ohmRefs.changedRatio.textContent = `${result.changedRatio.toFixed(2)} 倍`;
+  ohmRefs.currentRatio.textContent = `${result.currentRatio.toFixed(2)} 倍`;
+  ohmRefs.commonValue.textContent = ohmFormat(ohmState.commonValue, config.commonUnit);
+  ohmRefs.compareValue.textContent = ohmFormat(ohmState.compareValue, config.compareUnit);
+  ohmRefs.circuitAMetric.textContent = `U = ${ohmFormat(result.a.voltage, "V")}　R = ${ohmFormat(result.a.resistance, "Ω")}　I = ${ohmFormat(result.a.current, "A")}`;
+  ohmRefs.circuitBMetric.textContent = `U = ${ohmFormat(result.b.voltage, "V")}　R = ${ohmFormat(result.b.resistance, "Ω")}　I = ${ohmFormat(result.b.current, "A")}`;
+  ohmApplyInputConfig(ohmRefs.commonInput, ohmRefs.commonNumber, config.commonMin, config.commonMax, ohmState.commonValue);
+  ohmApplyInputConfig(ohmRefs.compareInput, ohmRefs.compareNumber, config.compareMin, config.compareMax, ohmState.compareValue);
   ohmDraw();
 }
 
-function ohmSetParameter(key, rawValue) {
-  const input = key === "voltage" ? ohmRefs.voltageInput : ohmRefs.resistanceInput;
+function ohmSetValue(key, rawValue) {
+  const config = ohmModeConfig[ohmState.mode];
+  const min = key === "commonValue" ? config.commonMin : config.compareMin;
+  const max = key === "commonValue" ? config.commonMax : config.compareMax;
   const value = Number(rawValue);
   if (!Number.isFinite(value)) return;
-  ohmState[key] = ohmClamp(value, Number(input.min), Number(input.max));
+  ohmState[key] = ohmClamp(value, min, max);
   ohmSync();
 }
 
-function ohmBindParameter(key, range, number) {
-  range.addEventListener("input", () => ohmSetParameter(key, range.value));
-  number.addEventListener("change", () => ohmSetParameter(key, number.value));
-  number.addEventListener("blur", () => ohmSetParameter(key, number.value));
+function ohmBindValue(key, range, numberInput) {
+  range.addEventListener("input", () => ohmSetValue(key, range.value));
+  numberInput.addEventListener("change", () => ohmSetValue(key, numberInput.value));
+  numberInput.addEventListener("blur", () => ohmSetValue(key, numberInput.value));
 }
 
-ohmBindParameter("voltage", ohmRefs.voltageInput, ohmRefs.voltageNumber);
-ohmBindParameter("resistance", ohmRefs.resistanceInput, ohmRefs.resistanceNumber);
-ohmRefs.startButton.addEventListener("click", () => { ohmState.running = true; ohmSync(); });
-ohmRefs.pauseButton.addEventListener("click", () => { ohmState.running = false; ohmSync(); });
-ohmRefs.resetButton.addEventListener("click", () => { ohmState.voltage = 6; ohmState.resistance = 3; ohmState.running = false; ohmState.phase = 0; ohmSync(); });
-
-let ohmPreviousFrame = performance.now();
-function ohmAnimate(now) {
-  const dt = Math.min((now - ohmPreviousFrame) / 1000, 0.05);
-  ohmPreviousFrame = now;
-  if (ohmState.running) {
-    ohmState.phase += dt;
-    ohmDraw();
-  }
-  requestAnimationFrame(ohmAnimate);
-}
+ohmRefs.modeButtons.forEach((button) => button.addEventListener("click", () => {
+  ohmState.mode = button.dataset.mode;
+  ohmState.commonValue = 6;
+  ohmState.compareValue = 6;
+  ohmSync();
+}));
+ohmBindValue("commonValue", ohmRefs.commonInput, ohmRefs.commonNumber);
+ohmBindValue("compareValue", ohmRefs.compareInput, ohmRefs.compareNumber);
+ohmRefs.resetButton.addEventListener("click", () => {
+  ohmState.mode = "voltage";
+  ohmState.commonValue = 6;
+  ohmState.compareValue = 6;
+  ohmSync();
+});
+window.addEventListener("resize", ohmDraw);
 
 ohmSync();
-requestAnimationFrame(ohmAnimate);

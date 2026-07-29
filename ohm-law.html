@@ -3,26 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>欧姆定律可视化实验台</title>
+    <title>欧姆定律对照实验</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=direct-labs-1" />
     <link rel="stylesheet" href="./model-lab.css?v=friction-fix-1" />
-    <link rel="stylesheet" href="./ohm-law.css?v=ohm-law-1" />
+    <link rel="stylesheet" href="./ohm-law.css?v=ohm-compare-1" />
   </head>
   <body class="model-lab ohm-law-lab">
-    <main class="app"><section class="workspace"><div class="stage">
-      <div class="stage-head"><div class="stage-title"><h1>欧姆定律可视化实验台</h1></div><div class="actions"><a class="ghost-link" href="./index.html">实验目录</a><button id="startButton" class="primary" type="button">开始</button><button id="pauseButton" type="button">暂停</button><button id="resetButton" type="button">重置</button></div></div>
-      <p class="stage-subtitle">调节电压或电阻，电路读数与 I-U 图像同步更新。</p>
-      <div class="canvas-wrap main-canvas"><canvas id="ohmCanvas" class="lab-canvas" width="980" height="540" aria-label="欧姆定律电路与伏安特性图"></canvas></div>
-      <div class="stage-readouts"><article class="stage-readout"><span>U</span><strong id="voltageMetric">6.00 V</strong></article><article class="stage-readout"><span>R</span><strong id="resistanceMetric">3.00 Ω</strong></article><article class="stage-readout"><span>I</span><strong id="currentMetric">2.00 A</strong></article><article class="stage-readout"><span>P</span><strong id="powerMetric">12.00 W</strong></article></div>
-    </div><aside class="controls"><div class="controls-overview"><div><span class="preset-label">实验控制</span><h2>电路参数</h2></div><div class="overview-badges"><span class="overview-badge" id="overviewCurrent">2.00 A</span></div></div>
-      <details class="section-panel" open><summary class="section-summary"><span>核心参数</span></summary><div class="section-body">
-        <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">电压</span><span class="label-math">\(U / \mathrm{V}\)</span></div><strong id="voltageValue">6.00 V</strong></div><input id="voltageInput" type="range" min="0" max="12" step="0.1" value="6" /><div class="inline-edit"><input id="voltageNumber" class="number-input" type="number" min="0" max="12" step="0.1" value="6" /><span class="input-unit">\(\mathrm{V}\)</span></div></label>
-        <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">定值电阻</span><span class="label-math">\(R / \Omega\)</span></div><strong id="resistanceValue">3.00 Ω</strong></div><input id="resistanceInput" type="range" min="1" max="12" step="0.1" value="3" /><div class="inline-edit"><input id="resistanceNumber" class="number-input" type="number" min="1" max="12" step="0.1" value="3" /><span class="input-unit">\(\Omega\)</span></div></label>
-      </div></details>
-      <details class="section-panel" open><summary class="section-summary"><span>关键公式</span></summary><div class="section-body"><div class="formula-panel"><strong>\(I = \frac{U}{R}\)</strong><strong>\(P = UI = \frac{U^2}{R}\)</strong></div></div></details>
-      <details class="section-panel"><summary class="section-summary"><span>适用条件</span></summary><div class="section-body"><p class="ohm-condition">温度不变的定值电阻。灯泡、二极管等非欧姆元件不适用。</p></div></details>
-    </aside></section></main>
-    <script src="./ohm-law.js?v=ohm-law-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=direct-labs-1"></script>
+    <main class="app">
+      <section class="workspace">
+        <div class="stage">
+          <div class="stage-head">
+            <div class="stage-title"><h1>欧姆定律对照实验</h1></div>
+            <div class="actions"><a class="ghost-link" href="./index.html">实验目录</a><button id="resetButton" type="button">重置</button></div>
+          </div>
+          <p class="stage-subtitle">只改变一个量，直接比较两只电流表。</p>
+
+          <div class="comparison-mode" role="group" aria-label="对照方式">
+            <button class="active" type="button" data-mode="voltage" aria-pressed="true">保持电阻，改变电压</button>
+            <button type="button" data-mode="resistance" aria-pressed="false">保持电压，改变电阻</button>
+          </div>
+
+          <div class="canvas-wrap main-canvas"><canvas id="ohmCanvas" class="lab-canvas" width="980" height="520" aria-label="两组欧姆定律对照电路"></canvas></div>
+
+          <section class="comparison-conclusion" aria-live="polite">
+            <div><span id="changedRatioLabel">电压倍数</span><strong id="changedRatio">2.00 倍</strong></div>
+            <div class="relation-arrow" aria-hidden="true">→</div>
+            <div><span>电流倍数</span><strong id="currentRatio">2.00 倍</strong></div>
+            <p id="conclusionText">电阻相同时，电流随电压同比例变化。</p>
+          </section>
+
+          <div class="circuit-readouts">
+            <article><span>电路 A</span><strong id="circuitAMetric">U = 3.00 V　R = 6.00 Ω　I = 0.50 A</strong></article>
+            <article><span>电路 B</span><strong id="circuitBMetric">U = 6.00 V　R = 6.00 Ω　I = 1.00 A</strong></article>
+          </div>
+        </div>
+
+        <aside class="controls">
+          <div class="controls-overview"><div><span class="preset-label">控制变量</span><h2 id="controlTitle">保持电阻相同</h2></div><div class="overview-badges"><span class="overview-badge" id="overviewRelation">I 同比变化</span></div></div>
+
+          <details class="section-panel" open><summary class="section-summary"><span>实验参数</span></summary><div class="section-body">
+            <div class="baseline-note"><span>电路 A 基准</span><strong id="baselineText">Uₐ = 3.00 V</strong></div>
+
+            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title" id="commonLabel">共同电阻</span><span class="label-math" id="commonMath">\(R / \Omega\)</span></div><strong id="commonValue">6.00 Ω</strong></div><input id="commonInput" type="range" min="1" max="12" step="0.1" value="6" /><div class="inline-edit"><input id="commonNumber" class="number-input" type="number" min="1" max="12" step="0.1" value="6" /><span class="input-unit" id="commonUnit">\(\Omega\)</span></div></label>
+
+            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title" id="compareLabel">电路 B 电压</span><span class="label-math" id="compareMath">\(U_B / \mathrm{V}\)</span></div><strong id="compareValue">6.00 V</strong></div><input id="compareInput" type="range" min="0" max="12" step="0.1" value="6" /><div class="inline-edit"><input id="compareNumber" class="number-input" type="number" min="0" max="12" step="0.1" value="6" /><span class="input-unit" id="compareUnit">\(\mathrm{V}\)</span></div></label>
+          </div></details>
+
+          <details class="section-panel" open><summary class="section-summary"><span>关键公式</span></summary><div class="section-body"><div class="formula-panel"><strong>\(I = \frac{U}{R}\)</strong><strong id="relationFormula">\(R\text{ 相同}:\ \frac{I_B}{I_A}=\frac{U_B}{U_A}\)</strong></div></div></details>
+          <details class="section-panel"><summary class="section-summary"><span>适用条件</span></summary><div class="section-body"><p class="ohm-condition">温度不变的定值电阻。灯泡、二极管等非欧姆元件不适用。</p></div></details>
+        </aside>
+      </section>
+    </main>
+    <script src="./ohm-law-model.js?v=ohm-compare-1"></script><script src="./ohm-law.js?v=ohm-compare-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=direct-labs-1"></script>
   </body>
 </html>

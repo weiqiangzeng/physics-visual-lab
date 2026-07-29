@@ -1,3 +1,24 @@
+.ohm-law-lab .stage-subtitle { margin-bottom: 14px; }
+.comparison-mode { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; padding: 5px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.7); }
+.comparison-mode button { min-height: 44px; border: 0; border-radius: 4px; background: transparent; }
+.comparison-mode button.active { color: #fff; background: var(--accent); }
+.comparison-conclusion { display: grid; grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 14px; padding: 14px 16px; border-left: 4px solid var(--accent); background: rgba(13, 113, 104, 0.07); }
+.comparison-conclusion div:not(.relation-arrow) { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.comparison-conclusion span { color: var(--muted); font-size: .82rem; }
+.comparison-conclusion strong { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.comparison-conclusion .relation-arrow { color: var(--accent); text-align: center; font-size: 1.25rem; font-weight: 800; }
+.comparison-conclusion p { grid-column: 1 / -1; margin: 2px 0 0; color: var(--ink); font-weight: 700; }
+.circuit-readouts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.circuit-readouts article { padding: 12px 14px; border: 1px solid rgba(19, 31, 35, 0.08); background: rgba(255, 255, 255, 0.82); }
+.circuit-readouts span { display: block; margin-bottom: 6px; color: var(--muted); font-size: .8rem; }
+.circuit-readouts strong { display: block; font-size: .88rem; font-variant-numeric: tabular-nums; line-height: 1.5; }
+.baseline-note { display: flex; justify-content: space-between; gap: 12px; padding: 12px 13px; border-left: 3px solid #1f78b4; background: rgba(31, 120, 180, 0.07); }
+.baseline-note span { color: var(--muted); font-size: .84rem; }
+.baseline-note strong { font-size: .9rem; }
 .ohm-law-lab .ohm-condition { margin: 0; color: var(--muted); line-height: 1.6; }
-.ohm-law-lab .stage-readouts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-@media (max-width: 760px) { .ohm-law-lab .stage-readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .comparison-mode, .circuit-readouts { grid-template-columns: 1fr; }
+  .comparison-conclusion { grid-template-columns: 1fr; }
+  .comparison-conclusion .relation-arrow { transform: rotate(90deg); }
+  .comparison-conclusion p { grid-column: 1; }
+}
