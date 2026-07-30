@@ -3,159 +3,184 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>折射与全反射可视化实验台</title>
+    <meta name="theme-color" content="#151817" />
+    <title>折射与全反射实验室</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=workspace-3" />
-    <link rel="stylesheet" href="./model-lab.css?v=curriculum" />
-    <link rel="stylesheet" href="./refraction.css?v=20260730" />
+    <link rel="stylesheet" href="./refraction.css?v=flagship-1" />
   </head>
-  <body class="model-lab refraction-lab">
-    <main class="app">
-      <section class="workspace">
-        <div class="stage">
-          <div class="stage-head">
-            <div class="stage-title">
-              <h1>折射与全反射可视化实验台</h1>
-              <span class="demo-badge" id="demoBadge">观察模式</span>
-            </div>
-            <div class="actions">
-              <a class="ghost-link" href="./index.html">实验目录</a>
-              <button id="resetButton" type="button">重置</button>
-            </div>
-          </div>
-          <p class="stage-subtitle">改变介质和入射角，观察光路如何改变。</p>
+  <body class="refraction-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录">
+        <span class="brand-mark" aria-hidden="true">Φ</span>
+        <span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span>
+      </a>
+      <div class="topbar-title">
+        <span>光学 · 实验 01</span>
+        <strong>折射与全反射</strong>
+      </div>
+      <div class="connection-state"><i aria-hidden="true"></i>模型已连接</div>
+      <div class="actions topbar-actions">
+        <button id="guideButton" class="toolbar-button" type="button">实验指南</button>
+        <button id="stepButton" class="toolbar-button" type="button">分步演示</button>
+        <button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button>
+        <button id="fullscreenButton" class="toolbar-button icon-command" type="button" title="全屏" aria-label="全屏">⛶</button>
+      </div>
+    </header>
 
-          <section class="lesson-guide" aria-label="当前观察任务">
-            <div class="guide-main">
-              <span class="preset-label">观察任务</span>
-              <strong id="modeGoal">验证折射角与入射角的关系</strong>
-              <p id="modePrompt">先固定两种介质，改变入射角，比较入射光线和折射光线相对法线的角度。</p>
-            </div>
-            <div class="guide-formula" id="modeFormula">\(n_1\sin\theta_1=n_2\sin\theta_2\)</div>
-          </section>
-
-          <details class="teaching-route compact-guidance" aria-label="观察提示">
-            <summary>展开观察提示</summary>
-            <div>
-              <span class="preset-label">观察路线</span>
-              <ol>
-                <li>先看法线，角度始终从法线量起。</li>
-                <li>切换入射角，比较折射光线的偏折程度。</li>
-                <li>让光从高折射率介质射向低折射率介质，寻找全反射起点。</li>
-              </ol>
-            </div>
-            <div>
-              <span class="preset-label">典型问题</span>
-              <ul>
-                <li>发生折射时，哪一个角度更大？</li>
-                <li>全反射只由入射角大决定吗？</li>
-              </ul>
-            </div>
-          </details>
-
-          <div class="preset-bar">
-            <div class="preset-copy">
-              <span class="preset-label">观察模式</span>
-              <strong id="presetTitle">折射关系</strong>
-            </div>
-            <div class="preset-buttons">
-              <button class="preset-button active" type="button" data-mode="refraction">折射关系</button>
-              <button class="preset-button" type="button" data-mode="critical">临界角</button>
-              <button class="preset-button" type="button" data-mode="total">全反射</button>
-            </div>
-          </div>
-
-          <div class="canvas-wrap main-canvas">
-            <canvas id="refractionCanvas" width="980" height="540" aria-label="折射与全反射光路图"></canvas>
-          </div>
-
-          <section class="critical-strip" aria-label="折射与全反射关键状态">
-            <article class="critical-card active" id="normalCard" role="button" tabindex="0" data-jump="normal">
-              <span>法线</span>
-              <strong>角度从法线量起</strong>
-              <p>先确认入射角和折射角的参考方向。</p>
-            </article>
-            <article class="critical-card" id="criticalCard" role="button" tabindex="0" data-jump="critical">
-              <span>临界状态</span>
-              <strong id="criticalCardValue">θc = --</strong>
-              <p>折射光线沿界面传播。</p>
-            </article>
-            <article class="critical-card" id="totalCard" role="button" tabindex="0" data-jump="total">
-              <span>全反射</span>
-              <strong>无折射光线</strong>
-              <p>入射角超过临界角后，只保留反射光。</p>
-            </article>
-            <article class="critical-now">
-              <span>当前状态</span>
-              <strong id="stateLabel">发生折射</strong>
-              <p id="stateNote">折射光线进入第二种介质。</p>
-            </article>
-          </section>
-
-          <div class="stage-readouts">
-            <article class="stage-readout"><span>θ₁</span><strong id="incidentMetric">35°</strong></article>
-            <article class="stage-readout"><span>θ₂</span><strong id="refractedMetric">22.5°</strong></article>
-            <article class="stage-readout"><span>θc</span><strong id="criticalMetric">--</strong></article>
-            <article class="stage-readout"><span>n₁</span><strong id="n1Metric">1.00</strong></article>
-            <article class="stage-readout"><span>n₂</span><strong id="n2Metric">1.50</strong></article>
-            <article class="stage-readout"><span>状态</span><strong id="modeMetric">折射</strong></article>
-          </div>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading">
+          <span class="eyebrow">OPTICS / 01</span>
+          <h1>折射<br />与全反射</h1>
+          <p>从光路观察到数据验证，建立折射率、角度和临界条件之间的联系。</p>
         </div>
 
-        <aside class="controls">
-          <div class="controls-overview">
-            <div>
-              <span class="preset-label">实验控制</span>
-              <h2>光路参数</h2>
-            </div>
-            <div class="overview-badges">
-              <span class="overview-badge" id="overviewState">折射</span>
-              <span class="overview-badge" id="overviewCritical">θc --</span>
-            </div>
+        <div class="rail-section">
+          <span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="refraction">
+            <span>01</span><strong>折射定律</strong><i>观察偏折</i>
+          </button>
+          <button class="scene-tab" type="button" data-mode="critical">
+            <span>02</span><strong>临界状态</strong><i>寻找边界</i>
+          </button>
+          <button class="scene-tab" type="button" data-mode="total">
+            <span>03</span><strong>全反射</strong><i>判断条件</i>
+          </button>
+        </div>
+
+        <div class="rail-section experiment-route">
+          <span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button" data-guide-step="0"><b>1</b><span>预测光路<small>先判断偏向或远离法线</small></span></button>
+          <button class="route-step" type="button" data-guide-step="1"><b>2</b><span>改变条件<small>拖动光源并切换介质</small></span></button>
+          <button class="route-step" type="button" data-guide-step="2"><b>3</b><span>测量验证<small>记录数据并检查图像</small></span></button>
+        </div>
+
+        <div class="rail-equation">
+          <span>核心模型</span>
+          <strong>n<sub>1</sub> sin θ<sub>1</sub> = n<sub>2</sub> sin θ<sub>2</sub></strong>
+          <small>角度均相对法线测量</small>
+        </div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="control-heading">
+          <div><span class="eyebrow">CONTROL</span><h2>光路参数</h2></div>
+          <button id="resetButton" class="reset-button" type="button">重置</button>
+        </div>
+
+        <section class="control-section">
+          <span class="section-kicker">光路方向</span>
+          <div class="segmented-control direction-control" role="group" aria-label="光路方向">
+            <button class="is-active" type="button" data-direction="air-glass">空气 → 玻璃</button>
+            <button type="button" data-direction="glass-air">玻璃 → 空气</button>
           </div>
+        </section>
 
-          <details class="section-panel" open>
-            <summary class="section-summary"><span>核心参数</span></summary>
-            <div class="section-body">
-              <label class="control">
-                <div class="label-row"><div class="label-copy"><span class="label-title">入射角</span><span class="label-math">\(\theta_1 / {}^\circ\)</span></div><strong id="angleValue">35°</strong></div>
-                <input id="angleInput" type="range" min="0" max="89" step="1" value="35" />
-                <div class="inline-edit"><input id="angleNumber" class="number-input" type="number" min="0" max="89" step="1" value="35" /><span class="input-unit">\({}^\circ\)</span></div>
-              </label>
-              <label class="control">
-                <div class="label-row"><div class="label-copy"><span class="label-title">介质 1 折射率</span><span class="label-math">\(n_1\)</span></div><strong id="n1Value">1.00</strong></div>
-                <input id="n1Input" type="range" min="1" max="2.4" step="0.01" value="1" />
-                <div class="inline-edit"><input id="n1Number" class="number-input" type="number" min="1" max="2.4" step="0.01" value="1" /></div>
-              </label>
-              <label class="control">
-                <div class="label-row"><div class="label-copy"><span class="label-title">介质 2 折射率</span><span class="label-math">\(n_2\)</span></div><strong id="n2Value">1.50</strong></div>
-                <input id="n2Input" type="range" min="1" max="2.4" step="0.01" value="1.5" />
-                <div class="inline-edit"><input id="n2Number" class="number-input" type="number" min="1" max="2.4" step="0.01" value="1.5" /></div>
-              </label>
-            </div>
-          </details>
+        <section class="control-section">
+          <div class="control-label"><span>入射角 <i>θ₁</i></span><strong id="angleValue">35.0°</strong></div>
+          <input id="angleInput" class="range-input" type="range" min="0" max="89" step="0.5" value="35" aria-label="入射角" />
+          <div class="number-stepper">
+            <button type="button" data-nudge="-1" aria-label="减小入射角">−</button>
+            <input id="angleNumber" type="number" min="0" max="89" step="0.5" value="35" aria-label="输入入射角" />
+            <span>°</span>
+            <button type="button" data-nudge="1" aria-label="增大入射角">+</button>
+          </div>
+        </section>
 
-          <details class="section-panel" open>
-            <summary class="section-summary"><span>显示选项</span></summary>
-            <div class="section-body">
-              <div class="toggle-grid">
-                <label class="toggle-item"><input id="showAnglesToggle" type="checkbox" checked /><span>显示角度标记</span></label>
-                <label class="toggle-item"><input id="showNormalToggle" type="checkbox" checked /><span>显示法线</span></label>
-                <label class="toggle-item"><input id="showLabelsToggle" type="checkbox" checked /><span>显示介质标签</span></label>
-              </div>
-            </div>
-          </details>
+        <section class="control-section media-controls">
+          <div class="section-headline"><span class="section-kicker">介质组合</span><button id="swapMediaButton" type="button">交换介质</button></div>
+          <label class="select-row"><span><i class="medium-dot medium-one"></i>入射介质 n₁</span><select id="medium1Select" aria-label="入射介质"></select></label>
+          <label class="select-row"><span><i class="medium-dot medium-two"></i>折射介质 n₂</span><select id="medium2Select" aria-label="折射介质"></select></label>
+          <div class="index-readout"><span>n₁ <strong id="n1Value">1.000</strong></span><span>n₂ <strong id="n2Value">1.500</strong></span></div>
+        </section>
 
-          <section class="formula-panel">
-            <span class="preset-label">模型核对</span>
-            <strong id="formulaReadout">\(n_1\sin\theta_1=n_2\sin\theta_2\)</strong>
-            <p id="formulaNote">读数将随着参数变化同步更新。</p>
-          </section>
-        </aside>
+        <section class="control-section">
+          <span class="section-kicker">光束颜色</span>
+          <div class="color-swatches" role="radiogroup" aria-label="光束颜色">
+            <button class="color-swatch red is-active" type="button" data-wavelength="650" role="radio" aria-checked="true" aria-label="红光 650 纳米"></button>
+            <button class="color-swatch yellow" type="button" data-wavelength="589" role="radio" aria-checked="false" aria-label="黄光 589 纳米"></button>
+            <button class="color-swatch green" type="button" data-wavelength="532" role="radio" aria-checked="false" aria-label="绿光 532 纳米"></button>
+            <button class="color-swatch blue" type="button" data-wavelength="450" role="radio" aria-checked="false" aria-label="蓝光 450 纳米"></button>
+            <strong id="wavelengthValue">650 nm</strong>
+          </div>
+        </section>
+
+        <section class="control-section overlay-controls">
+          <span class="section-kicker">分析叠加层</span>
+          <div class="toggle-grid">
+            <label><input id="showNormalToggle" type="checkbox" checked /><span>法线</span></label>
+            <label><input id="showAnglesToggle" type="checkbox" checked /><span>角度</span></label>
+            <label><input id="showReflectionToggle" type="checkbox" checked /><span>反射光</span></label>
+            <label><input id="showCriticalToggle" type="checkbox" checked /><span>临界角</span></label>
+          </div>
+        </section>
+
+        <div class="control-actions">
+          <button id="criticalButton" class="secondary-command" type="button">跳到临界角</button>
+          <button id="recordButton" class="primary-command" type="button">记录数据</button>
+        </div>
+      </aside>
+
+      <section class="stage">
+        <header class="stage-head">
+          <div class="stage-title">
+            <span class="stage-breadcrumb">折射与全反射 / <b id="modeTitle">折射定律</b></span>
+            <h2 id="modeGoal">改变入射角，观察光线如何偏折</h2>
+          </div>
+          <div class="stage-status">
+            <span id="stateBadge" class="state-badge">发生折射</span>
+            <span class="drag-hint">拖动光源改变入射角</span>
+          </div>
+        </header>
+
+        <section class="instrument-stage" aria-label="折射与全反射光具盘">
+          <canvas id="refractionCanvas" width="900" height="470" aria-label="可拖动的折射与全反射光具盘"></canvas>
+          <aside class="live-readouts" aria-label="实时读数">
+            <div class="readout-head"><span>LIVE DATA</span><i aria-hidden="true"></i></div>
+            <dl>
+              <div><dt>入射角 <i>θ₁</i></dt><dd id="incidentMetric">35.0°</dd></div>
+              <div><dt>折射角 <i>θ₂</i></dt><dd id="refractedMetric">22.5°</dd></div>
+              <div><dt>临界角 <i>θc</i></dt><dd id="criticalMetric">—</dd></div>
+              <div><dt>相对折射率</dt><dd id="relativeMetric">1.500</dd></div>
+            </dl>
+            <div class="law-check"><span>定律核对</span><strong id="lawDelta">Δ = 0.000</strong><small id="lawCheckText">两侧计算值一致</small></div>
+          </aside>
+        </section>
+
+        <section class="analysis-grid" aria-label="数据图像">
+          <article class="chart-panel">
+            <header><div><span>ANGLE RESPONSE</span><h3>θ₂ – θ₁ 关系</h3></div><strong id="curveStatus">连续折射</strong></header>
+            <canvas id="angleChart" width="620" height="230" aria-label="折射角随入射角变化图像"></canvas>
+          </article>
+          <article class="chart-panel">
+            <header><div><span>SNELL PLOT</span><h3>sin θ₁ – sin θ₂</h3></div><button id="clearDataButton" type="button">清空数据</button></header>
+            <canvas id="sineChart" width="620" height="230" aria-label="斯涅尔定律线性关系图"></canvas>
+          </article>
+        </section>
+
+        <footer class="observation-bar">
+          <span class="step-index" id="stepIndex">01</span>
+          <div><strong id="stepTitle">先预测</strong><p id="stepPrompt">光从空气进入玻璃时，折射光会偏向法线还是远离法线？</p></div>
+          <div class="formula-state"><span id="formulaLabel">当前关系</span><strong id="formulaReadout">1.000 sin 35.0° = 1.500 sin 22.5°</strong></div>
+        </footer>
       </section>
     </main>
 
-    <script src="./refraction.js?v=20260730"></script>
+    <dialog id="guideDialog" class="guide-dialog">
+      <form method="dialog">
+        <header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>折射与全反射探究指南</h2></div><button aria-label="关闭指南">×</button></header>
+        <ol>
+          <li><b>预测</b><span>比较两种介质的折射率，先判断光线相对法线的偏折方向。</span></li>
+          <li><b>操作</b><span>拖动光源改变入射角，观察光路、实时读数和关系曲线同步变化。</span></li>
+          <li><b>验证</b><span>记录多组数据，检查 n₁ sin θ₁ 与 n₂ sin θ₂ 是否相等。</span></li>
+          <li><b>拓展</b><span>切换到玻璃射向空气，找到折射光消失前的临界状态。</span></li>
+        </ol>
+        <button class="primary-command" value="close">开始实验</button>
+      </form>
+    </dialog>
+
+    <script src="./refraction.js?v=flagship-1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
     <script src="./platform.js?v=workspace-3"></script>
