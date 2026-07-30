@@ -5,6 +5,7 @@
     "newton-laws.html",
     "projectile.html",
     "circular.html",
+    "ohm-law.html",
     "oscillation.html",
     "waves.html",
     "charged-particle.html"
@@ -353,7 +354,7 @@
   function readProgress() {
     try {
       const parsed = JSON.parse(window.localStorage.getItem(storageKey) || "{}");
-      if (!parsed || typeof parsed !== "object") return { visited: {}, completed: {}, tasks: {} };
+      if (!parsed || typeof parsed !== "object") return { visited: {}, completed: {}, tasks: {}, lastVisited: "" };
       const visited = parsed.visited && typeof parsed.visited === "object" ? parsed.visited : {};
       lessons.forEach((lesson) => {
         if (parsed[lesson]) visited[lesson] = true;
@@ -361,10 +362,11 @@
       return {
         visited,
         completed: parsed.completed && typeof parsed.completed === "object" ? parsed.completed : {},
-        tasks: parsed.tasks && typeof parsed.tasks === "object" ? parsed.tasks : {}
+        tasks: parsed.tasks && typeof parsed.tasks === "object" ? parsed.tasks : {},
+        lastVisited: lessons.includes(parsed.lastVisited) ? parsed.lastVisited : ""
       };
     } catch {
-      return { visited: {}, completed: {}, tasks: {} };
+      return { visited: {}, completed: {}, tasks: {}, lastVisited: "" };
     }
   }
 
@@ -379,6 +381,7 @@
   const progress = readProgress();
   if (!isHome && lessons.includes(currentPage)) {
     progress.visited[currentPage] = true;
+    progress.lastVisited = currentPage;
     saveProgress(progress);
   }
 
@@ -388,6 +391,7 @@
       if (!lesson || !lessons.includes(lesson)) return;
       const nextProgress = readProgress();
       nextProgress.visited[lesson] = true;
+      nextProgress.lastVisited = lesson;
       saveProgress(nextProgress);
     });
   });
@@ -399,7 +403,19 @@
     if (count) count.textContent = `${completed} / ${lessons.length}`;
     if (fill) fill.style.width = `${(completed / lessons.length) * 100}%`;
 
-    document.querySelectorAll("[data-lesson-card]").forEach((card) => {
+    const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
+    const recentLink = document.getElementById("recentLessonLink");
+    const recentNote = document.getElementById("recentLessonNote");
+    const recentCard = cards.find((card) => card.dataset.lessonCard === progress.lastVisited);
+    if (recentLink && recentNote && recentCard) {
+      const title = recentCard.querySelector("h3")?.textContent?.trim() || progress.lastVisited;
+      recentLink.href = `./${progress.lastVisited}`;
+      recentLink.textContent = `继续：${title}`;
+      recentLink.hidden = false;
+      recentNote.textContent = "从上次离开的实验继续观察。";
+    }
+
+    cards.forEach((card) => {
       const lesson = card.dataset.lessonCard;
       const link = card.querySelector(".card-link");
       if (progress.visited[lesson]) {
@@ -409,6 +425,32 @@
       if (progress.completed[lesson]) card.classList.add("completed");
     });
     renderCourseNavigation();
+    const searchInput = document.getElementById("experimentSearch");
+    const subjectFilter = document.getElementById("subjectFilter");
+    const resultCount = document.getElementById("experimentResultCount");
+    const applyCatalogFilters = () => {
+      const query = (searchInput?.value || "").trim().toLocaleLowerCase();
+      const subject = subjectFilter?.value || "all";
+      const activeVolume = document.querySelector("[data-volume].active")?.dataset.volume || readVolume();
+      let visibleCount = 0;
+      cards.forEach((card) => {
+        const matchesQuery = !query || card.textContent.toLocaleLowerCase().includes(query);
+        const matchesSubject = subject === "all" || Boolean(card.querySelector(`.subject-tag.${subject}`));
+        const matchesVolume = (card.dataset.volumes || "").split(/\s+/).includes(activeVolume);
+        const visible = matchesQuery && matchesSubject && matchesVolume;
+        card.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+      if (resultCount) resultCount.textContent = `${visibleCount} 个实验`;
+      const empty = document.getElementById("volumeEmpty");
+      if (empty) {
+        empty.hidden = visibleCount > 0;
+        empty.textContent = query || subject !== "all" ? "没有符合条件的实验。" : "本册暂未开放实验。";
+      }
+    };
+    [searchInput, subjectFilter].filter(Boolean).forEach((control) => control.addEventListener("input", applyCatalogFilters));
+    document.querySelectorAll("[data-volume]").forEach((tab) => tab.addEventListener("click", () => window.requestAnimationFrame(applyCatalogFilters)));
+    applyCatalogFilters();
     typesetMath();
     return;
   }
@@ -516,6 +558,34 @@
     link.textContent = "实验目录";
     actions.prepend(link);
  }
+
+  function renderExperimentNavigation() {
+    if (isHome || !actions) return;
+    const currentIndex = lessons.indexOf(currentPage);
+    if (currentIndex < 0) return;
+    [
+      { index: currentIndex - 1, label: "上一个实验" },
+      { index: currentIndex + 1, label: "下一个实验" }
+    ].forEach(({ index, label }) => {
+      const lesson = lessons[index];
+      if (!lesson || actions.querySelector(`[data-lab-nav="${lesson}"]`)) return;
+      const link = document.createElement("a");
+      link.className = "lab-nav-link";
+      link.dataset.labNav = lesson;
+      link.href = `./${lesson}`;
+      link.textContent = label;
+      actions.append(link);
+    });
+    const heading = document.querySelector(".stage-head h1");
+    if (heading && !heading.querySelector(".lab-context")) {
+      const context = document.createElement("span");
+      context.className = "lab-context";
+      context.textContent = `实验 ${currentIndex + 1} / ${lessons.length}`;
+      heading.insertAdjacentElement("beforebegin", context);
+    }
+  }
+
+  renderExperimentNavigation();
  moveActionsToCanvas();
   observeControlValues();
   typesetMath();

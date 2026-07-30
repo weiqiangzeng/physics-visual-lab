@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>高中物理可视化实验</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
-    <link rel="stylesheet" href="./platform.css?v=direct-labs-1" />
+    <link rel="stylesheet" href="./platform.css?v=workspace-1" />
   </head>
   <body class="platform-home">
     <main class="app">
@@ -24,6 +24,33 @@
               <span class="platform-kicker">实验目录</span>
               <h2 id="courseTitle">必修第一册</h2>
             </div>
+            <div class="progress-summary" aria-label="实验完成进度">
+              <strong id="progressCount">0 / 9</strong>
+              <span>已完成实验</span>
+              <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
+            </div>
+          </div>
+
+          <div class="catalog-tools" aria-label="实验目录工具">
+            <label class="catalog-search">
+              <span>搜索实验</span>
+              <input id="experimentSearch" type="search" placeholder="名称、章节或公式" autocomplete="off" />
+            </label>
+            <label class="catalog-filter">
+              <span>学科方向</span>
+              <select id="subjectFilter">
+                <option value="all">全部方向</option>
+                <option value="mechanics">力学</option>
+                <option value="electromagnetism">电磁学</option>
+                <option value="waves">波动</option>
+              </select>
+            </label>
+            <div class="catalog-result"><strong id="experimentResultCount">3 个实验</strong><span>当前目录</span></div>
+          </div>
+
+          <div class="recent-lesson" aria-label="最近访问实验">
+            <div><span class="platform-kicker">最近访问</span><p id="recentLessonNote">打开任意实验后，这里会保留最近入口。</p></div>
+            <a id="recentLessonLink" class="recent-lesson-link" href="./index.html" hidden>继续实验<span aria-hidden="true">→</span></a>
           </div>
 
           <div class="volume-tabs" role="tablist" aria-label="教材册次">
@@ -108,6 +135,6 @@
     <script src="./platform-protocol.js?v=protocol-v1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=direct-labs-1"></script>
+    <script src="./platform.js?v=workspace-1"></script>
   </body>
 </html>
