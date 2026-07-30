@@ -548,6 +548,33 @@
   margin-top: 16px;
 }
 
+.model-library {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid var(--platform-border);
+}
+
+.model-library-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.model-library-heading h3 {
+  margin: 6px 0 0;
+  font-size: 1.15rem;
+}
+
+.model-library-heading p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  text-align: right;
+}
+
 .model-card {
   display: flex;
   min-height: 238px;
@@ -566,6 +593,7 @@
 .model-card-topline {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px;
 }
@@ -1080,6 +1108,17 @@ summary:focus-visible {
   }
 
   .model-heading p {
+    text-align: left;
+  }
+
+  .model-library-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .model-library-heading p {
+    max-width: none;
     text-align: left;
   }
 

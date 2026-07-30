@@ -145,18 +145,18 @@
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
   const courseModules = [
-    { id: "kinematics", title: "运动学与力学基础", description: "用坐标、时间、图像和误差理解运动描述。" },
-    { id: "forces", title: "相互作用与牛顿运动定律", description: "从受力分析进入力、质量和加速度的动态关系。" },
-    { id: "curved-motion", title: "曲线运动与万有引力", description: "把二维运动拆成分运动，并扩展到圆周和轨道。" },
-    { id: "energy", title: "功和机械能", description: "用功、动能和势能追踪能量转化。" },
-    { id: "electric-field", title: "电场与电荷", description: "聚焦电荷相互作用、电场、电势和静电器件。" },
-    { id: "current", title: "恒定电流与电路", description: "联动电路图、器材、电表和数据图像。" },
-    { id: "magnetic-field", title: "磁场与电磁感应", description: "观察磁场、磁力、粒子轨迹和感应电流。" },
-    { id: "momentum", title: "动量与碰撞", description: "用守恒量理解短时间相互作用和碰撞。" },
-    { id: "waves", title: "机械振动与机械波", description: "用相位、波形和传播过程统一振动与波。" },
-    { id: "optics", title: "光学", description: "用可拖拽光路理解成像、干涉和衍射。" },
-    { id: "thermal", title: "热学与气体", description: "连接宏观状态量、微观粒子运动和热力学过程。" },
-    { id: "modern-physics", title: "原子物理与近代物理", description: "用统计和能级图像理解微观实验现象。" }
+    { id: "kinematics", title: "运动学与力学基础", description: "用坐标、时间、图像和误差理解运动描述。", chapterIds: ["required-1-1", "required-1-2"] },
+    { id: "forces", title: "相互作用与牛顿运动定律", description: "从受力分析进入力、质量和加速度的动态关系。", chapterIds: ["required-1-3", "required-1-4"] },
+    { id: "curved-motion", title: "曲线运动与万有引力", description: "把二维运动拆成分运动，并扩展到圆周和轨道。", chapterIds: ["required-2-5", "required-2-6", "required-2-7"] },
+    { id: "energy", title: "功和机械能", description: "用功、动能和势能追踪能量转化。", chapterIds: ["required-2-8"] },
+    { id: "electric-field", title: "电场与电荷", description: "聚焦电荷相互作用、电场、电势和静电器件。", chapterIds: ["required-3-9", "required-3-10"] },
+    { id: "current", title: "恒定电流与电路", description: "联动电路图、器材、电表和数据图像。", chapterIds: ["required-3-11", "required-3-12"] },
+    { id: "magnetic-field", title: "磁场与电磁感应", description: "观察磁场、磁力、粒子轨迹和感应电流。", chapterIds: ["required-3-13", "selective-2-1", "selective-2-2", "selective-2-3", "selective-2-4", "selective-2-5"] },
+    { id: "momentum", title: "动量与碰撞", description: "用守恒量理解短时间相互作用和碰撞。", chapterIds: ["selective-1-1"] },
+    { id: "waves", title: "机械振动与机械波", description: "用相位、波形和传播过程统一振动与波。", chapterIds: ["selective-1-2", "selective-1-3"] },
+    { id: "optics", title: "光学", description: "用可拖拽光路理解成像、干涉和衍射。", chapterIds: ["selective-1-4"] },
+    { id: "thermal", title: "热学与气体", description: "连接宏观状态量、微观粒子运动和热力学过程。", chapterIds: ["selective-3-1", "selective-3-2", "selective-3-3"] },
+    { id: "modern-physics", title: "原子物理与近代物理", description: "用统计和能级图像理解微观实验现象。", chapterIds: ["selective-3-4", "selective-3-5"] }
   ];
   let katexPromise = null;
   let mathTypesetRequest = 0;
@@ -331,8 +331,61 @@
     const title = document.getElementById("courseTitle");
     const description = document.getElementById("moduleDescription");
     const empty = document.getElementById("volumeEmpty");
-    const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
+    const modelCatalog = document.getElementById("modelCatalog");
+    const lessonCards = Array.from(document.querySelectorAll("[data-lesson-card]"));
     if (!tabs.length) return;
+
+    const escapeHtml = (value) => String(value || "").replace(/[&<>\"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[character]));
+    const subjectClass = (category) => {
+      if (/电磁|电场|电路|磁场/.test(category || "")) return "electromagnetism";
+      if (/波|振动/.test(category || "")) return "waves";
+      return "mechanics";
+    };
+    const modelModules = (model) => courseModules
+      .filter((module) => (module.chapterIds || []).includes(model.chapterId))
+      .map((module) => module.id);
+    const modelCards = [];
+    if (modelCatalog && !modelCatalog.dataset.rendered) {
+      const plannedModels = (curriculum.models || []).filter((model) => !model.lab);
+      plannedModels.forEach((model) => {
+        const modules = modelModules(model);
+        if (!modules.length) return;
+        const status = model.status === "open" ? "可视化实验已开放" : "模型内容已整理";
+        const action = model.status === "open" && model.lab
+          ? `./${model.lab}`
+          : `./model.html?id=${encodeURIComponent(model.id)}`;
+        const actionLabel = model.status === "open" && model.lab ? "进入实验" : "查看模型";
+        const card = document.createElement("article");
+        card.className = `model-card${model.status === "open" ? " is-open" : ""}`;
+        card.dataset.modelCard = model.id;
+        card.dataset.modules = modules.join(" ");
+        card.innerHTML = `
+          <div class="model-card-topline">
+            <span class="chapter-tag">${escapeHtml(model.category)}</span>
+            <span class="subject-tag ${subjectClass(model.category)}">${escapeHtml(model.category)}</span>
+            <span class="model-status">${escapeHtml(status)}</span>
+          </div>
+          <h3>${escapeHtml(model.title)}</h3>
+          <p>${escapeHtml(model.summary)}</p>
+          <div class="model-card-meta">
+            <span>核心关系：${escapeHtml((model.relations || []).slice(0, 2).join(" · "))}</span>
+            <span>观察重点：${escapeHtml((model.explore || ["建立模型与现象的对应关系"])[0])}</span>
+          </div>
+          <a class="card-link" href="${action}">${actionLabel}<span aria-hidden="true">→</span></a>`;
+        modelCatalog.append(card);
+        modelCards.push(card);
+      });
+      modelCatalog.dataset.rendered = "true";
+    } else if (modelCatalog) {
+      modelCards.push(...modelCatalog.querySelectorAll("[data-model-card]"));
+    }
+    const cards = [...lessonCards, ...modelCards];
 
     tabs.forEach((tab) => {
       const module = courseModules.find((item) => item.id === tab.dataset.module);
@@ -341,7 +394,7 @@
       const countLabel = document.createElement("span");
       countLabel.className = "module-count";
       countLabel.textContent = `${count}`;
-      countLabel.setAttribute("aria-label", `${count} 个已开放实验`);
+      countLabel.setAttribute("aria-label", `${count} 个目录条目`);
       tab.append(countLabel);
     });
 
@@ -452,6 +505,7 @@
       if (progress.completed[lesson]) card.classList.add("completed");
     });
     renderCourseNavigation();
+    const catalogCards = Array.from(document.querySelectorAll("[data-lesson-card], [data-model-card]"));
     const searchInput = document.getElementById("experimentSearch");
     const subjectFilter = document.getElementById("subjectFilter");
     const resultCount = document.getElementById("experimentResultCount");
@@ -463,7 +517,7 @@
       const activeModule = document.querySelector("[data-module].active")?.dataset.module || readModule();
       const isSearching = query.length > 0;
       let visibleCount = 0;
-      cards.forEach((card) => {
+      catalogCards.forEach((card) => {
         const matchesQuery = !query || card.textContent.toLocaleLowerCase().includes(query);
         const matchesSubject = subject === "all" || Boolean(card.querySelector(`.subject-tag.${subject}`));
         const matchesModule = isSearching || (card.dataset.modules || "").split(/\s+/).includes(activeModule);
@@ -474,7 +528,7 @@
       });
       document.querySelectorAll("[data-module]").forEach((tab) => {
         const moduleId = tab.dataset.module;
-        const hasMatch = isSearching && cards.some((card) => {
+        const hasMatch = isSearching && catalogCards.some((card) => {
           const belongs = (card.dataset.modules || "").split(/\s+/).includes(moduleId);
           const matchesText = card.textContent.toLocaleLowerCase().includes(query);
           const matchesSubject = subject === "all" || Boolean(card.querySelector(`.subject-tag.${subject}`));
@@ -489,7 +543,7 @@
         catalogTitle.textContent = active.title;
         if (catalogDescription) catalogDescription.textContent = active.description;
       }
-      if (resultCount) resultCount.textContent = `${visibleCount} 个实验`;
+      if (resultCount) resultCount.textContent = `${visibleCount} 个目录条目`;
       const empty = document.getElementById("volumeEmpty");
       if (empty) {
         empty.hidden = visibleCount > 0;
