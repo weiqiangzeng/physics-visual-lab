@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>质量亏损与结合能实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./binding-energy.css?v=flagship-2" />
+  </head>
+  <body class="flagship-lab binding-energy-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">Δm</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>近代物理 · 实验 05</span><strong>质量亏损与结合能</strong></div>
+      <div class="connection-state"><i></i><span>核质量账本已连接</span></div>
+      <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">NUCLEAR ENERGY / 04</span><h1>质量亏损<br />与结合能</h1><p>从可测静质量建立能量账本，再用每核子结合能判断核反应为何可能放能。</p></div>
+        <section class="rail-section">
+          <span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="mass-defect"><span>01</span><strong>质量亏损</strong><i>分离质量为何大于整体</i></button>
+          <button class="scene-tab" type="button" data-mode="assembly"><span>02</span><strong>结合与放能</strong><i>静质量差进入能量账本</i></button>
+          <button class="scene-tab" type="button" data-mode="stability"><span>03</span><strong>稳定性曲线</strong><i>比较结合能而非总量</i></button>
+          <button class="scene-tab" type="button" data-mode="reaction"><span>04</span><strong>核反应 Q 值</strong><i>反应前后质量守恒账本</i></button>
+        </section>
+        <section class="rail-section experiment-route">
+          <span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button"><b>1</b><span>先称分离核子<small>统一使用原子质量法</small></span></button>
+          <button class="route-step" type="button"><b>2</b><span>再换算结合能<small>1 u 对应 931.494 MeV</small></span></button>
+          <button class="route-step" type="button"><b>3</b><span>最后比较反应前后<small>平均束缚增强才可能放能</small></span></button>
+        </section>
+        <div class="rail-equation"><span>原子质量法</span><strong>Δm = Zm(¹H) + Nmₙ − m<sub>atom</sub></strong><strong>E<sub>b</sub> = Δmc²</strong><small>电子质量在同一核素或电荷守恒的反应两侧抵消；核子与能量光点均按教学可见性缩放</small></div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>核素与质量账本</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section isotope-control">
+          <label><span>当前核素</span><select id="isotopeSelect" aria-label="当前核素"><option value="deuterium">氘 ²H</option><option value="helium4" selected>氦-4 ⁴He</option><option value="carbon12">碳-12 ¹²C</option><option value="oxygen16">氧-16 ¹⁶O</option><option value="iron56">铁-56 ⁵⁶Fe</option><option value="nickel62">镍-62 ⁶²Ni</option><option value="uranium235">铀-235 ²³⁵U</option></select></label>
+          <label><span>对照核素</span><select id="compareSelect" aria-label="对照核素"><option value="helium4">氦-4 ⁴He</option><option value="carbon12">碳-12 ¹²C</option><option value="iron56" selected>铁-56 ⁵⁶Fe</option><option value="nickel62">镍-62 ⁶²Ni</option><option value="uranium235">铀-235 ²³⁵U</option></select></label>
+          <p id="isotopeNote" class="control-note">用原子质量计算，电子数在等式两边抵消</p>
+        </section>
+        <section id="assemblySection" class="control-section">
+          <div class="control-label"><span>能量账本进度</span><strong id="assemblyValue">100%</strong></div>
+          <input id="assemblyInput" class="range-input assembly-range" type="range" min="0" max="1" step="0.001" value="1" aria-label="能量账本进度" />
+          <p class="control-note">进度只表示账本插值，不是原子核形成的真实时间历程</p>
+        </section>
+        <section id="reactionSection" class="control-section reaction-control" hidden>
+          <label><span>代表性反应</span><select id="reactionSelect" aria-label="代表性核反应"><option value="fusion" selected>氘氚聚变</option><option value="fission">铀-235 代表性裂变道</option></select></label>
+          <p id="reactionNote" class="control-note">本页只核算允许反应的 Q 值，不模拟触发条件</p>
+        </section>
+        <section class="control-section preset-section"><span class="section-kicker">典型核素</span><div class="binding-presets"><button type="button" data-preset="deuterium">弱束缚氘核</button><button type="button" data-preset="helium4">氦-4</button><button type="button" data-preset="iron56">铁区峰值</button><button type="button" data-preset="uranium235">重核铀-235</button></div></section>
+        <section class="control-section playback-controls">
+          <div class="section-headline"><span class="section-kicker">账本演示</span><strong id="playbackValue">已暂停 · 100%</strong></div>
+          <div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="false">▶ 运行</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 核对单位</button></div>
+          <div class="rate-options" role="group" aria-label="播放速度"><button class="is-active" type="button" data-rate="0.5">0.5× 慢放</button><button type="button" data-rate="1">1× 标准</button></div>
+        </section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showNucleonsToggle" type="checkbox" checked /><span>核子组成</span></label><label><input id="showEnergyToggle" type="checkbox" checked /><span>释放能量</span></label><label><input id="showLabelsToggle" type="checkbox" checked /><span>质量标签</span></label><label><input id="showTrendToggle" type="checkbox" checked /><span>液滴趋势</span></label><label><input id="showLedgerToggle" type="checkbox" checked /><span>能量账本</span></label></div></section>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="mass-defect"><span>01</span><strong>质量差</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="assembly"><span>02</span><strong>结合</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="stability"><span>03</span><strong>稳定性</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="reaction"><span>04</span><strong>Q 值</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">近代物理 / <b id="modeTitle">质量亏损</b></span><h2 id="modeGoal">结合后的原子静质量小于分离核子对应的质量之和</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">⁴He · Δm 0.030377 u</span><span id="stageHint" class="drag-hint">切换核素，核对每一项质量来自哪里</span></div></header>
+        <section class="instrument-stage" aria-label="核子组成与质量能量账本">
+          <canvas id="bindingCanvas" width="900" height="470" aria-label="核子组成、结合过程、稳定性与核反应动画"></canvas>
+          <aside class="live-readouts" aria-label="实时核质量读数"><div class="readout-head"><span>NUCLEAR MASS LEDGER</span><i aria-hidden="true"></i></div><dl><div><dt>核素</dt><dd id="isotopeMetric">氦-4 ⁴He</dd></div><div><dt>核子组成</dt><dd id="compositionMetric">Z=2 · N=2</dd></div><div><dt>分离质量</dt><dd id="separatedMetric">4.032980 u</dd></div><div><dt>原子质量</dt><dd id="atomMetric">4.002603 u</dd></div><div><dt>质量亏损 <i>Δm</i></dt><dd id="defectMetric">0.030377 u</dd></div><div><dt>平均结合能</dt><dd id="perNucleonMetric">7.074 MeV/核子</dd></div></dl><div class="law-check"><span>当前物理判断</span><strong id="bindingNature">Δm 对应 28.296 MeV</strong><small id="bindingExplanation">质量没有“消失”，系统静能降低并以其他能量形式释放</small></div></aside>
+        </section>
+        <section class="analysis-grid" aria-label="质量能量账本与平均结合能曲线">
+          <article class="chart-panel"><header><div><span>MASS–ENERGY LEDGER</span><h3 id="energyChartTitle">分离质量与原子质量</h3></div><strong id="energyChartStatus">差值放大显示</strong></header><canvas id="energyChart" width="620" height="230" aria-label="质量差与结合能账本图"></canvas></article>
+          <article class="chart-panel"><header><div><span>BINDING CURVE</span><h3 id="stabilityChartTitle">平均结合能-质量数</h3></div><strong id="stabilityChartStatus">真实核素点 + 趋势线</strong></header><canvas id="stabilityChart" width="620" height="230" aria-label="平均结合能随质量数变化曲线"></canvas></article>
+        </section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先称分离核子</strong><p id="stepPrompt">为什么计算原子质量时可以用氢原子质量而不是裸质子质量？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">Δm = 0.030377 u</strong></div></footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>结合能探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>质量口径</b><span>本页使用中性原子质量：Z 个氢原子加 N 个中子的质量与目标原子质量相减，电子质量在两边抵消。</span></li><li><b>质量亏损</b><span>质量亏损表示束缚系统静能比自由组成部分低；质量和能量共同守恒，不是物质凭空消失。</span></li><li><b>结合能</b><span>把原子核完全拆成自由核子至少需要补回结合能 E=Δmc²；形成束缚态时同量能量释放。</span></li><li><b>稳定性</b><span>比较不同质量数核素时应看平均结合能 E<sub>b</sub>/A，而不是只看随核子数增长的总结合能。</span></li><li><b>趋势曲线</b><span>连续线来自不含配对项的液滴模型，只表示总体趋势；彩色核素点由列出的原子质量直接计算。</span></li><li><b>核反应边界</b><span>Q 值只由反应前后静质量差核算；聚变势垒、裂变概率、产物分布和链式反应不在本模型内。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./binding-energy-model.js?v=flagship-1"></script>
+    <script src="./binding-energy.js?v=flagship-1"></script>
+    <script src="./url-state.js?v=protocol-v1"></script>
+    <script src="./learning-records.js?v=protocol-v1"></script>
+    <script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

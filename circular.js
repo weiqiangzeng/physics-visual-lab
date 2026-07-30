@@ -1,420 +1,46 @@
-const state = {
-  mass: 1,
-  radius: 1.2,
-  speed: 2.4,
-  time: 0,
-  timeScale: 1,
-  mode: "vectors",
-  running: false,
-  paused: false,
-  showVectors: true,
-  showTrail: true,
-  demoMode: false
-};
-
+const TAU = Math.PI * 2;
+const state = { mass:1, radius:1.2, speed:2.4, phase:0, time:0, timeScale:1, running:false, mode:"vectors", guideStep:0, released:false, releaseElapsed:0, release:null, dragging:false, showVelocity:true, showAcceleration:true, showForce:true, showDelta:true, samples:[] };
 const refs = {
-  canvas: document.getElementById("circularCanvas"),
-  startButton: document.getElementById("startButton"),
-  pauseButton: document.getElementById("pauseButton"),
-  resetButton: document.getElementById("resetButton"),
-  presetTitle: document.getElementById("presetTitle"),
-  presetButtons: Array.from(document.querySelectorAll(".preset-button")),
-  modeGoal: document.getElementById("modeGoal"),
-  modePrompt: document.getElementById("modePrompt"),
-  modeFormula: document.getElementById("modeFormula"),
-  massInput: document.getElementById("massInput"),
-  radiusInput: document.getElementById("radiusInput"),
-  speedInput: document.getElementById("speedInput"),
-  timeInput: document.getElementById("timeInput"),
-  massNumber: document.getElementById("massNumber"),
-  radiusNumber: document.getElementById("radiusNumber"),
-  speedNumber: document.getElementById("speedNumber"),
-  timeNumber: document.getElementById("timeNumber"),
-  massValue: document.getElementById("massValue"),
-  radiusValue: document.getElementById("radiusValue"),
-  speedValue: document.getElementById("speedValue"),
-  timeValue: document.getElementById("timeValue"),
-  radiusMetric: document.getElementById("radiusMetric"),
-  speedMetric: document.getElementById("speedMetric"),
-  omegaMetric: document.getElementById("omegaMetric"),
-  accelMetric: document.getElementById("accelMetric"),
-  forceMetric: document.getElementById("forceMetric"),
-  periodMetric: document.getElementById("periodMetric"),
-  rightCard: document.getElementById("rightCard"),
-  topCard: document.getElementById("topCard"),
-  leftCard: document.getElementById("leftCard"),
-  criticalCards: Array.from(document.querySelectorAll(".critical-card[data-jump]")),
-  criticalStateLabel: document.getElementById("criticalStateLabel"),
-  criticalStateNote: document.getElementById("criticalStateNote"),
-  showVectorsToggle: document.getElementById("showVectorsToggle"),
-  showTrailToggle: document.getElementById("showTrailToggle"),
-  demoModeToggle: document.getElementById("demoModeToggle"),
-  speedButtons: Array.from(document.querySelectorAll(".speed-button")),
-  overviewSpeed: document.getElementById("overviewSpeed"),
-  overviewTime: document.getElementById("overviewTime"),
-  demoBadge: document.getElementById("demoBadge")
+  canvas:document.getElementById("circularCanvas"),responseChart:document.getElementById("responseChart"),componentChart:document.getElementById("componentChart"),sceneTabs:Array.from(document.querySelectorAll(".scene-tab[data-mode]")),routeSteps:Array.from(document.querySelectorAll(".route-step")),
+  massInput:document.getElementById("massInput"),radiusInput:document.getElementById("radiusInput"),speedInput:document.getElementById("speedInput"),phaseInput:document.getElementById("phaseInput"),timeScaleInput:document.getElementById("timeScaleInput"),massValue:document.getElementById("massValue"),radiusValue:document.getElementById("radiusValue"),speedValue:document.getElementById("speedValue"),timeValue:document.getElementById("timeValue"),timeScaleValue:document.getElementById("timeScaleValue"),
+  modeTitle:document.getElementById("modeTitle"),modeGoal:document.getElementById("modeGoal"),stateBadge:document.getElementById("stateBadge"),stageHint:document.getElementById("stageHint"),omegaMetric:document.getElementById("omegaMetric"),periodMetric:document.getElementById("periodMetric"),accelerationMetric:document.getElementById("accelerationMetric"),forceMetric:document.getElementById("forceMetric"),directionNature:document.getElementById("directionNature"),directionExplanation:document.getElementById("directionExplanation"),responseKicker:document.getElementById("responseKicker"),responseTitle:document.getElementById("responseTitle"),responseStatus:document.getElementById("responseStatus"),sampleStatus:document.getElementById("sampleStatus"),stepIndex:document.getElementById("stepIndex"),stepTitle:document.getElementById("stepTitle"),stepPrompt:document.getElementById("stepPrompt"),formulaReadout:document.getElementById("formulaReadout"),
+  playButton:document.getElementById("playButton"),pauseButton:document.getElementById("pauseButton"),restartButton:document.getElementById("restartButton"),resetButton:document.getElementById("resetButton"),releaseButton:document.getElementById("releaseButton"),restoreButton:document.getElementById("restoreButton"),releaseState:document.getElementById("releaseState"),recordButton:document.getElementById("recordButton"),clearDataButton:document.getElementById("clearDataButton"),speedPresets:Array.from(document.querySelectorAll("[data-speed-preset]")),showVelocityToggle:document.getElementById("showVelocityToggle"),showAccelerationToggle:document.getElementById("showAccelerationToggle"),showForceToggle:document.getElementById("showForceToggle"),showDeltaToggle:document.getElementById("showDeltaToggle"),guideButton:document.getElementById("guideButton"),guideDialog:document.getElementById("guideDialog"),stepButton:document.getElementById("stepButton"),focusButton:document.getElementById("focusButton"),fullscreenButton:document.getElementById("fullscreenButton")
 };
-
-const ctx = refs.canvas.getContext("2d");
-const dpr = window.devicePixelRatio || 1;
-const width = 980;
-const height = 500;
-refs.canvas.width = width * dpr;
-refs.canvas.height = height * dpr;
-ctx.scale(dpr, dpr);
-
-const center = { x: width * 0.5, y: height * 0.52 };
-let lastFrameTime = null;
-let animationFrame = 0;
-
-const modeConfigs = {
-  vectors: {
-    title: "方向关系",
-    goal: "观察速度切向、加速度指向圆心",
-    prompt: "暂停到任意位置，速度箭头总沿切线，加速度箭头总指向圆心。",
-    formula: "\\(a_c = \\frac{v^2}{r}\\)"
-  },
-  force: {
-    title: "向心力",
-    goal: "比较速度、半径和质量怎样影响向心力",
-    prompt: "速度加倍时向心力变为四倍；半径越小，保持同样速度需要的向心力越大。",
-    formula: "\\(F_c = \\frac{mv^2}{r}\\)"
-  },
-  period: {
-    title: "周期频率",
-    goal: "观察转一圈所需时间",
-    prompt: "速度越大周期越短；半径越大，同样速度下一圈路径更长。",
-    formula: "\\(T = \\frac{2\\pi r}{v}\\)"
-  }
-};
-
-function getDerived() {
-  const omega = state.speed / state.radius;
-  const period = (2 * Math.PI) / omega;
-  const accel = (state.speed * state.speed) / state.radius;
-  const force = state.mass * accel;
-  return { omega, period, accel, force };
+const ctx=refs.canvas.getContext("2d"),responseCtx=refs.responseChart.getContext("2d"),componentCtx=refs.componentChart.getContext("2d");
+const modes={vectors:{title:"方向关系",goal:"速率不变，速度仍因方向改变而变化",hint:"拖动物体改变角位置"},force:{title:"向心力标度",goal:"质量、速度和半径共同决定所需向心合力",hint:"改变一个参数并记录"},period:{title:"周期与频率",goal:"一圈路程与线速度共同决定周期",hint:"比较不同半径和速度"},release:{title:"切线释放",goal:"约束消失后，物体沿瞬时切线飞出",hint:"拖到任意位置后剪断绳子"}};
+const guide=[{title:"比较两个时刻",prompt:"速率保持不变，但不同位置的速度箭头方向不同。"},{title:"观察速度改变量",prompt:"相邻时刻速度之差指向圆心附近，极限对应向心加速度。"},{title:"联系受力",prompt:"指向圆心的合力提供向心加速度；它不是一种额外的新力。"}];
+function clamp(v,a,b){return Math.min(b,Math.max(a,Number(v)));} function fmt(v,d=2){return Number(v).toFixed(d);}
+function calculate(source=state){const mass=Math.max(.01,Number(source.mass)),radius=Math.max(.01,Number(source.radius)),speed=Math.max(0,Number(source.speed)),phase=Number(source.phase)||0,omega=speed/radius,period=speed>0?TAU/omega:Infinity,acceleration=speed*speed/radius,force=mass*acceleration,x=radius*Math.cos(phase),y=radius*Math.sin(phase),vx=-speed*Math.sin(phase),vy=speed*Math.cos(phase),ax=-acceleration*Math.cos(phase),ay=-acceleration*Math.sin(phase);return{mass,radius,speed,phase,omega,period,acceleration,force,x,y,vx,vy,ax,ay};}
+function currentPoint(){if(!state.released)return calculate();const q=state.release,t=state.releaseElapsed;return{...calculate(),x:q.x+q.vx*t,y:q.y+q.vy*t,vx:q.vx,vy:q.vy,ax:0,ay:0,acceleration:0,force:0};}
+function release(){if(state.released)return;const d=calculate();state.release={x:d.x,y:d.y,vx:d.vx,vy:d.vy,phase:d.phase};state.released=true;state.releaseElapsed=0;state.mode="release";state.running=true;render();}
+function restore(){state.released=false;state.releaseElapsed=0;state.release=null;state.running=false;render();}
+function setCanvasSize(canvas,c){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.max(320,Math.round(r.width)),h=Math.max(180,Math.round(r.height));if(canvas.width!==w*d||canvas.height!==h*d){canvas.width=w*d;canvas.height=h*d;}c.setTransform(d,0,0,d,0,0);return{width:w,height:h};}
+function arrow(c,x1,y1,x2,y2,color,label,width=3){const a=Math.atan2(y2-y1,x2-x1);c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=width;c.lineCap="round";c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-10*Math.cos(a-.52),y2-10*Math.sin(a-.52));c.lineTo(x2-10*Math.cos(a+.52),y2-10*Math.sin(a+.52));c.closePath();c.fill();c.font="700 11px ui-monospace,monospace";c.textAlign=x2>=x1?"left":"right";c.fillText(label,x2+(x2>=x1?7:-7),y2-7);c.restore();}
+function sceneGeometry(width,height){const center={x:width*.48,y:height*.52},radiusPx=Math.min(width*.26,height*.34);return{center,radiusPx,scale:radiusPx/state.radius};}
+function drawScene(){const{width,height}=setCanvasSize(refs.canvas,ctx),d=calculate(),p=currentPoint(),g=sceneGeometry(width,height),cx=g.center.x,cy=g.center.y,px=cx+p.x*g.scale,py=cy-p.y*g.scale;ctx.clearRect(0,0,width,height);ctx.fillStyle="#0c0f0e";ctx.fillRect(0,0,width,height);
+  ctx.strokeStyle="rgba(216,222,217,.07)";ctx.lineWidth=1;for(let x=20;x<width;x+=42){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,height);ctx.stroke();}for(let y=20;y<height;y+=42){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(width,y);ctx.stroke();}
+  ctx.strokeStyle="#69d18e";ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(cx,cy,g.radiusPx,0,TAU);ctx.stroke();ctx.fillStyle="#d8ded9";ctx.beginPath();ctx.arc(cx,cy,4,0,TAU);ctx.fill();
+  if(!state.released){ctx.strokeStyle="rgba(181,140,229,.65)";ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();ctx.setLineDash([]);}else{const q=state.release,qx=cx+q.x*g.scale,qy=cy-q.y*g.scale;ctx.strokeStyle="rgba(255,122,104,.65)";ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(qx,qy);ctx.lineTo(px,py);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#ff7a68";ctx.beginPath();ctx.arc(qx,qy,4,0,TAU);ctx.fill();ctx.font="10px system-ui,sans-serif";ctx.fillText("释放点",qx+8,qy-8);}
+  ctx.fillStyle="#ecebdd";ctx.beginPath();ctx.arc(px,py,7,0,TAU);ctx.fill();const vs=Math.min(30,width/20)/Math.max(state.speed,.1),as=Math.min(20,width/28)/Math.max(d.acceleration,.1);
+  if(state.showVelocity)arrow(ctx,px,py,px+p.vx*vs,py-p.vy*vs,"#64c7d9",`v ${fmt(state.speed,1)}`);
+  if(state.showAcceleration&&!state.released)arrow(ctx,px,py,px+d.ax*as,py-d.ay*as,"#f2b84b",`ac ${fmt(d.acceleration,1)}`);
+  if(state.showForce&&!state.released&&state.mode==="force")arrow(ctx,px+4,py+4,px+4+d.ax*as*1.25,py+4-d.ay*as*1.25,"#ff7a68",`Fc ${fmt(d.force,1)}`,4);
+  if(state.showDelta&&!state.released){const delta=.25,phase2=state.phase+d.omega*delta,vx2=-state.speed*Math.sin(phase2),vy2=state.speed*Math.cos(phase2),bx=width-150,by=74,s=11;ctx.fillStyle="#9ca69f";ctx.font="700 9px ui-monospace,monospace";ctx.fillText("VELOCITY CHANGE",bx-22,30);arrow(ctx,bx,by,bx+d.vx*s,by-d.vy*s,"rgba(100,199,217,.75)","v₁",2);arrow(ctx,bx,by,bx+vx2*s,by-vy2*s,"rgba(105,209,142,.75)","v₂",2);arrow(ctx,bx+d.vx*s,by-d.vy*s,bx+vx2*s,by-vy2*s,"#b58ce5","Δv",2);}
+  ctx.fillStyle="#9ca69f";ctx.font="10px ui-monospace,monospace";ctx.textAlign="left";ctx.fillText(state.released?`释放后 ${fmt(state.releaseElapsed)} s · a = 0`:`θ = ${fmt((state.phase*180/Math.PI%360+360)%360,0)}° · ω = ${fmt(d.omega)} rad/s`,24,height-18);
 }
-
-function getPoint(time = state.time) {
-  const { omega } = getDerived();
-  const theta = omega * time;
-  return {
-    theta,
-    x: state.radius * Math.cos(theta),
-    y: state.radius * Math.sin(theta),
-    vx: -state.speed * Math.sin(theta),
-    vy: state.speed * Math.cos(theta),
-    ax: -((state.speed * state.speed) / state.radius) * Math.cos(theta),
-    ay: -((state.speed * state.speed) / state.radius) * Math.sin(theta)
-  };
-}
-
-function formatNumber(value, digits = 2, unit = "") {
-  if (!Number.isFinite(value)) return "--";
-  const text = Math.abs(value) >= 1000 || (Math.abs(value) > 0 && Math.abs(value) < 0.01)
-    ? value.toExponential(2).replace("+", "")
-    : value.toFixed(digits);
-  return unit ? `${text} ${unit}` : text;
-}
-
-function toCanvas(point) {
-  const scale = 136;
-  return {
-    x: center.x + point.x * scale,
-    y: center.y - point.y * scale
-  };
-}
-
-function drawArrow(from, vector, color, label, scale = 1) {
-  const len = Math.hypot(vector.x, vector.y);
-  if (len < 0.001) return;
-  const to = { x: from.x + vector.x * scale, y: from.y - vector.y * scale };
-  const angle = Math.atan2(to.y - from.y, to.x - from.x);
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = state.demoMode ? 3.5 : 2.5;
-  ctx.beginPath();
-  ctx.moveTo(from.x, from.y);
-  ctx.lineTo(to.x, to.y);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(to.x, to.y);
-  ctx.lineTo(to.x - 12 * Math.cos(angle - Math.PI / 6), to.y - 12 * Math.sin(angle - Math.PI / 6));
-  ctx.lineTo(to.x - 12 * Math.cos(angle + Math.PI / 6), to.y - 12 * Math.sin(angle + Math.PI / 6));
-  ctx.closePath();
-  ctx.fill();
-  ctx.font = "13px Avenir Next, PingFang SC, sans-serif";
-  ctx.fillText(label, to.x + 8, to.y - 8);
-  ctx.restore();
-}
-
-function drawLabelBox(text, x, y, color) {
-  ctx.save();
-  ctx.font = "700 13px Avenir Next, PingFang SC, sans-serif";
-  const boxWidth = ctx.measureText(text).width + 22;
-  const boxHeight = 30;
-  ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.roundRect(x, y, boxWidth, boxHeight, 14);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = color;
-  ctx.fillText(text, x + 11, y + 20);
-  ctx.restore();
-}
-
-function drawGrid() {
-  ctx.strokeStyle = "rgba(18, 31, 36, 0.08)";
-  ctx.lineWidth = 1;
-  for (let x = 80; x <= width - 80; x += 48) {
-    ctx.beginPath();
-    ctx.moveTo(x, 40);
-    ctx.lineTo(x, height - 52);
-    ctx.stroke();
-  }
-  for (let y = 52; y <= height - 52; y += 48) {
-    ctx.beginPath();
-    ctx.moveTo(70, y);
-    ctx.lineTo(width - 70, y);
-    ctx.stroke();
-  }
-  ctx.strokeStyle = "rgba(18, 31, 36, 0.22)";
-  ctx.lineWidth = 1.6;
-  ctx.beginPath();
-  ctx.moveTo(70, center.y);
-  ctx.lineTo(width - 70, center.y);
-  ctx.moveTo(center.x, 40);
-  ctx.lineTo(center.x, height - 52);
-  ctx.stroke();
-}
-
-function drawCircle() {
-  const radiusPx = state.radius * 136;
-  if (state.showTrail) {
-    ctx.strokeStyle = "#0d7168";
-    ctx.lineWidth = state.demoMode ? 4 : 3;
-    ctx.beginPath();
-    ctx.arc(center.x, center.y, radiusPx, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-  ctx.fillStyle = "#121f24";
-  ctx.beginPath();
-  ctx.arc(center.x, center.y, 5, 0, Math.PI * 2);
-  ctx.fill();
-  drawLabelBox("圆心", center.x + 10, center.y - 38, "#121f24");
-}
-
-function getCriticalState() {
-  const theta = ((getPoint().theta % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-  if (Math.abs(theta) < 0.22 || Math.abs(theta - 2 * Math.PI) < 0.22) {
-    return { key: "right", label: "最右点", note: "速度向上，加速度向左指向圆心。" };
-  }
-  if (Math.abs(theta - Math.PI / 2) < 0.22) {
-    return { key: "top", label: "最高点", note: "速度向左，加速度向下指向圆心。" };
-  }
-  if (Math.abs(theta - Math.PI) < 0.22) {
-    return { key: "left", label: "最左点", note: "速度向下，加速度向右指向圆心。" };
-  }
-  return { key: "none", label: "速度切向", note: "速度方向沿切线，加速度方向沿半径指向圆心。" };
-}
-
-function render() {
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "#fbfcfa";
-  ctx.fillRect(0, 0, width, height);
-  drawGrid();
-  drawCircle();
-
-  const point = getPoint();
-  const c = toCanvas(point);
-  ctx.strokeStyle = "rgba(123, 63, 160, 0.45)";
-  ctx.setLineDash([7, 7]);
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.moveTo(center.x, center.y);
-  ctx.lineTo(c.x, c.y);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  ctx.fillStyle = "#121f24";
-  ctx.beginPath();
-  ctx.arc(c.x, c.y, state.demoMode ? 10 : 8, 0, Math.PI * 2);
-  ctx.fill();
-
-  if (state.showVectors) {
-    drawArrow(c, { x: point.vx, y: point.vy }, "#0d7168", "v", state.demoMode ? 34 : 28);
-    drawArrow(c, { x: point.ax, y: point.ay }, "#7b3fa0", "a_c", state.demoMode ? 20 : 16);
-    if (state.mode === "force") drawArrow(c, { x: point.ax, y: point.ay }, "#c96b29", "F_c", state.demoMode ? 27 : 21);
-  }
-  syncReadouts();
-}
-
-function syncReadouts() {
-  const d = getDerived();
-  const localTime = ((state.time % d.period) + d.period) % d.period;
-  const critical = getCriticalState();
-  refs.massValue.textContent = formatNumber(state.mass, 2, "kg");
-  refs.radiusValue.textContent = formatNumber(state.radius, 2, "m");
-  refs.speedValue.textContent = formatNumber(state.speed, 2, "m/s");
-  refs.timeValue.textContent = formatNumber(localTime, 2, "s");
-  refs.radiusMetric.textContent = formatNumber(state.radius, 2, "m");
-  refs.speedMetric.textContent = formatNumber(state.speed, 2, "m/s");
-  refs.omegaMetric.textContent = formatNumber(d.omega, 2, "rad/s");
-  refs.accelMetric.textContent = formatNumber(d.accel, 2, "m/s²");
-  refs.forceMetric.textContent = formatNumber(d.force, 2, "N");
-  refs.periodMetric.textContent = formatNumber(d.period, 2, "s");
-  refs.overviewSpeed.textContent = `${state.timeScale}x`;
-  refs.overviewTime.textContent = formatNumber(localTime, 2, "s");
-  refs.startButton.textContent = state.running ? "运行中" : "开始";
-  refs.startButton.classList.toggle("primary", !state.running);
-  refs.rightCard.classList.toggle("active", critical.key === "right");
-  refs.topCard.classList.toggle("active", critical.key === "top");
-  refs.leftCard.classList.toggle("active", critical.key === "left");
-  refs.criticalStateLabel.textContent = critical.label;
-  refs.criticalStateNote.textContent = critical.note;
-}
-
-function syncInputs() {
-  const { period } = getDerived();
-  const localTime = ((state.time % period) + period) % period;
-  refs.massInput.value = state.mass;
-  refs.radiusInput.value = state.radius;
-  refs.speedInput.value = state.speed;
-  refs.massNumber.value = state.mass;
-  refs.radiusNumber.value = state.radius;
-  refs.speedNumber.value = state.speed;
-  refs.timeInput.max = period.toFixed(3);
-  refs.timeNumber.max = period.toFixed(3);
-  refs.timeInput.value = localTime;
-  refs.timeNumber.value = localTime.toFixed(2);
-  refs.showVectorsToggle.checked = state.showVectors;
-  refs.showTrailToggle.checked = state.showTrail;
-  refs.demoModeToggle.checked = state.demoMode;
-  refs.speedButtons.forEach((button) => button.classList.toggle("active", Number(button.dataset.speed) === state.timeScale));
-  refs.presetTitle.textContent = modeConfigs[state.mode].title;
-  refs.modeGoal.textContent = modeConfigs[state.mode].goal;
-  refs.modePrompt.textContent = modeConfigs[state.mode].prompt;
-  refs.modeFormula.textContent = modeConfigs[state.mode].formula;
-  window.physicsTypesetMath?.();
-  refs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === state.mode));
-  document.body.classList.toggle("demo-mode", state.demoMode);
-  refs.demoBadge.textContent = state.demoMode ? "教学演示中" : "";
-}
-
-function pauseForObservation() {
-  state.running = false;
-  state.paused = false;
-  refs.pauseButton.textContent = "暂停";
-}
-
-function setObservationTime(time) {
-  state.time = Math.min(getDerived().period, Math.max(0, Number(time)));
-  pauseForObservation();
-  syncInputs();
-  render();
-}
-
-function jumpTo(kind) {
-  const { period } = getDerived();
-  if (kind === "top") setObservationTime(period / 4);
-  else if (kind === "left") setObservationTime(period / 2);
-  else setObservationTime(0);
-}
-
-function bindRange(range, number, key) {
-  range.addEventListener("input", (event) => {
-    state[key] = Number(event.target.value);
-    state.time = 0;
-    syncInputs();
-    render();
-  });
-  number.addEventListener("change", (event) => {
-    const next = Number(event.target.value);
-    if (!Number.isFinite(next)) return syncInputs();
-    state[key] = Math.min(Number(number.max), Math.max(Number(number.min), next));
-    state.time = 0;
-    syncInputs();
-    render();
-  });
-}
-
-bindRange(refs.massInput, refs.massNumber, "mass");
-bindRange(refs.radiusInput, refs.radiusNumber, "radius");
-bindRange(refs.speedInput, refs.speedNumber, "speed");
-refs.timeInput.addEventListener("input", (event) => setObservationTime(event.target.value));
-refs.timeNumber.addEventListener("change", (event) => setObservationTime(event.target.value));
-refs.criticalCards.forEach((card) => {
-  card.addEventListener("click", () => jumpTo(card.dataset.jump));
-  card.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      jumpTo(card.dataset.jump);
-    }
-  });
-});
-refs.presetButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    state.mode = button.dataset.mode;
-    syncInputs();
-    render();
-  });
-});
-refs.startButton.addEventListener("click", () => {
-  state.running = true;
-  state.paused = false;
-  refs.pauseButton.textContent = "暂停";
-  syncReadouts();
-});
-refs.pauseButton.addEventListener("click", () => {
-  if (!state.running) return;
-  state.paused = !state.paused;
-  refs.pauseButton.textContent = state.paused ? "已暂停" : "暂停";
-});
-refs.resetButton.addEventListener("click", () => {
-  state.time = 0;
-  state.running = false;
-  state.paused = false;
-  refs.pauseButton.textContent = "暂停";
-  syncInputs();
-  render();
-});
-refs.showVectorsToggle.addEventListener("change", (event) => {
-  state.showVectors = event.target.checked;
-  render();
-});
-refs.showTrailToggle.addEventListener("change", (event) => {
-  state.showTrail = event.target.checked;
-  render();
-});
-refs.demoModeToggle.addEventListener("change", (event) => {
-  state.demoMode = event.target.checked;
-  syncInputs();
-  render();
-});
-refs.speedButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    state.timeScale = Number(button.dataset.speed);
-    syncInputs();
-    syncReadouts();
-  });
-});
-
-function animate(timestamp) {
-  if (lastFrameTime == null) lastFrameTime = timestamp;
-  const elapsed = Math.min(0.05, (timestamp - lastFrameTime) / 1000);
-  lastFrameTime = timestamp;
-  if (state.running && !state.paused) {
-    state.time += elapsed * state.timeScale;
-  }
-  render();
-  animationFrame = requestAnimationFrame(animate);
-}
-
-syncInputs();
-render();
-cancelAnimationFrame(animationFrame);
-animationFrame = requestAnimationFrame(animate);
+function axes(c,w,h,xMax,yMax,labels){const p={l:42,r:14,t:18,b:31},pw=w-p.l-p.r,ph=h-p.t-p.b;c.strokeStyle="rgba(216,222,217,.14)";c.fillStyle="#7f8a83";c.font="9px ui-monospace,monospace";for(let i=0;i<=4;i++){const x=p.l+pw*i/4,y=p.t+ph*i/4;c.beginPath();c.moveTo(x,p.t);c.lineTo(x,p.t+ph);c.stroke();c.beginPath();c.moveTo(p.l,y);c.lineTo(p.l+pw,y);c.stroke();c.textAlign="center";c.fillText(fmt(xMax*i/4,1),x,h-10);c.textAlign="right";c.fillText(fmt(yMax*(4-i)/4,1),p.l-6,y+3);}c.textAlign="left";c.fillText(labels.y,p.l,10);c.textAlign="right";c.fillText(labels.x,w-5,h-10);return{x:v=>p.l+v/xMax*pw,y:v=>p.t+(yMax-v)/yMax*ph};}
+function plot(c,pts,map,color){c.strokeStyle=color;c.lineWidth=2.2;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(map.x(p.x),map.y(p.y)):c.moveTo(map.x(p.x),map.y(p.y)));c.stroke();}
+function drawResponse(){const{width,height}=setCanvasSize(refs.responseChart,responseCtx),d=calculate();responseCtx.clearRect(0,0,width,height);responseCtx.fillStyle="#111512";responseCtx.fillRect(0,0,width,height);let xMax,yMax,points=[],currentY;if(state.mode==="period"){xMax=6;yMax=Math.max(5,TAU*state.radius/.4);for(let v=.4;v<=xMax;v+=.05)points.push({x:v,y:TAU*state.radius/v});currentY=d.period;}else{xMax=6;yMax=(state.mode==="force"?state.mass:1)*xMax*xMax/state.radius*1.08;for(let v=0;v<=xMax;v+=.05)points.push({x:v,y:(state.mode==="force"?state.mass:1)*v*v/state.radius});currentY=state.mode==="force"?d.force:d.acceleration;}const map=axes(responseCtx,width,height,xMax,yMax,{x:"v / (m/s)",y:state.mode==="period"?"T / s":state.mode==="force"?"Fc / N":"ac / (m/s²)"});plot(responseCtx,points,map,state.mode==="period"?"#b58ce5":state.mode==="force"?"#ff7a68":"#69d18e");state.samples.forEach(s=>{responseCtx.fillStyle="#64c7d9";responseCtx.beginPath();responseCtx.arc(map.x(s.speed),map.y(state.mode==="period"?s.period:state.mode==="force"?s.force:s.acceleration),3,0,TAU);responseCtx.fill();});responseCtx.fillStyle="#f2b84b";responseCtx.beginPath();responseCtx.arc(map.x(state.speed),map.y(currentY),5,0,TAU);responseCtx.fill();}
+function drawComponents(){const{width,height}=setCanvasSize(refs.componentChart,componentCtx),d=calculate(),period=d.period,maxV=Math.max(.5,state.speed*1.2);componentCtx.clearRect(0,0,width,height);componentCtx.fillStyle="#111512";componentCtx.fillRect(0,0,width,height);const p={l:42,r:14,t:18,b:31},pw=width-p.l-p.r,ph=height-p.t-p.b,map={x:t=>p.l+t/period*pw,y:v=>p.t+(maxV-v)/(2*maxV)*ph};componentCtx.strokeStyle="rgba(216,222,217,.14)";for(let i=0;i<=4;i++){const x=p.l+pw*i/4,y=p.t+ph*i/4;componentCtx.beginPath();componentCtx.moveTo(x,p.t);componentCtx.lineTo(x,p.t+ph);componentCtx.stroke();componentCtx.beginPath();componentCtx.moveTo(p.l,y);componentCtx.lineTo(p.l+pw,y);componentCtx.stroke();}componentCtx.fillStyle="#7f8a83";componentCtx.font="9px ui-monospace,monospace";componentCtx.fillText("vx, vy / (m/s)",p.l,10);const xs=[],ys=[];for(let i=0;i<=120;i++){const t=period*i/120,phase=d.omega*t;xs.push({x:t,y:-state.speed*Math.sin(phase)});ys.push({x:t,y:state.speed*Math.cos(phase)});}plot(componentCtx,xs,map,"#64c7d9");plot(componentCtx,ys,map,"#f2b84b");}
+function pointInfo(){if(state.released)return{label:"切线飞出",nature:"a = 0，v 保持不变",text:"约束消失后，物体沿释放瞬间的切线做匀速直线运动",cls:"is-released"};const deg=(state.phase*180/Math.PI%360+360)%360;if(deg<4||deg>356)return{label:"最右点",nature:"v 向上，ac 向左",text:"速度与向心加速度垂直",cls:""};if(Math.abs(deg-90)<4)return{label:"最高点",nature:"v 向左，ac 向下",text:"加速度始终指向圆心",cls:""};if(Math.abs(deg-180)<4)return{label:"最左点",nature:"v 向下，ac 向右",text:"速度大小不变但方向已经改变",cls:""};return{label:"圆周运动",nature:"v ⟂ ac",text:"速度沿切线，加速度沿半径指向圆心",cls:""};}
+function setProgress(input){const p=(Number(input.value)-Number(input.min))/(Number(input.max)-Number(input.min))*100;input.style.setProperty("--range-progress",`${p}%`);}
+function syncUI(){const d=calculate(),info=pointInfo(),mode=modes[state.mode],task=guide[state.guideStep];refs.massValue.textContent=`${fmt(state.mass)} kg`;refs.radiusValue.textContent=`${fmt(state.radius)} m`;refs.speedValue.textContent=`${fmt(state.speed)} m/s`;refs.timeValue.textContent=`t = ${fmt(state.time)} s`;refs.timeScaleValue.textContent=`${fmt(state.timeScale)}×`;refs.omegaMetric.textContent=`${fmt(d.omega)} rad/s`;refs.periodMetric.textContent=`${fmt(d.period)} s`;refs.accelerationMetric.textContent=`${fmt(state.released?0:d.acceleration)} m/s²`;refs.forceMetric.textContent=`${fmt(state.released?0:d.force)} N`;refs.directionNature.textContent=info.nature;refs.directionExplanation.textContent=info.text;refs.stateBadge.textContent=info.label;refs.stateBadge.className=`state-badge ${info.cls}`.trim();refs.modeTitle.textContent=mode.title;refs.modeGoal.textContent=mode.goal;refs.stageHint.textContent=mode.hint;refs.releaseState.textContent=state.released?`已释放 ${fmt(state.releaseElapsed)} s`:"绳保持连接";refs.releaseButton.disabled=state.released;refs.responseKicker.textContent=state.mode==="period"?"PERIOD RESPONSE":state.mode==="force"?"FORCE RESPONSE":"CENTRIPETAL RESPONSE";refs.responseTitle.textContent=state.mode==="period"?"周期 T – 速度 v":state.mode==="force"?"向心力 Fc – 速度 v":"向心加速度 ac – 速度 v";refs.responseStatus.textContent=state.mode==="force"?`m = ${fmt(state.mass)} kg`:state.mode==="period"?`r = ${fmt(state.radius)} m`:`r = ${fmt(state.radius)} m`;refs.sampleStatus.textContent=`${state.samples.length} 个记录点`;refs.stepIndex.textContent=`0${state.guideStep+1}`;refs.stepTitle.textContent=task.title;refs.stepPrompt.textContent=task.prompt;refs.formulaReadout.textContent=state.released?`F合 = 0，v = ${fmt(state.speed)} m/s`:state.mode==="period"?`T = 2π × ${fmt(state.radius)} / ${fmt(state.speed)} = ${fmt(d.period)} s`:state.mode==="force"?`Fc = ${fmt(state.mass)} × ${fmt(d.acceleration)} = ${fmt(d.force)} N`:`ac = ${fmt(state.speed)}² / ${fmt(state.radius)} = ${fmt(d.acceleration)} m/s²`;refs.phaseInput.value=(state.phase*180/Math.PI%360+360)%360;refs.playButton.textContent=state.running?"播放中…":"▶ 播放";refs.playButton.setAttribute("aria-pressed",String(state.running));refs.sceneTabs.forEach(b=>b.classList.toggle("is-active",b.dataset.mode===state.mode));refs.routeSteps.forEach((b,i)=>b.classList.toggle("is-active",i===state.guideStep));refs.speedPresets.forEach(b=>b.classList.toggle("is-active",Math.abs(Number(b.dataset.speedPreset)-state.speed)<.05));[refs.massInput,refs.radiusInput,refs.speedInput,refs.phaseInput,refs.timeScaleInput].forEach(setProgress);}
+function render(){drawScene();drawResponse();drawComponents();syncUI();}
+function setState(p){if(p.mass!==undefined)state.mass=clamp(p.mass,.2,5);if(p.radius!==undefined)state.radius=clamp(p.radius,.4,2.4);if(p.speed!==undefined)state.speed=clamp(p.speed,.4,6);if(p.phase!==undefined)state.phase=Number(p.phase);if(p.timeScale!==undefined)state.timeScale=clamp(p.timeScale,.25,2);if(p.running!==undefined)state.running=Boolean(p.running);refs.massInput.value=state.mass;refs.radiusInput.value=state.radius;refs.speedInput.value=state.speed;refs.timeScaleInput.value=state.timeScale;render();}
+function setMode(mode){state.mode=mode;state.running=false;if(mode==="release"){state.phase=Math.PI/3;state.time=state.phase/calculate().omega;}else restore();render();}
+function record(){const d=calculate();state.samples.push({mass:state.mass,radius:state.radius,speed:state.speed,acceleration:d.acceleration,force:d.force,period:d.period});if(state.samples.length>40)state.samples.shift();render();}
+[[refs.massInput,"mass"],[refs.radiusInput,"radius"],[refs.speedInput,"speed"],[refs.timeScaleInput,"timeScale"]].forEach(([i,k])=>i.addEventListener("input",()=>{restore();state.time=0;state.phase=0;setState({[k]:i.value});}));refs.phaseInput.addEventListener("input",()=>{restore();state.phase=Number(refs.phaseInput.value)*Math.PI/180;state.time=state.phase/calculate().omega;render();});refs.sceneTabs.forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));refs.routeSteps.forEach((b,i)=>b.addEventListener("click",()=>{state.guideStep=i;render();}));refs.speedPresets.forEach(b=>b.addEventListener("click",()=>{restore();state.phase=0;state.time=0;setState({speed:b.dataset.speedPreset});}));refs.playButton.addEventListener("click",()=>{state.running=true;render();});refs.pauseButton.addEventListener("click",()=>{state.running=false;render();});refs.restartButton.addEventListener("click",()=>{restore();state.phase=0;state.time=0;state.running=true;render();});refs.releaseButton.addEventListener("click",release);refs.restoreButton.addEventListener("click",restore);refs.recordButton.addEventListener("click",record);refs.clearDataButton.addEventListener("click",()=>{state.samples=[];render();});refs.resetButton.addEventListener("click",()=>{Object.assign(state,{mass:1,radius:1.2,speed:2.4,phase:0,time:0,timeScale:1,running:false,mode:"vectors",guideStep:0,released:false,releaseElapsed:0,release:null,samples:[]});setState(state);});
+[[refs.showVelocityToggle,"showVelocity"],[refs.showAccelerationToggle,"showAcceleration"],[refs.showForceToggle,"showForce"],[refs.showDeltaToggle,"showDelta"]].forEach(([i,k])=>i.addEventListener("change",()=>{state[k]=i.checked;render();}));refs.guideButton.addEventListener("click",()=>refs.guideDialog.showModal());refs.stepButton.addEventListener("click",()=>{state.guideStep=(state.guideStep+1)%3;render();});refs.focusButton.addEventListener("click",()=>{const a=document.body.classList.toggle("focus-mode");refs.focusButton.setAttribute("aria-pressed",String(a));});refs.fullscreenButton.addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
+function dragPhase(e){const r=refs.canvas.getBoundingClientRect(),g=sceneGeometry(r.width,r.height),x=e.clientX-r.left-g.center.x,y=g.center.y-(e.clientY-r.top);restore();state.running=false;state.phase=Math.atan2(y,x);if(state.phase<0)state.phase+=TAU;state.time=state.phase/calculate().omega;render();}refs.canvas.addEventListener("pointerdown",e=>{state.dragging=true;refs.canvas.setPointerCapture(e.pointerId);dragPhase(e);});refs.canvas.addEventListener("pointermove",e=>{if(state.dragging)dragPhase(e);});refs.canvas.addEventListener("pointerup",e=>{state.dragging=false;refs.canvas.releasePointerCapture(e.pointerId);});refs.canvas.addEventListener("pointercancel",()=>state.dragging=false);window.addEventListener("resize",render);
+let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(state.running){if(state.released)state.releaseElapsed+=dt*state.timeScale;else{const d=calculate();state.time+=dt*state.timeScale;state.phase=(state.phase+d.omega*dt*state.timeScale)%TAU;}render();}requestAnimationFrame(frame);}
+window.circularLab={calculate:s=>calculate({...state,...s}),getState:()=>({...state,release:state.release?{...state.release}:null,samples:state.samples.map(x=>({...x}))}),setState,setMode,release,restore,step:dt=>{const t=Math.max(0,Number(dt)||0);if(state.released)state.releaseElapsed+=t;else{const d=calculate();state.time+=t;state.phase=(state.phase+d.omega*t)%TAU;}render();return currentPoint();},currentPoint,record};render();requestAnimationFrame(frame);

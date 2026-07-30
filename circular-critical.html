@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>圆周运动临界条件实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./circular-critical.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab circular-critical-lab">
+    <header
+      class="lab-topbar"><a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">Σ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a><div class="topbar-title"><span>曲线运动 · 实验 03</span><strong>圆周运动临界条件</strong></div><div class="connection-state"><i></i><span>径向受力模型已连接</span></div><div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div></header>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div
+          class="rail-heading"><span class="eyebrow">RADIAL LIMIT / 04</span><h1>圆周运动<br/>临界条件</h1><p>把“需要的向心力”和真实力能提供的径向分量放进同一账本，定位打滑、失去接触和恰好过顶。</p></div>
+        <section
+          class="rail-section"><span class="rail-label">实验场景</span><button class="scene-tab is-active" type="button" data-mode="flat"><span>01</span><strong>平路转弯</strong><i>静摩擦力存在最大值</i></button><button class="scene-tab" type="button" data-mode="banked"><span>02</span><strong>倾斜弯道</strong><i>支持力也能提供径向分量</i></button><button class="scene-tab" type="button" data-mode="loop"><span>03</span><strong>竖直圆环</strong><i>顶部支持力不能为负</i></button><button class="scene-tab" type="button" data-mode="hill"><span>04</span><strong>拱桥顶部</strong><i>速度过大将失去接触</i></button></section>
+        <section
+          class="rail-section experiment-route"><span class="rail-label">探究路径</span><button class="route-step is-active" type="button"><b>1</b><span>先写径向合力<small>向心力是合力的径向效果</small></span></button><button class="route-step" type="button"><b>2</b><span>再检查真实力边界<small>摩擦和支持力都有约束</small></span></button><button class="route-step" type="button"><b>3</b><span>最后定位临界等号<small>极限状态不是额外的新力</small></span></button></section>
+        <div
+          class="rail-equation"><span>径向受力账本</span><strong>ΣF<sub>r</sub>=mv²/r</strong><strong>0≤N · |f|≤μN</strong><small>箭头长度按教学可见性缩放；读数由解析受力与能量关系计算</small></div>
+      </nav>
+      <aside class="controls" aria-label="实验控制">
+        <div
+          class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>速度、半径与约束</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section
+          class="control-section"><div class="control-label"><span id="massLabel">车辆质量 <i>m</i></span><strong id="massValue">1200 kg</strong></div><input id="massInput" class="range-input mass-range" type="range" min="200" max="2000" step="20" value="1200" aria-label="质量"/><div class="control-label"><span>轨道半径 <i>r</i></span><strong id="radiusValue">40 m</strong></div><input id="radiusInput" class="range-input radius-range" type="range" min="8" max="120" step="1" value="40" aria-label="轨道半径"/><div class="control-label"><span id="speedLabel">车辆速度 <i>v</i></span><strong id="speedValue">14.00 m/s</strong></div><input id="speedInput" class="range-input speed-range" type="range" min="0" max="40" step="any" value="14" aria-label="速度"/></section>
+        <section id="frictionSection"
+          class="control-section"><div class="control-label"><span>静摩擦因数 <i>μ</i></span><strong id="frictionValue">0.55</strong></div><input id="frictionInput" class="range-input friction-range" type="range" min="0" max="1" step="0.01" value="0.55" aria-label="静摩擦因数"/></section>
+        <section id="bankSection" class="control-section"
+          hidden><div class="control-label"><span>弯道倾角 <i>θ</i></span><strong id="bankValue">20°</strong></div><input id="bankInput" class="range-input bank-range" type="range" min="0" max="40" step="1" value="20" aria-label="弯道倾角"/></section>
+        <section
+          class="control-section preset-section"><span class="section-kicker">典型状态</span><div class="critical-presets"><button type="button" data-preset="safe">安全余量</button><button type="button" data-preset="limit">临界等号</button><button type="button" data-preset="fail">越过极限</button><button type="button" data-preset="ideal">无需摩擦</button></div></section>
+        <section
+          class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">过程演示</span><strong id="playbackValue">已暂停 · 0%</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="false">▶ 运行</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 临界状态</button></div><input id="progressInput" class="range-input progress-range" type="range" min="0" max="1" step="0.001" value="0" aria-label="运动过程进度"/><div class="rate-options" role="group" aria-label="播放速度"><button class="is-active" type="button" data-rate="0.5">0.5× 慢放</button><button type="button" data-rate="1">1× 标准</button></div></section>
+        <section
+          class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showForcesToggle" type="checkbox" checked/><span>真实力箭头</span></label><label><input id="showRadialToggle" type="checkbox" checked/><span>径向方向</span></label><label><input id="showLimitToggle" type="checkbox" checked/><span>临界边界</span></label><label><input id="showTrailToggle" type="checkbox" checked/><span>运动轨迹</span></label><label><input id="showTheoryToggle" type="checkbox" checked/><span>理论曲线</span></label></div></section>
+      </aside>
+      <section class="stage">
+        <nav class="mobile-scene-tabs"
+          aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="flat"><span>01</span><strong>平路</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="banked"><span>02</span><strong>倾斜</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="loop"><span>03</span><strong>圆环</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="hill"><span>04</span><strong>拱顶</strong></button></nav>
+        <header class="stage-head">
+          <div
+            class="stage-title"><span class="stage-breadcrumb">曲线运动 / <b id="modeTitle">平路转弯</b></span><h2 id="modeGoal">静摩擦力提供径向合力，但不会自动等于 μN</h2></div>
+          <div
+            class="stage-status"><span id="stateBadge" class="state-badge">安全 · 91%</span><span id="stageHint" class="drag-hint">增大速度，观察需要的摩擦力何时达到上限</span></div>
+        </header>
+        <section class="instrument-stage" aria-label="圆周运动临界条件装置">
+          <canvas id="criticalCanvas" width="900" height="470"
+            aria-label="平路、倾斜弯道、竖直圆环和拱桥运动动画"></canvas>
+          <aside class="live-readouts" aria-label="实时径向受力读数">
+            <div
+              class="readout-head"><span>RADIAL FORCE STATE</span><i></i></div>
+            <dl>
+              <div>
+                <dt>当前状态</dt>
+                <dd id="motionMetric">平路转弯</dd>
+              </div>
+              <div>
+                <dt id="velocityMetricLabel">速度 <i>v</i></dt>
+                <dd id="velocityMetric">14.0 m/s</dd>
+              </div>
+              <div>
+                <dt>向心需求 <i>mv²/r</i></dt>
+                <dd id="requiredMetric">5.88 kN</dd>
+              </div>
+              <div>
+                <dt>支持力 <i>N</i></dt>
+                <dd id="normalMetric">11.76 kN</dd>
+              </div>
+              <div>
+                <dt>约束利用率</dt>
+                <dd id="utilizationMetric">91%</dd>
+              </div>
+              <div>
+                <dt id="criticalMetricLabel">临界速度</dt>
+                <dd id="criticalMetric">14.68 m/s</dd>
+              </div>
+            </dl>
+            <div
+              class="law-check"><span>当前物理判断</span><strong id="criticalNature">静摩擦仍有余量</strong><small id="criticalExplanation">实际静摩擦力按向心需求自适应，尚未达到 μN</small></div>
+          </aside>
+        </section>
+        <section class="analysis-grid" aria-label="径向受力和临界条件图">
+          <article class="chart-panel">
+            <header><div><span>FORCE DEMAND</span><h3 id="demandTitle">摩擦需求-速度</h3></div><strong id="demandStatus">f需∝v²</strong></header>
+            <canvas id="demandChart" width="620" height="230"
+              aria-label="向心需求与可用真实力图"></canvas>
+          </article>
+          <article class="chart-panel">
+            <header><div><span>RADIAL LEDGER</span><h3 id="ledgerTitle">径向受力账本</h3></div><strong id="ledgerStatus">ΣFr=mv²/r</strong></header>
+            <canvas id="ledgerChart" width="620" height="230"
+              aria-label="径向各力分量账本图"></canvas>
+          </article>
+        </section>
+        <footer
+          class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先写径向合力</strong><p id="stepPrompt">向心力为什么不能和摩擦力、支持力并列画成另一支箭头？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">f需=mv²/r=5.88 kN</strong></div></footer>
+      </section>
+    </main>
+    <dialog id="guideDialog" class="guide-dialog">
+      <form
+        method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>圆周临界探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>向心力</b><span>“向心力”是径向合力的效果名称，不应和重力、支持力、摩擦力并列成一种新力。</span></li><li><b>静摩擦</b><span>平路安全转弯时实际静摩擦力等于所需径向合力，只有在临界时才等于 μN。</span></li><li><b>倾斜弯道</b><span>理想速度下支持力分量即可满足竖直平衡和径向需求；偏离理想速度时摩擦方向可能沿坡向上或向下。</span></li><li><b>竖直圆环</b><span>支持力不能为负；内轨顶部 N=0 是保持接触的最低临界，结合能量守恒得到底部最低速度 √(5gr)。</span></li><li><b>拱桥顶部</b><span>速度增大时支持力减小；N=0 后车辆不能被路面向下“拉住”，会沿切线进入抛体运动。</span></li><li><b>模型边界</b><span>忽略空气阻力、轮胎形变、悬架和路面不均匀；轨迹与箭头尺寸按教学可见性缩放。</span></li></ol><button class="primary-command" value="close">开始实验</button></form>
+    </dialog>
+    <script src="./circular-critical-model.js?v=flagship-1"></script>
+    <script src="./circular-critical.js?v=flagship-1"></script>
+    <script src="./url-state.js?v=protocol-v1"></script>
+    <script src="./learning-records.js?v=protocol-v1"></script>
+    <script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

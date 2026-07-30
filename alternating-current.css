@@ -1,0 +1,56 @@
+.alternating-current-lab {
+  --critical-cyan: #67c6d8;
+  --critical-green: #7bd898;
+  --critical-amber: #f0b84d;
+  --critical-red: #ff776c;
+  --critical-violet: #b79ae6;
+}
+.alternating-current-lab .field-range,
+.alternating-current-lab .power-range {
+  background: linear-gradient(90deg,var(--critical-cyan) 0
+    var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.alternating-current-lab .frequency-range,
+.alternating-current-lab .turns-range,
+.alternating-current-lab .secondary-range {
+  background: linear-gradient(90deg,var(--critical-violet) 0
+    var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.alternating-current-lab .voltage-range,
+.alternating-current-lab .geometry-range {
+  background: linear-gradient(90deg,var(--critical-amber) 0
+    var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.alternating-current-lab .load-range {
+  background: linear-gradient(90deg,var(--critical-green) 0
+    var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.alternating-current-lab #acCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  cursor: crosshair;
+  touch-action: none;
+}
+.alternating-current-lab .state-badge.is-warning {
+  color: var(--critical-amber);
+  border-color: rgba(240,184,77,.5);
+  background: rgba(240,184,77,.08);
+}
+.alternating-current-lab .state-badge.is-loss {
+  color: var(--critical-red);
+  border-color: rgba(255,119,108,.5);
+  background: rgba(255,119,108,.08);
+}
+.alternating-current-lab .state-badge.is-transform {
+  color: var(--critical-violet);
+  border-color: rgba(183,154,230,.5);
+  background: rgba(183,154,230,.08);
+}
+@media (max-width:820px) {
+  .alternating-current-lab #acCanvas {
+    min-height: 300px;
+    aspect-ratio: 1.35;
+  }
+}

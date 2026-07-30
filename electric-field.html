@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>电场与电势实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./electric-field.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab electric-field-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">E</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>电场与电荷 · 实验 01</span><strong>电场强度与电势</strong></div>
+      <div class="connection-state"><i></i><span>模型已连接</span></div>
+      <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">ELECTROSTATICS / 01</span><h1>电场强度<br />与电势</h1><p>从空间中的场出发，统一理解受力、等势线、做功和电势能。</p></div>
+        <section class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="single"><span>01</span><strong>单电荷场</strong><i>场强不依赖试探电荷</i></button>
+          <button class="scene-tab" type="button" data-mode="superposition"><span>02</span><strong>场的叠加</strong><i>先分量，再求合场</i></button>
+          <button class="scene-tab" type="button" data-mode="potential"><span>03</span><strong>电势与等势线</strong><i>标量与矢量并不等价</i></button>
+          <button class="scene-tab" type="button" data-mode="work"><span>04</span><strong>做功与能量</strong><i>只由起点终点决定</i></button>
+        </section>
+        <section class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button"><b>1</b><span>先定义场强<small>用正试探电荷约定方向</small></span></button>
+          <button class="route-step" type="button"><b>2</b><span>再比较电势<small>标量叠加可以相消</small></span></button>
+          <button class="route-step" type="button"><b>3</b><span>最后核对能量<small>W = −ΔU 与路径无关</small></span></button>
+        </section>
+        <div class="rail-equation"><span>静电场关系</span><strong>E = F / q₀</strong><strong>Wᴀʙ = q₀(Vᴀ − Vʙ)</strong><small>电场线不是粒子轨迹；电势是标量，场强是矢量</small></div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>静电参数</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section id="source1Section" class="control-section"><div class="control-label"><span>源电荷 1 <i>Q₁</i></span><strong id="source1Value">+6.0 nC</strong></div><input id="source1Input" class="range-input source1-range" type="range" min="-8" max="8" step="0.5" value="6" aria-label="源电荷一" /></section>
+        <section id="source2Section" class="control-section"><div class="control-label"><span>源电荷 2 <i>Q₂</i></span><strong id="source2Value">−6.0 nC</strong></div><input id="source2Input" class="range-input source2-range" type="range" min="-8" max="8" step="0.5" value="-6" aria-label="源电荷二" /></section>
+        <section id="separationSection" class="control-section"><div class="control-label"><span>源电荷间距 <i>d</i></span><strong id="separationValue">3.0 m</strong></div><input id="separationInput" class="range-input separation-range" type="range" min="1.2" max="5" step="0.1" value="3" aria-label="源电荷间距" /></section>
+        <section id="uniformSection" class="control-section" hidden><div class="control-label"><span>匀强电场 <i>E₀</i></span><strong id="uniformValue">12.0 N/C</strong></div><input id="uniformInput" class="range-input uniform-range" type="range" min="-20" max="20" step="1" value="12" aria-label="匀强电场" /></section>
+        <section class="control-section"><div class="control-label"><span>试探电荷 <i>q₀</i></span><strong id="testChargeValue">+2.0 nC</strong></div><input id="testChargeInput" class="range-input test-range" type="range" min="-4" max="4" step="0.5" value="2" aria-label="试探电荷" /><p id="testChargeNote" class="control-note">改变 q₀ 只改变 F=q₀E，不改变空间中的 E</p></section>
+        <section id="pathSection" class="control-section segmented-section" hidden><span class="section-kicker">运动路径</span><div class="path-options" role="group" aria-label="运动路径"><button class="is-active" type="button" data-path="direct">路径 A · 直达</button><button type="button" data-path="curve">路径 B · 绕行</button></div><p class="control-note">两条路径端点相同，沿途功率过程不同，电场力总功相同</p></section>
+        <section class="control-section preset-section"><span class="section-kicker">典型组合</span><div class="field-presets"><button type="button" data-preset="positive">单正电荷</button><button type="button" data-preset="dipole">电偶极子</button><button type="button" data-preset="like">等量同号</button><button type="button" data-preset="flip-test">反转 q₀</button></div></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker" id="progressLabel">探针控制</span><strong id="progressValue">x = 2.40 m · y = 1.20 m</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="false" disabled>▶ 播放</button><button id="pauseButton" class="secondary-command" type="button" disabled>Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 半径 2 m</button></div><input id="progressInput" class="range-input progress-range" type="range" min="0" max="1" step="0.001" value="0" aria-label="路径进度" disabled /><div class="rate-options" role="group" aria-label="播放速度"><button class="is-active" type="button" data-rate="0.5">0.5× 慢放</button><button type="button" data-rate="1">1× 标准</button></div></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showFieldLinesToggle" type="checkbox" checked /><span>电场线</span></label><label><input id="showVectorsToggle" type="checkbox" checked /><span>场强矢量</span></label><label><input id="showEquipotentialToggle" type="checkbox" checked /><span>等势线</span></label><label><input id="showForceToggle" type="checkbox" checked /><span>受力矢量</span></label><label><input id="showPotentialMapToggle" type="checkbox" checked /><span>电势底图</span></label></div></section>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="single"><span>01</span><strong>单电荷</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="superposition"><span>02</span><strong>叠加</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="potential"><span>03</span><strong>电势</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="work"><span>04</span><strong>做功</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">静电场 / <b id="modeTitle">单电荷场</b></span><h2 id="modeGoal">电场先存在，试探电荷只负责测量</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">正源电荷</span><span id="stageHint" class="drag-hint">拖动探针，比较 E、F 和 V</span></div></header>
+        <section class="instrument-stage" aria-label="电场空间分布与实时测量"><canvas id="fieldCanvas" width="900" height="470" aria-label="可拖动试探电荷的电场与等势线场景"></canvas><aside class="live-readouts" aria-label="实时静电读数"><div class="readout-head"><span>FIELD PROBE</span><i aria-hidden="true"></i></div><dl><div><dt>电场强度 <i>|E|</i></dt><dd id="fieldMetric">7.490 N/C</dd></div><div><dt>场强方向 <i>θE</i></dt><dd id="directionMetric">26.6°</dd></div><div><dt>电势 <i>V</i></dt><dd id="potentialMetric">20.098 V</dd></div><div><dt>电场力 <i>|F|</i></dt><dd id="forceMetric">14.980 nN</dd></div><div><dt>电势能 <i>U=q₀V</i></dt><dd id="energyMetric">40.196 nJ</dd></div></dl><div class="law-check"><span>当前判断</span><strong id="fieldNature">E 与 q₀ 无关</strong><small id="fieldExplanation">正试探电荷受力方向与场强方向相同</small></div></aside></section>
+        <section class="analysis-grid" aria-label="电场和电势关系图像"><article class="chart-panel"><header><div><span id="profileKicker">RADIAL PROFILE</span><h3 id="profileTitle">场强 E(r)</h3></div><strong id="profileStatus">E ∝ 1/r²</strong></header><canvas id="profileChart" width="620" height="230" aria-label="场强或电势空间分布图"></canvas></article><article class="chart-panel"><header><div><span id="vectorKicker">POTENTIAL PROFILE</span><h3 id="vectorTitle">电势 V(r)</h3></div><strong id="vectorStatus">V ∝ 1/r</strong></header><canvas id="vectorChart" width="620" height="230" aria-label="场分量或能量关系图"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先定义场强</strong><p id="stepPrompt">把 q₀ 变为零，空间中的 E 和 V 是否消失？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">E = k|Q|/r² = 7.490 N/C</strong></div></footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>电场与电势探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>坐标与单位</b><span>画面使用米、纳库仑、牛每库仑、伏特、纳牛和纳焦；点电荷电势零点取无穷远，匀强场电势零点取 x=0。</span></li><li><b>场强方向</b><span>电场强度方向定义为正试探电荷受力方向；负试探电荷受力反向，但空间中的电场不因此改变。</span></li><li><b>叠加</b><span>场强是矢量，先分别求 E₁、E₂ 再做矢量和；电势是标量，直接代数相加。</span></li><li><b>等势线</b><span>电场线与等势线局部垂直；等势线越密，通常表示电势随距离变化越快、场强越大。</span></li><li><b>能量</b><span>静电场力是保守力，同一对端点间 W=q(VA−VB)=−ΔU，与具体路径无关。</span></li><li><b>近似</b><span>源电荷视为点电荷，忽略介质极化、辐射和试探电荷对源电荷分布的扰动；电荷圆点和箭头按教学可见性放大。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./electric-field-model.js?v=flagship-1"></script><script src="./electric-field.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

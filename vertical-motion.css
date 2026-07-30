@@ -1,0 +1,56 @@
+.vertical-motion-lab {
+  --critical-cyan:#64c6d8;
+  --critical-green:#7ad798;
+  --critical-amber:#f0b951;
+  --critical-red:#ff786e;
+  --critical-violet:#b59ae5;
+}
+.vertical-motion-lab .height-range,
+.vertical-motion-lab .area-range {
+  background:linear-gradient(90deg,var(--critical-cyan) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.vertical-motion-lab .speed-range,
+.vertical-motion-lab .frame-range {
+  background:linear-gradient(90deg,var(--critical-violet) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.vertical-motion-lab .gravity-range,
+.vertical-motion-lab .mass-range {
+  background:linear-gradient(90deg,var(--critical-amber) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.vertical-motion-lab .drag-range {
+  background:linear-gradient(90deg,var(--critical-red) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.vertical-motion-lab #motionCanvas {
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:280px;
+  cursor:crosshair;
+  touch-action:none;
+}
+.vertical-motion-lab .state-badge.is-fall {
+  color:var(--critical-cyan);
+  border-color:rgba(100,198,216,.5);
+  background:rgba(100,198,216,.08);
+}
+.vertical-motion-lab .state-badge.is-apex {
+  color:var(--critical-amber);
+  border-color:rgba(240,185,81,.5);
+  background:rgba(240,185,81,.08);
+}
+.vertical-motion-lab .state-badge.is-frame {
+  color:var(--critical-violet);
+  border-color:rgba(181,154,229,.5);
+  background:rgba(181,154,229,.08);
+}
+.vertical-motion-lab .state-badge.is-drag {
+  color:var(--critical-red);
+  border-color:rgba(255,120,110,.5);
+  background:rgba(255,120,110,.08);
+}
+@media (max-width:820px) {
+  .vertical-motion-lab #motionCanvas {
+    min-height:300px;
+    aspect-ratio:1.35;
+  }
+}

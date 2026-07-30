@@ -1,450 +1,58 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>带电粒子在电场与磁场中的运动虚拟实验台</title>
-    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
-    <link rel="stylesheet" href="./platform.css?v=workspace-2" />
-  </head>
-  <body>
-    <main class="app">
-      <section class="workspace">
-        <div class="stage">
-          <div class="stage-head">
-            <div class="stage-title">
-              <h1>带电粒子在电场与磁场中的运动虚拟实验台</h1>
-              <span class="demo-badge" id="demoBadge">教学演示中</span>
-            </div>
-            <div class="actions">
-              <a class="ghost-link" href="./index.html">实验目录</a>
-              <button id="startButton" class="primary" type="button">开始</button>
-              <button id="pauseButton" type="button">暂停</button>
-              <button id="resetButton" type="button">重置</button>
-            </div>
-          </div>
-          <p class="stage-subtitle">观察带电粒子在电场、磁场和复合场中的轨迹。</p>
-          <section class="lesson-guide" aria-label="当前学习任务">
-            <div class="guide-main">
-              <span class="preset-label">学习任务</span>
-              <strong>先比较不同力的作用，再找到能让竖直合力接近 0 的配速。</strong>
-              <p>比较电场力、磁场力和恒力对轨迹的影响。</p>
-            </div>
-            <div class="guide-formula">\(F = q(E + \boldsymbol{v} \times \boldsymbol{B}) + F_0\)</div>
-          </section>
-          <div class="preset-bar">
-            <div class="preset-copy">
-              <span class="preset-label">场景模式</span>
-              <strong id="presetTitle">自定义调参</strong>
-            </div>
-            <div class="preset-buttons">
-              <button class="preset-button active" type="button" data-mode="custom">自定义</button>
-              <button class="preset-button" type="button" data-mode="electric-only">仅电场</button>
-              <button class="preset-button" type="button" data-mode="magnetic-only">仅磁场</button>
-              <button class="preset-button" type="button" data-mode="speed-matching">配速法</button>
-            </div>
-          </div>
-          <div class="match-banner hidden" id="matchBanner">
-            <div class="match-header">
-              <span class="preset-label">配速反馈</span>
-              <strong id="matchStatus">待配平</strong>
-            </div>
-            <p class="match-message" id="matchMessage">调节速度，观察配速、漂移和圆周分运动。</p>
-          </div>
-          <div class="canvas-wrap">
-            <canvas id="simCanvas" width="980" height="640" aria-label="带电粒子运动轨迹"></canvas>
-          </div>
-          <div class="stage-readouts">
-            <article class="stage-readout">
-              <span>v</span>
-              <strong id="stageSpeedMetric">0 m/s</strong>
-            </article>
-            <article class="stage-readout">
-              <span>F_E</span>
-              <strong id="stageElectricForceMetric">0 N</strong>
-            </article>
-            <article class="stage-readout">
-              <span>F_B</span>
-              <strong id="stageMagneticForceMetric">0 N</strong>
-            </article>
-            <article class="stage-readout">
-              <span>F合</span>
-              <strong id="stageNetForceMetric">0 N</strong>
-            </article>
-            <article class="stage-readout hidden" id="stageTargetReadout">
-              <span>v配</span>
-              <strong id="stageTargetSpeedMetric">--</strong>
-            </article>
-          </div>
-          <div class="legend-bar">
-            <span class="legend-item"><i class="legend-dot particle-dot"></i>粒子</span>
-            <span class="legend-item"><i class="legend-dot trail-dot"></i>轨迹</span>
-            <span class="legend-item"><i class="legend-dot velocity-dot"></i>速度</span>
-            <span class="legend-item"><i class="legend-dot electric-dot"></i>电场力</span>
-            <span class="legend-item"><i class="legend-dot magnetic-dot"></i>磁场力</span>
-            <span class="legend-item"><i class="legend-dot net-dot"></i>合力</span>
-            <span class="legend-item hidden" id="extraForceLegend"><i class="legend-dot extra-dot"></i><span id="extraForceLegendLabel">外力</span></span>
-            <span class="legend-item hidden" id="driftLegend"><i class="legend-dot drift-dot"></i>配速漂移</span>
-            <span class="legend-item hidden" id="circleLegend"><i class="legend-dot circle-dot"></i>余速圆周</span>
-          </div>
-        </div>
-
-        <aside class="controls">
-          <div class="controls-overview">
-            <div>
-              <span class="preset-label">参数与读数</span>
-              <h2>教学实验控制台</h2>
-            </div>
-            <div class="overview-badges">
-              <span class="overview-badge" id="overviewMode">自定义调参</span>
-              <span class="overview-badge" id="overviewSpeed">1x</span>
-              <span class="overview-badge" id="overviewTime">t = 0.00 μs</span>
-            </div>
-          </div>
-          <details class="section-panel" open>
-            <summary class="section-summary">
-              <span>参数与读数</span>
-            </summary>
-            <div class="section-body">
-              <details class="subsection-panel" open>
-                <summary class="subsection-summary">基本参数</summary>
-                <div class="subsection-body">
-                  <label class="control">
-                    <div class="label-row">
-                      <div class="label-copy">
-                        <span class="label-title">电荷量</span>
-                        <span class="label-math">\(q / e\)</span>
-                      </div>
-                      <div class="value-lock">
-                        <strong id="chargeValue">+1 e</strong>
-                        <button class="mini-lock" id="lockChargeButton" type="button">解锁</button>
-                      </div>
-                    </div>
-                    <input id="chargeInput" type="range" min="-6" max="6" step="1" value="1" />
-                    <div class="inline-edit">
-                      <input id="chargeNumber" class="number-input" type="number" min="-6" max="6" step="1" value="1" />
-                      <span class="input-unit">\(e\)</span>
-                    </div>
-                  </label>
-
-                  <label class="control">
-                    <div class="label-row">
-                      <div class="label-copy">
-                        <span class="label-title">质量</span>
-                        <span class="label-math">\(m / (\times 10^{-27}\,\mathrm{kg})\)</span>
-                      </div>
-                      <div class="value-lock">
-                        <strong id="massValue">1.5 ×10^-27 kg</strong>
-                        <button class="mini-lock" id="lockMassButton" type="button">解锁</button>
-                      </div>
-                    </div>
-                    <input id="massInput" type="range" min="0.5" max="10" step="0.1" value="1.5" />
-                    <div class="inline-edit">
-                      <input id="massNumber" class="number-input" type="number" min="0.5" max="10" step="0.1" value="1.5" />
-                      <span class="input-unit">\(\times 10^{-27}\,\mathrm{kg}\)</span>
-                    </div>
-                  </label>
-
-                  <label class="control">
-                    <div class="label-row">
-                      <div class="label-copy">
-                        <span class="label-title">电场强度</span>
-                        <span class="label-math">\(E_y / (\times 10^{5}\,\mathrm{N/C})\)</span>
-                      </div>
-                      <div class="value-lock">
-                        <strong id="electricValue">+3.0 ×10^5 N/C</strong>
-                        <button class="mini-lock" id="lockElectricButton" type="button">解锁</button>
-                      </div>
-                    </div>
-                    <div class="mode-hint" id="electricHint"></div>
-                    <input id="electricInput" type="range" min="-24" max="24" step="0.1" value="3" />
-                    <div class="inline-edit">
-                      <input id="electricNumber" class="number-input" type="number" min="-24" max="24" step="0.1" value="3" />
-                      <span class="input-unit">\(\times 10^{5}\,\mathrm{N/C}\)</span>
-                    </div>
-                  </label>
-
-                  <label class="control">
-                    <div class="label-row">
-                      <div class="label-copy">
-                        <span class="label-title">磁感应强度</span>
-                        <span class="label-math">\(B_z / \mathrm{T}\)</span>
-                      </div>
-                      <div class="value-lock">
-                        <strong id="magneticValue">0.00 T</strong>
-                        <button class="mini-lock" id="lockMagneticButton" type="button">解锁</button>
-                      </div>
-                    </div>
-                    <div class="mode-hint" id="magneticHint"></div>
-                    <input id="magneticInput" type="range" min="-8" max="8" step="0.05" value="0" />
-                    <div class="inline-edit">
-                      <input id="magneticNumber" class="number-input" type="number" min="-8" max="8" step="0.05" value="0" />
-                      <span class="input-unit">\(\mathrm{T}\)</span>
-                    </div>
-                  </label>
-
-                  <label class="control">
-                    <div class="label-row">
-                      <div class="label-copy">
-                        <span class="label-title">初速度</span>
-                        <span class="label-math">\(v_0 / (\times 10^{6}\,\mathrm{m/s})\)</span>
-                      </div>
-                      <div class="value-lock">
-                        <strong id="speedValue">8.0 ×10^6 m/s</strong>
-                        <button class="mini-lock" id="lockSpeedButton" type="button">解锁</button>
-                      </div>
-                    </div>
-                    <input id="speedInput" type="range" min="1" max="28" step="0.1" value="8" />
-                    <div class="inline-edit">
-                      <input id="speedNumber" class="number-input" type="number" min="1" max="28" step="0.1" value="8" />
-                      <span class="input-unit">\(\times 10^{6}\,\mathrm{m/s}\)</span>
-                    </div>
-                  </label>
-
-                  <label class="control">
-                    <div class="label-row">
-                      <div class="label-copy">
-                        <span class="label-title">入射角</span>
-                        <span class="label-math">\(\theta / {}^\circ\)</span>
-                      </div>
-                      <div class="value-lock">
-                        <strong id="angleValue">0°</strong>
-                        <button class="mini-lock" id="lockAngleButton" type="button">解锁</button>
-                      </div>
-                    </div>
-                    <input id="angleInput" type="range" min="-85" max="85" step="0.5" value="0" />
-                    <div class="inline-edit">
-                      <input id="angleNumber" class="number-input" type="number" min="-85" max="85" step="0.5" value="0" />
-                      <span class="input-unit">\({}^\circ\)</span>
-                    </div>
-                  </label>
-                </div>
-              </details>
-
-              <details class="subsection-panel hidden" id="speedMatchPanel" open>
-                <summary class="subsection-summary">配速法设置</summary>
-                <div class="subsection-body">
-                  <section class="equation-panel compact-panel">
-                    <div class="metrics-head">
-                      <span class="preset-label">受力来源</span>
-                      <strong id="speedMatchSourceTitle">重力型恒力</strong>
-                    </div>
-                    <div class="source-buttons">
-                      <button class="source-button active" type="button" data-source="gravity">重力型</button>
-                      <button class="source-button" type="button" data-source="electric">电场力</button>
-                      <button class="source-button" type="button" data-source="constant">恒力</button>
-                    </div>
-                    <p class="equation-note" id="speedMatchHint">先调节速度，使洛伦兹力与其他恒力在竖直方向平衡，再把总速度分解为配速和余速。</p>
-
-                    <div class="speed-match-control" id="gravityControl">
-                      <span class="speed-label">等效重力场</span>
-                      <div class="inline-edit">
-                        <input id="gravityInput" type="range" min="1" max="50" step="0.1" value="25.6" />
-                        <input id="gravityNumber" class="number-input" type="number" min="1" max="50" step="0.1" value="25.6" />
-                        <span class="input-unit">\(\times 10^{13}\,\mathrm{m/s^2}\)</span>
-                      </div>
-                    </div>
-
-                    <div class="speed-match-control hidden" id="constantForceControl">
-                      <span class="speed-label">恒力 \(F_0\)</span>
-                      <div class="inline-edit">
-                        <input id="constantForceInput" type="range" min="-5" max="5" step="0.05" value="-1" />
-                        <input id="constantForceNumber" class="number-input" type="number" min="-5" max="5" step="0.05" value="-1" />
-                        <span class="input-unit">\(\times 10^{-12}\,\mathrm{N}\)</span>
-                      </div>
-                    </div>
-
-                    <div class="speed-match-formula">
-                      <p class="equation-note" id="speedMatchFormulaNote">当前配速公式</p>
-                      <div class="equation-lines" id="speedMatchFormulaLines"></div>
-                    </div>
-
-                    <div class="speed-match-formula">
-                      <p class="equation-note">配速辅助</p>
-                      <div class="metrics-grid helper-grid">
-                        <article class="metric-card">
-                          <span class="metric-name">\(v_{\text{配}}\)</span>
-                          <strong id="targetSpeedInline">--</strong>
-                        </article>
-                        <article class="metric-card">
-                          <span class="metric-name">\(v_{\text{余}}\)</span>
-                          <strong id="residualSpeedInline">--</strong>
-                        </article>
-                        <article class="metric-card">
-                          <span class="metric-name">\(\Delta v\)</span>
-                          <strong id="deltaSpeedInline">--</strong>
-                        </article>
-                        <article class="metric-card">
-                          <span class="metric-name">分解思路</span>
-                          <strong id="regionStateInline">漂移 + 圆周</strong>
-                        </article>
-                      </div>
-                      <div class="speed-buttons helper-buttons">
-                        <button id="applyTargetSpeedButton" class="speed-button" type="button">设为 v配</button>
-                        <button class="speed-button adjust-button" type="button" data-adjust="-5">-5%</button>
-                        <button class="speed-button adjust-button" type="button" data-adjust="-1">-1%</button>
-                        <button class="speed-button adjust-button" type="button" data-adjust="1">+1%</button>
-                        <button class="speed-button adjust-button" type="button" data-adjust="5">+5%</button>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              </details>
-
-              <details class="subsection-panel">
-                <summary class="subsection-summary">实时物理量</summary>
-                <div class="subsection-body">
-                  <section class="metrics-panel compact-panel">
-                    <div class="metrics-head">
-                      <span class="preset-label">实时物理量</span>
-                      <strong id="metricsModeTitle">当前场景</strong>
-                    </div>
-                    <div class="metrics-grid">
-                      <article class="metric-card">
-                        <span class="metric-name">\(F_E\)</span>
-                        <strong id="electricForceMetric">0 N</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(F_B\)</span>
-                        <strong id="magneticForceMetric">0 N</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(v\)</span>
-                        <strong id="speedMetric">0 m/s</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(F_{\text{合}}\)</span>
-                        <strong id="netForceMetric">0 N</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(r\)</span>
-                        <strong id="radiusMetric">--</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(T\)</span>
-                        <strong id="periodMetric">--</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(t\)</span>
-                        <strong id="timeMetric">0 μs</strong>
-                      </article>
-                      <article class="metric-card">
-                        <span class="metric-name">\(t_{\max}\)</span>
-                        <strong id="maxTimeMetric">8.0 μs</strong>
-                      </article>
-                      <article class="metric-card hidden" id="matchForceCard">
-                        <span class="metric-name" id="matchForceLabel">\(F_{\text{外}}\)</span>
-                        <strong id="matchForceMetric">--</strong>
-                      </article>
-                      <article class="metric-card hidden" id="targetSpeedCard">
-                        <span class="metric-name">\(v_{\text{配}}\)</span>
-                        <strong id="targetSpeedMetric">--</strong>
-                      </article>
-                    </div>
-                    <p class="metrics-note" id="metricsNote">显示当前瞬时物理量。</p>
-                  </section>
-                </div>
-              </details>
-
-              <details class="subsection-panel">
-                <summary class="subsection-summary">轨迹方程</summary>
-                <div class="subsection-body">
-                  <section class="equation-panel compact-panel">
-                    <div class="metrics-head">
-                      <span class="preset-label">轨迹方程</span>
-                      <strong id="equationTitle">当前轨迹</strong>
-                    </div>
-                    <div class="equation-body">
-                      <p class="equation-note" id="equationNote">当前场景的参数方程。</p>
-                      <div class="equation-lines" id="equationLines"></div>
-                    </div>
-                  </section>
-                </div>
-              </details>
-            </div>
-          </details>
-
-          <details class="section-panel">
-            <summary class="section-summary">
-              <span>显示选项</span>
-            </summary>
-            <div class="section-body">
-              <details class="subsection-panel" open>
-                <summary class="subsection-summary">图层显示</summary>
-                <div class="subsection-body">
-                  <section class="display-panel compact-panel">
-                    <div class="toggle-grid">
-                      <label class="toggle-item">
-                        <input id="showGridToggle" type="checkbox" checked />
-                        <span>显示网格</span>
-                      </label>
-                      <label class="toggle-item">
-                        <input id="showTrailToggle" type="checkbox" checked />
-                        <span>显示轨迹</span>
-                      </label>
-                      <label class="toggle-item">
-                        <input id="showVectorsToggle" type="checkbox" checked />
-                        <span>显示箭头</span>
-                      </label>
-                      <label class="toggle-item">
-                        <input id="demoModeToggle" type="checkbox" />
-                        <span>教学演示模式</span>
-                      </label>
-                      <label class="toggle-item">
-                        <input id="preserveTrailToggle" type="checkbox" />
-                        <span>改参数时保留原轨迹</span>
-                      </label>
-                    </div>
-                  </section>
-                </div>
-              </details>
-
-              <details class="subsection-panel">
-                <summary class="subsection-summary">播放控制</summary>
-                <div class="subsection-body">
-                  <section class="display-panel compact-panel">
-                    <div class="speed-panel first-panel">
-                      <span class="speed-label">播放速度</span>
-                      <div class="speed-buttons">
-                        <button class="speed-button" type="button" data-speed="0.25">0.25x</button>
-                        <button class="speed-button" type="button" data-speed="0.5">0.5x</button>
-                        <button class="speed-button active" type="button" data-speed="1">1x</button>
-                      </div>
-                    </div>
-                    <div class="speed-panel">
-                      <span class="speed-label">模拟时间边界</span>
-                      <div class="inline-edit">
-                        <input id="maxTimeNumber" class="number-input" type="number" min="0.5" max="100" step="0.5" value="8.0" />
-                        <span class="input-unit">\(\mu\mathrm{s}\)</span>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              </details>
-
-              <details class="subsection-panel">
-                <summary class="subsection-summary">保存与导出</summary>
-                <div class="subsection-body">
-                  <section class="display-panel compact-panel">
-                    <div class="speed-panel first-panel">
-                      <div class="speed-buttons">
-                        <button id="exportPngButton" class="speed-button" type="button">导出截图</button>
-                        <button id="exportCsvButton" class="speed-button" type="button">导出数据</button>
-                        <button id="recordVideoButton" class="speed-button" type="button">开始录制</button>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              </details>
-            </div>
-          </details>
-        </aside>
-      </section>
-    </main>
-
-    <script src="./script.js?v=math-controls-3"></script>
-    <script src="./url-state.js?v=protocol-v1"></script>
-    <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=workspace-2"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#151817" />
+  <title>带电粒子与电磁场实验室</title>
+  <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
+  <link rel="stylesheet" href="./platform.css?v=workspace-3" />
+  <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+  <link rel="stylesheet" href="./charged-particle.css?v=flagship-1" />
+</head>
+<body class="flagship-lab particle-lab">
+  <header class="lab-topbar">
+    <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">Φ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+    <div class="topbar-title"><span>电磁场 · 实验 01</span><strong>带电粒子运动</strong></div>
+    <div class="connection-state"><i></i>模型已连接</div>
+    <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button">实验指南</button><button id="stepButton" class="toolbar-button">分步演示</button><button id="focusButton" class="toolbar-button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" title="全屏" aria-label="全屏">⛶</button></div>
+  </header>
+  <main class="lab-shell">
+    <nav class="lesson-rail" aria-label="实验学习路径">
+      <div class="rail-heading"><span class="eyebrow">FIELDS / 01</span><h1>带电粒子<br />与电磁场</h1><p>比较电场改变速率与磁场改变方向，并寻找复合场中不偏转的唯一配速。</p></div>
+      <div class="rail-section"><span class="rail-label">实验场景</span>
+        <button class="scene-tab is-active" data-mode="electric"><span>01</span><strong>匀强电场</strong><i>恒定电场力与抛物线</i></button>
+        <button class="scene-tab" data-mode="magnetic"><span>02</span><strong>匀强磁场</strong><i>洛伦兹力与圆周运动</i></button>
+        <button class="scene-tab" data-mode="selector"><span>03</span><strong>速度选择器</strong><i>qE 与 qvB 配平</i></button>
+        <button class="scene-tab" data-mode="crossed"><span>04</span><strong>复合场轨迹</strong><i>漂移与余速圆周</i></button>
+      </div>
+      <div class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+        <button class="route-step is-active"><b>1</b><span>判断力的方向<small>先看 q、v、E、B</small></span></button>
+        <button class="route-step"><b>2</b><span>检查速率变化<small>磁场力是否做功</small></span></button>
+        <button class="route-step"><b>3</b><span>寻找不偏转条件<small>验证 v=E/B</small></span></button>
+      </div>
+      <div class="rail-equation"><span>洛伦兹力</span><strong>F = q(E + v × B)</strong><strong>r = mv / |q|B</strong><small>磁场力始终垂直于瞬时速度</small></div>
+    </nav>
+    <aside class="controls" aria-label="实验控制">
+      <div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>粒子与场参数</h2></div><button id="resetButton" class="reset-button">重置</button></div>
+      <section class="control-section"><span class="section-kicker">电荷符号</span><div class="segmented-control"><button class="charge-button is-active" data-charge="1">正电荷 +q</button><button class="charge-button" data-charge="-1">负电荷 −q</button></div></section>
+      <section class="control-section"><div class="control-label"><span>质量 <i>m</i></span><strong id="massValue">1.50 ×10⁻²⁷ kg</strong></div><input id="massInput" class="range-input mass-range" type="range" min="0.5" max="8" step="0.1" value="1.5" aria-label="粒子质量" /></section>
+      <section class="control-section"><div class="control-label"><span>电场 <i>Eᵧ</i></span><strong id="electricValue">3.00 ×10⁵ N/C</strong></div><input id="electricInput" class="range-input electric-range" type="range" min="-12" max="12" step="0.1" value="3" aria-label="电场强度" /></section>
+      <section class="control-section"><div class="control-label"><span>磁场 <i>Bz</i></span><strong id="magneticValue">0.00 T</strong></div><input id="magneticInput" class="range-input magnetic-range" type="range" min="-2" max="2" step="0.02" value="0" aria-label="磁感应强度" /></section>
+      <section class="control-section"><div class="control-label"><span>初速度 <i>v₀</i></span><strong id="speedValue">4.00 ×10⁶ m/s</strong></div><input id="speedInput" class="range-input speed-range" type="range" min="0.2" max="12" step="0.1" value="4" aria-label="初速度" /></section>
+      <section class="control-section"><div class="control-label"><span>入射角 <i>θ</i></span><strong id="angleValue">0°</strong></div><input id="angleInput" class="range-input angle-range" type="range" min="-75" max="75" step="1" value="0" aria-label="入射角" /></section>
+      <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">时间控制</span><strong id="timeValue">t = 0.000 μs</strong></div><div class="playback-row"><button id="playButton" class="primary-command">▶ 播放</button><button id="pauseButton" class="secondary-command">Ⅱ 暂停</button><button id="targetButton" class="secondary-command">◎ 配速</button></div><input id="timeInput" class="range-input time-range" type="range" min="0" max="0.3" step="0.001" value="0" aria-label="观察时刻" /></section>
+      <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showTrailToggle" type="checkbox" checked /><span>完整轨迹</span></label><label><input id="showVectorsToggle" type="checkbox" checked /><span>速度与力</span></label><label><input id="showFieldToggle" type="checkbox" checked /><span>场方向</span></label><label><input id="showDecompositionToggle" type="checkbox" checked /><span>速度分解</span></label></div></section>
+    </aside>
+    <section class="stage">
+      <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" data-mode="electric"><span>01</span><strong>电场</strong></button><button class="scene-tab mobile-scene-tab" data-mode="magnetic"><span>02</span><strong>磁场</strong></button><button class="scene-tab mobile-scene-tab" data-mode="selector"><span>03</span><strong>配速</strong></button><button class="scene-tab mobile-scene-tab" data-mode="crossed"><span>04</span><strong>复合</strong></button></nav>
+      <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">带电粒子 / <b id="modeTitle">匀强电场</b></span><h2 id="modeGoal">电场力恒定，粒子做类平抛运动</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">速率改变</span><span id="stageHint" class="drag-hint">拖动速度箭头改变初速度</span></div></header>
+      <section class="instrument-stage"><canvas id="particleCanvas" width="900" height="470" aria-label="可拖动初速度的带电粒子轨迹"></canvas><aside class="live-readouts"><div class="readout-head"><span>LIVE DATA</span><i></i></div><dl><div><dt>瞬时速率 <i>v</i></dt><dd id="speedMetric">4.00 ×10⁶ m/s</dd></div><div><dt>电场力 <i>Fᴇ</i></dt><dd id="electricForceMetric">4.81 ×10⁻¹⁴ N</dd></div><div><dt>磁场力 <i>Fʙ</i></dt><dd id="magneticForceMetric">0 N</dd></div><div><dt>轨道半径 <i>r</i></dt><dd id="radiusMetric">—</dd></div></dl><div class="law-check"><span>运动判断</span><strong id="motionNature">电场力可以做功</strong><small id="motionExplanation">竖直速度随时间线性变化</small></div></aside></section>
+      <section class="analysis-grid"><article class="chart-panel"><header><div><span>KINEMATICS</span><h3>速率—时间</h3></div><strong id="speedChartStatus">电场改变动能</strong></header><canvas id="speedChart" width="620" height="230"></canvas></article><article class="chart-panel"><header><div><span>FORCE BALANCE</span><h3 id="forceChartTitle">竖直方向力</h3></div><strong id="forceChartStatus">F合 = Fᴇ</strong></header><canvas id="forceChart" width="620" height="230"></canvas></article></section>
+      <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">判断力的方向</strong><p id="stepPrompt">先由电荷正负判断电场力方向。</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">Fᴇ = qE</strong></div></footer>
+    </section>
+  </main>
+  <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>带电粒子探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>电场</b><span>电场力与速度无关，可以改变粒子动能。</span></li><li><b>磁场</b><span>洛伦兹力垂直于速度，只改变速度方向，不改变速率。</span></li><li><b>配速</b><span>当速度方向正确且 v=E/B 时，电场力和磁场力抵消。</span></li><li><b>电荷</b><span>改变电荷正负会同时反转两种力，但不改变配速大小。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+  <script src="./charged-particle.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+</body>
 </html>

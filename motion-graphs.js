@@ -1,368 +1,59 @@
-const motionState = {
-  initialSpeed: 2,
-  acceleration: 1,
-  time: 0,
-  duration: 6,
-  timeScale: 1,
-  mode: "accelerate",
-  running: false,
-  showPosition: true,
-  showVelocity: true,
-  demoMode: false
-};
-
-const motionRefs = {
-  canvas: document.getElementById("motionCanvas"),
-  startButton: document.getElementById("startButton"),
-  pauseButton: document.getElementById("pauseButton"),
-  resetButton: document.getElementById("resetButton"),
-  presetTitle: document.getElementById("presetTitle"),
-  presetButtons: Array.from(document.querySelectorAll(".preset-button")),
-  modeGoal: document.getElementById("modeGoal"),
-  modePrompt: document.getElementById("modePrompt"),
-  modeFormula: document.getElementById("modeFormula"),
-  initialSpeedInput: document.getElementById("initialSpeedInput"),
-  initialSpeedNumber: document.getElementById("initialSpeedNumber"),
-  accelerationInput: document.getElementById("accelerationInput"),
-  accelerationNumber: document.getElementById("accelerationNumber"),
-  timeInput: document.getElementById("timeInput"),
-  timeNumber: document.getElementById("timeNumber"),
-  initialSpeedValue: document.getElementById("initialSpeedValue"),
-  accelerationValue: document.getElementById("accelerationValue"),
-  timeValue: document.getElementById("timeValue"),
-  timeMetric: document.getElementById("timeMetric"),
-  positionMetric: document.getElementById("positionMetric"),
-  velocityMetric: document.getElementById("velocityMetric"),
-  accelMetric: document.getElementById("accelMetric"),
-  displacementMetric: document.getElementById("displacementMetric"),
-  criticalCards: Array.from(document.querySelectorAll(".critical-card[data-jump]")),
-  criticalStateLabel: document.getElementById("criticalStateLabel"),
-  criticalStateNote: document.getElementById("criticalStateNote"),
-  showPositionToggle: document.getElementById("showPositionToggle"),
-  showVelocityToggle: document.getElementById("showVelocityToggle"),
-  demoModeToggle: document.getElementById("demoModeToggle"),
-  speedButtons: Array.from(document.querySelectorAll(".speed-button")),
-  overviewSpeed: document.getElementById("overviewSpeed"),
-  overviewTime: document.getElementById("overviewTime")
-};
-
-const motionCtx = motionRefs.canvas.getContext("2d");
-const motionWidth = 980;
-const motionHeight = 560;
-const motionDpr = window.devicePixelRatio || 1;
-motionRefs.canvas.width = motionWidth * motionDpr;
-motionRefs.canvas.height = motionHeight * motionDpr;
-motionCtx.scale(motionDpr, motionDpr);
-
-const motionModes = {
-  uniform: { title: "匀速运动", goal: "观察 x-t 图像的斜率", prompt: "速度保持不变，x-t 图像是直线，v-t 图像与时间轴平行。", formula: "\\(v = \\mathrm{常量}\\)", initialSpeed: 2, acceleration: 0 },
-  accelerate: { title: "匀变速运动", goal: "观察斜率和面积的含义", prompt: "x-t 图像逐渐变陡，v-t 图像的斜率就是加速度。", formula: "\\(v = v_0 + at\\)", initialSpeed: 2, acceleration: 1 },
-  brake: { title: "减速到停", goal: "观察速度变号和运动方向", prompt: "先前进后停下，再继续观察速度变号后位置的变化。", formula: "\\(x = v_0t + \\frac{1}{2}at^2\\)", initialSpeed: 4, acceleration: -1 }
-};
-
-let motionLastFrame = null;
-
-function motionClamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function motionFormat(value, digits = 2, unit = "") {
-  const text = Number.isFinite(value) ? value.toFixed(digits) : "--";
-  return unit ? `${text} ${unit}` : text;
-}
-
-function motionAt(time = motionState.time) {
-  return {
-    time,
-    position: motionState.initialSpeed * time + 0.5 * motionState.acceleration * time * time,
-    velocity: motionState.initialSpeed + motionState.acceleration * time,
-    acceleration: motionState.acceleration
-  };
-}
-
-function motionRange(field) {
-  const values = Array.from({ length: 61 }, (_, index) => motionAt((index / 60) * motionState.duration)[field]);
-  const min = Math.min(0, ...values);
-  const max = Math.max(0, ...values);
-  const padding = Math.max((max - min) * 0.12, 1);
-  return { min: min - padding, max: max + padding };
-}
-
-function motionMap(value, min, max, start, length) {
-  return start + ((value - min) / (max - min || 1)) * length;
-}
-
-function motionDrawText(text, x, y, color = "#5c686d", size = 12, weight = "400") {
-  motionCtx.save();
-  motionCtx.fillStyle = color;
-  motionCtx.font = `${weight} ${size}px Avenir Next, PingFang SC, sans-serif`;
-  motionCtx.fillText(text, x, y);
-  motionCtx.restore();
-}
-
-function motionDrawAxes(x, y, width, height, range, yLabel, xLabel) {
-  motionCtx.strokeStyle = "rgba(18, 31, 36, 0.2)";
-  motionCtx.lineWidth = 1.2;
-  motionCtx.beginPath();
-  motionCtx.moveTo(x, y);
-  motionCtx.lineTo(x, y + height);
-  motionCtx.lineTo(x + width, y + height);
-  motionCtx.stroke();
-  const tickValues = new Set();
-  for (let step = 0; step <= 4; step += 1) {
-    tickValues.add(range.min + ((range.max - range.min) * step) / 4);
-  }
-  if (range.min < 0 && range.max > 0) tickValues.add(0);
-  [...tickValues].sort((first, second) => first - second).forEach((value) => {
-    const zero = Math.abs(value) < 0.000001;
-    const normalized = (value - range.min) / (range.max - range.min || 1);
-    const zeroY = y + height - normalized * height;
-    motionCtx.strokeStyle = zero ? "rgba(18, 31, 36, 0.3)" : "rgba(18, 31, 36, 0.07)";
-    motionCtx.lineWidth = zero ? 1.6 : 1;
-    motionCtx.beginPath();
-    motionCtx.moveTo(x, zeroY);
-    motionCtx.lineTo(x + width, zeroY);
-    motionCtx.stroke();
-    motionDrawText(zero ? "0" : value.toFixed(1), x - 42, zeroY + 4, zero ? "#121f24" : "#5c686d", 11, zero ? "700" : "400");
-  });
-  for (let step = 0; step <= 6; step += 1) {
-    const px = x + (width * step) / 6;
-    motionCtx.strokeStyle = "rgba(18, 31, 36, 0.06)";
-    motionCtx.beginPath();
-    motionCtx.moveTo(px, y);
-    motionCtx.lineTo(px, y + height);
-    motionCtx.stroke();
-    motionDrawText(`${step}s`, px - 7, y + height + 20);
-  }
-  motionDrawText(yLabel, x, y - 10, "#121f24", 13, "700");
-  motionDrawText(xLabel, x + width - 42, y + height + 38, "#5c686d", 12, "400");
-}
-
-function motionDrawChart(x, y, width, height, field, color, label, show) {
-  const range = motionRange(field);
-  motionDrawAxes(x, y, width, height, range, label, "t / s");
-  if (!show) {
-    motionDrawText("已隐藏", x + width - 48, y - 10, "#5c686d", 11, "400");
-    return;
-  }
-  motionCtx.strokeStyle = color;
-  motionCtx.lineWidth = motionState.demoMode ? 4 : 2.8;
-  motionCtx.beginPath();
-  for (let index = 0; index <= 90; index += 1) {
-    const time = (index / 90) * motionState.duration;
-    const pointX = x + (width * time) / motionState.duration;
-    const pointY = y + height - motionMap(motionAt(time)[field], range.min, range.max, 0, height);
-    if (index === 0) motionCtx.moveTo(pointX, pointY);
-    else motionCtx.lineTo(pointX, pointY);
-  }
-  motionCtx.stroke();
-  const current = motionAt();
-  const currentX = x + (width * current.time) / motionState.duration;
-  const currentY = y + height - motionMap(current[field], range.min, range.max, 0, height);
-  motionCtx.fillStyle = color;
-  motionCtx.beginPath();
-  motionCtx.arc(currentX, currentY, motionState.demoMode ? 7 : 5, 0, Math.PI * 2);
-  motionCtx.fill();
-
-  if (field === "velocity" && motionState.acceleration !== 0) {
-    const reversalTime = -motionState.initialSpeed / motionState.acceleration;
-    if (reversalTime > 0 && reversalTime < motionState.duration) {
-      const reversalX = x + (width * reversalTime) / motionState.duration;
-      const zeroY = y + height - motionMap(0, range.min, range.max, 0, height);
-      motionCtx.save();
-      motionCtx.strokeStyle = "rgba(201, 107, 41, 0.82)";
-      motionCtx.lineWidth = 1.8;
-      motionCtx.setLineDash([6, 5]);
-      motionCtx.beginPath();
-      motionCtx.moveTo(reversalX, y);
-      motionCtx.lineTo(reversalX, y + height);
-      motionCtx.stroke();
-      motionCtx.setLineDash([]);
-      motionCtx.fillStyle = "#c96b29";
-      motionCtx.beginPath();
-      motionCtx.arc(reversalX, zeroY, 6, 0, Math.PI * 2);
-      motionCtx.fill();
-      motionDrawText("v = 0：方向反向", reversalX + 8, zeroY - 10, "#c96b29", 11, "700");
-      motionCtx.restore();
+const motionState={mode:"uniform",x0:-2,v0:2,a:0,duration:6,time:0,timeScale:1,running:false,guideStep:0,keyIndex:0,showGhosts:true,showTangent:true,showArea:true,showAcceleration:true,dragging:null};
+const motionRefs={canvas:document.getElementById("motionCanvas"),positionChart:document.getElementById("positionChart"),velocityChart:document.getElementById("velocityChart"),sceneTabs:Array.from(document.querySelectorAll(".scene-tab[data-mode]")),routeSteps:Array.from(document.querySelectorAll(".route-step")),scaleButtons:Array.from(document.querySelectorAll(".scale-button")),positionInput:document.getElementById("positionInput"),initialSpeedInput:document.getElementById("initialSpeedInput"),accelerationInput:document.getElementById("accelerationInput"),timeInput:document.getElementById("timeInput"),positionValue:document.getElementById("positionValue"),initialSpeedValue:document.getElementById("initialSpeedValue"),accelerationValue:document.getElementById("accelerationValue"),timeValue:document.getElementById("timeValue"),modeTitle:document.getElementById("modeTitle"),modeGoal:document.getElementById("modeGoal"),stateBadge:document.getElementById("stateBadge"),stageHint:document.getElementById("stageHint"),positionMetric:document.getElementById("positionMetric"),velocityMetric:document.getElementById("velocityMetric"),accelerationMetric:document.getElementById("accelerationMetric"),distanceMetric:document.getElementById("distanceMetric"),motionNature:document.getElementById("motionNature"),motionExplanation:document.getElementById("motionExplanation"),positionChartStatus:document.getElementById("positionChartStatus"),velocityChartStatus:document.getElementById("velocityChartStatus"),stepIndex:document.getElementById("stepIndex"),stepTitle:document.getElementById("stepTitle"),stepPrompt:document.getElementById("stepPrompt"),formulaReadout:document.getElementById("formulaReadout"),playButton:document.getElementById("playButton"),pauseButton:document.getElementById("pauseButton"),keyButton:document.getElementById("keyButton"),resetButton:document.getElementById("resetButton"),showGhostsToggle:document.getElementById("showGhostsToggle"),showTangentToggle:document.getElementById("showTangentToggle"),showAreaToggle:document.getElementById("showAreaToggle"),showAccelerationToggle:document.getElementById("showAccelerationToggle"),guideButton:document.getElementById("guideButton"),guideDialog:document.getElementById("guideDialog"),stepButton:document.getElementById("stepButton"),focusButton:document.getElementById("focusButton"),fullscreenButton:document.getElementById("fullscreenButton")};
+const motionCtx=motionRefs.canvas.getContext("2d"),positionCtx=motionRefs.positionChart.getContext("2d"),velocityCtx=motionRefs.velocityChart.getContext("2d");
+const motionModes={uniform:{title:"匀速直线运动",goal:"x-t 图像是直线，斜率等于恒定速度",badge:"同向匀速",hint:"拖动下方图像选择时刻",defaults:{x0:-2,v0:2,a:0}},accelerated:{title:"匀加速运动",goal:"x-t 切线逐渐变陡，v-t 斜率保持不变",badge:"速度线性增加",hint:"比较两个时刻的切线",defaults:{x0:0,v0:1,a:1}},reversal:{title:"减速与反向",goal:"速度过零时位置达到极值，但加速度仍不为零",badge:"先减速后反向",hint:"跳到 v=0 的转向时刻",defaults:{x0:0,v0:4,a:-1}},piecewise:{title:"分段运动",goal:"把 v-t 各段有向面积累加，重建完整 x-t 图像",badge:"加速 · 匀速 · 反向",hint:"依次查看三个分界时刻",defaults:{x0:-2,v0:0,a:1.5}}};
+const motionGuide=[{title:"对应同一时刻",prompt:"拖动时间探针，确认小车和图像标记同时移动。"},{title:"读取斜率",prompt:"x-t 切线斜率给出 v，v-t 直线斜率给出 a。"},{title:"读取有向面积",prompt:"累加时间轴上、下方的面积，得到当前位移。"}];
+function motionClamp(v,a,b){return Math.min(b,Math.max(a,Number(v)));}function motionFmt(v,d=2){const n=Math.abs(v)<5e-9?0:Number(v);return n.toFixed(d);}function motionPieceAt(t){const x0=motionState.x0;if(t<=2)return{x:x0+.75*t*t,v:1.5*t,a:1.5};if(t<=4){const u=t-2;return{x:x0+3+3*u,v:3,a:0};}const u=t-4;return{x:x0+9+3*u-u*u,v:3-2*u,a:-2};}function motionAt(t=motionState.time,s=motionState){const time=motionClamp(t,0,s.duration);if(s.mode==="piecewise"){const p=motionPieceAt(time);return{time,...p};}return{time,x:s.x0+s.v0*time+.5*s.a*time*time,v:s.v0+s.a*time,a:s.a};}
+function motionDistance(t=motionState.time){const time=motionClamp(t,0,motionState.duration);if(motionState.mode==="piecewise"){if(time<=2)return motionAt(time).x-motionState.x0;if(time<=4)return 3+3*(time-2);const u=time-4;if(u<=1.5)return 9+3*u-u*u;return 11.25+2.25-(3*u-u*u);}const end=motionAt(time),turn=motionState.a!==0?-motionState.v0/motionState.a:null;if(turn>0&&turn<time){const xt=motionAt(turn).x;return Math.abs(xt-motionState.x0)+Math.abs(end.x-xt);}return Math.abs(end.x-motionState.x0);}
+function motionSamples(count=240){const out=[];for(let i=0;i<=count;i++)out.push(motionAt(motionState.duration*i/count));return out;}function motionRange(points,key,includeZero=true){const values=points.map(p=>p[key]),min=Math.min(...values,includeZero?0:Infinity),max=Math.max(...values,includeZero?0:-Infinity),span=Math.max(max-min,.5),pad=span*.14;return{min:min-pad,max:max+pad};}
+function motionSize(canvas,ctx){const r=canvas.getBoundingClientRect(),q=Math.min(devicePixelRatio||1,2),w=Math.max(320,Math.round(r.width)),h=Math.max(180,Math.round(r.height));if(canvas.width!==w*q||canvas.height!==h*q){canvas.width=w*q;canvas.height=h*q;}ctx.setTransform(q,0,0,q,0,0);return{w,h};}function motionLine(ctx,x1,y1,x2,y2,color="#68726c",width=2,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.restore();}function motionText(ctx,text,x,y,size=10,color="#9ca69f",align="left",weight=500){ctx.fillStyle=color;ctx.font=`${weight} ${size}px ui-sans-serif,system-ui`;ctx.textAlign=align;ctx.fillText(text,x,y);ctx.textAlign="left";}function motionArrow(ctx,x,y,dx,color,label){if(Math.abs(dx)<1)return;motionLine(ctx,x,y,x+dx,y,color,2.5);const sign=Math.sign(dx);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x+dx,y);ctx.lineTo(x+dx-sign*8,y-4);ctx.lineTo(x+dx-sign*8,y+4);ctx.fill();motionText(ctx,label,x+dx+sign*8,y-7,10,color,"center",700);}
+function motionDrawTrack(){const{w,h}=motionSize(motionRefs.canvas,motionCtx),points=motionSamples(),range=motionRange(points,"x",false),left=38,right=w-25,y=h*.58,mapX=x=>left+(x-range.min)/(range.max-range.min)*(right-left),current=motionAt();motionCtx.clearRect(0,0,w,h);motionCtx.fillStyle="#0c0f0e";motionCtx.fillRect(0,0,w,h);for(let x=0;x<w;x+=40)motionLine(motionCtx,x,0,x,h,"rgba(216,222,217,.05)",1);motionLine(motionCtx,left,y,right,y,"#77817b",3);for(let i=0;i<=6;i++){const x=left+(right-left)*i/6,value=range.min+(range.max-range.min)*i/6;motionLine(motionCtx,x,y-7,x,y+7,"#59625d",1);motionText(motionCtx,motionFmt(value,1),x,y+24,9,"#7f8a83","center");}
+  if(motionState.showGhosts){for(let t=0;t<=motionState.duration;t+=1){const p=motionAt(t),x=mapX(p.x);motionCtx.fillStyle=`rgba(100,199,217,${.18+.08*t})`;motionCtx.fillRect(x-12,y-16,24,14);motionText(motionCtx,`${t}s`,x,y-25,8,"#64c7d9","center");}}
+  const cartX=mapX(current.x);motionCtx.fillStyle="#69d18e";motionCtx.fillRect(cartX-20,y-23,40,21);motionCtx.fillStyle="#dfe5df";motionCtx.beginPath();motionCtx.arc(cartX-12,y+1,5,0,Math.PI*2);motionCtx.arc(cartX+12,y+1,5,0,Math.PI*2);motionCtx.fill();motionArrow(motionCtx,cartX,y-34,Math.sign(current.v)*Math.min(80,18+Math.abs(current.v)*10),"#64c7d9","v");if(Math.abs(current.a)>.01)motionArrow(motionCtx,cartX,y-53,Math.sign(current.a)*Math.min(65,18+Math.abs(current.a)*12),"#ff7a68","a");motionText(motionCtx,`x = ${motionFmt(current.x)} m`,cartX,y+42,11,"#ecebdd","center",700);motionText(motionCtx,`t = ${motionFmt(current.time)} s`,left,22,10,"#9ca69f");motionText(motionCtx,`Δx = ${motionFmt(current.x-motionState.x0)} m`,right,22,10,"#f2b84b","right");}
+function motionAxes(ctx,w,h,range,yLabel,top=18,bottom=30){const p={l:43,r:14,t:top,b:bottom},map={x:t=>p.l+t/motionState.duration*(w-p.l-p.r),y:v=>p.t+(range.max-v)/(range.max-range.min)*(h-p.t-p.b),p};for(let i=0;i<=6;i++){const x=map.x(i);motionLine(ctx,x,p.t,x,h-p.b,"rgba(216,222,217,.09)",1);motionText(ctx,String(i),x,h-10,8,"#7f8a83","center");}for(let i=0;i<=4;i++){const value=range.min+(range.max-range.min)*i/4,y=map.y(value);motionLine(ctx,p.l,y,w-p.r,y,"rgba(216,222,217,.09)",1);motionText(ctx,motionFmt(value,1),p.l-6,y+3,8,"#7f8a83","right");}if(range.min<0&&range.max>0)motionLine(ctx,p.l,map.y(0),w-p.r,map.y(0),"rgba(216,222,217,.28)",1.4);motionText(ctx,yLabel,p.l,10,8,"#9ca69f");return map;}function motionPlot(ctx,points,map,key,color,width=2.3){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(map.x(p.time),map.y(p[key])):ctx.moveTo(map.x(p.time),map.y(p[key])));ctx.stroke();}
+function motionDrawPositionChart(){const{w,h}=motionSize(motionRefs.positionChart,positionCtx),points=motionSamples(),range=motionRange(points,"x"),map=motionAxes(positionCtx,w,h,range,"x / m"),current=motionAt(),cx=map.x(current.time),cy=map.y(current.x);positionCtx.clearRect(0,0,w,h);positionCtx.fillStyle="#111512";positionCtx.fillRect(0,0,w,h);const freshMap=motionAxes(positionCtx,w,h,range,"x / m");motionPlot(positionCtx,points,freshMap,"x","#69d18e");if(motionState.showTangent){const dt=.8,t1=Math.max(0,current.time-dt),t2=Math.min(motionState.duration,current.time+dt),x1=current.x+current.v*(t1-current.time),x2=current.x+current.v*(t2-current.time);motionLine(positionCtx,freshMap.x(t1),freshMap.y(x1),freshMap.x(t2),freshMap.y(x2),"#f2b84b",1.8,[5,4]);}motionLine(positionCtx,freshMap.x(current.time),freshMap.p.t,freshMap.x(current.time),h-freshMap.p.b,"rgba(242,184,75,.65)",1.2,[4,4]);positionCtx.fillStyle="#ecebdd";positionCtx.beginPath();positionCtx.arc(freshMap.x(current.time),freshMap.y(current.x),4,0,Math.PI*2);positionCtx.fill();}
+function motionDrawVelocityChart(){
+  const{w,h}=motionSize(motionRefs.velocityChart,velocityCtx),points=motionSamples();
+  const topH=motionState.showAcceleration?Math.round(h*.67):h;
+  velocityCtx.clearRect(0,0,w,h);
+  velocityCtx.fillStyle="#111512";
+  velocityCtx.fillRect(0,0,w,h);
+  const vr=motionRange(points,"v"),map=motionAxes(velocityCtx,w,topH,vr,"v / m·s⁻¹",18,24),zero=map.y(0),currentT=motionState.time;
+  if(motionState.showArea){
+    for(let i=0;i<points.length-1;i++){
+      const start=points[i],next=points[i+1];
+      if(start.time>=currentT)break;
+      const endT=Math.min(next.time,currentT),end=motionAt(endT),avg=(start.v+end.v)/2;
+      velocityCtx.fillStyle=avg>=0?"rgba(242,184,75,.22)":"rgba(255,122,104,.22)";
+      velocityCtx.beginPath();
+      velocityCtx.moveTo(map.x(start.time),zero);
+      velocityCtx.lineTo(map.x(start.time),map.y(start.v));
+      velocityCtx.lineTo(map.x(end.time),map.y(end.v));
+      velocityCtx.lineTo(map.x(end.time),zero);
+      velocityCtx.closePath();
+      velocityCtx.fill();
+      if(endT===currentT)break;
     }
   }
-}
-
-function motionDrawTrack() {
-  const range = motionRange("position");
-  const left = 86;
-  const right = motionWidth - 86;
-  const y = 92;
-  motionCtx.strokeStyle = "rgba(18, 31, 36, 0.24)";
-  motionCtx.lineWidth = 2;
-  motionCtx.beginPath();
-  motionCtx.moveTo(left, y);
-  motionCtx.lineTo(right, y);
-  motionCtx.stroke();
-  motionDrawText("运动方向", left, y - 24, "#121f24", 13, "700");
-  for (let index = 0; index <= 6; index += 1) {
-    const value = range.min + ((range.max - range.min) * index) / 6;
-    const x = motionMap(value, range.min, range.max, left, right - left);
-    motionCtx.strokeStyle = "rgba(18, 31, 36, 0.12)";
-    motionCtx.beginPath();
-    motionCtx.moveTo(x, y - 7);
-    motionCtx.lineTo(x, y + 7);
-    motionCtx.stroke();
-    motionDrawText(value.toFixed(1), x - 12, y + 26);
-  }
-  const point = motionAt();
-  const cartX = motionMap(point.position, range.min, range.max, left, right - left);
-  motionCtx.fillStyle = "#0d7168";
-  motionCtx.fillRect(cartX - 18, y - 21, 36, 22);
-  motionCtx.fillStyle = "#121f24";
-  motionCtx.beginPath();
-  motionCtx.arc(cartX - 10, y + 3, 5, 0, Math.PI * 2);
-  motionCtx.arc(cartX + 10, y + 3, 5, 0, Math.PI * 2);
-  motionCtx.fill();
-  if (Math.abs(point.velocity) > 0.01) {
-    const direction = Math.sign(point.velocity);
-    motionCtx.strokeStyle = "#1f78b4";
-    motionCtx.lineWidth = 3;
-    motionCtx.beginPath();
-    motionCtx.moveTo(cartX, y - 30);
-    motionCtx.lineTo(cartX + direction * 34, y - 30);
-    motionCtx.stroke();
-    motionDrawText("v", cartX + direction * 40, y - 25, "#1f78b4", 13, "700");
+  motionPlot(velocityCtx,points,map,"v","#64c7d9");
+  motionLine(velocityCtx,map.x(currentT),map.p.t,map.x(currentT),topH-map.p.b,"rgba(242,184,75,.65)",1.2,[4,4]);
+  const now=motionAt();
+  velocityCtx.fillStyle="#ecebdd";
+  velocityCtx.beginPath();
+  velocityCtx.arc(map.x(currentT),map.y(now.v),4,0,Math.PI*2);
+  velocityCtx.fill();
+  if(motionState.showAcceleration){
+    const bottomH=h-topH,ar=motionRange(points,"a");
+    motionLine(velocityCtx,0,topH,w,topH,"rgba(216,222,217,.16)",1);
+    velocityCtx.save();
+    velocityCtx.translate(0,topH);
+    const amap=motionAxes(velocityCtx,w,bottomH,ar,"a / m·s⁻²",8,20);
+    motionPlot(velocityCtx,points,amap,"a","#ff7a68",1.8);
+    motionLine(velocityCtx,amap.x(currentT),amap.p.t,amap.x(currentT),bottomH-amap.p.b,"rgba(242,184,75,.55)",1,[4,4]);
+    velocityCtx.restore();
   }
 }
-
-function motionCriticalState() {
-  const point = motionAt();
-  if (Math.abs(point.velocity) < 0.05 && Math.abs(point.acceleration) > 0.01) {
-    return { key: "turn", label: "速度为零的瞬间", note: "运动方向即将改变，但加速度仍然存在。" };
-  }
-  if (point.velocity < 0) return { key: "area", label: "反向运动", note: "v-t 图像在时间轴下方，对应位移增量为负。" };
-  if (point.acceleration === 0) return { key: "slope", label: "匀速运动", note: "x-t 图像斜率不变，v-t 图像保持水平。" };
-  return { key: "slope", label: "正在加速", note: "x-t 图像斜率逐渐变大，v-t 图像斜率为正。" };
-}
-
-function motionSyncReadouts() {
-  const point = motionAt();
-  const critical = motionCriticalState();
-  motionRefs.initialSpeedValue.textContent = motionFormat(motionState.initialSpeed, 2, "m/s");
-  motionRefs.accelerationValue.textContent = motionFormat(motionState.acceleration, 2, "m/s²");
-  motionRefs.timeValue.textContent = motionFormat(motionState.time, 2, "s");
-  motionRefs.timeMetric.textContent = motionFormat(point.time, 2, "s");
-  motionRefs.positionMetric.textContent = motionFormat(point.position, 2, "m");
-  motionRefs.velocityMetric.textContent = motionFormat(point.velocity, 2, "m/s");
-  motionRefs.accelMetric.textContent = motionFormat(point.acceleration, 2, "m/s²");
-  motionRefs.displacementMetric.textContent = motionFormat(point.position, 2, "m");
-  motionRefs.overviewSpeed.textContent = `${motionState.timeScale}x`;
-  motionRefs.overviewTime.textContent = motionFormat(motionState.time, 2, "s");
-  motionRefs.startButton.textContent = motionState.running ? "运行中" : "开始";
-  motionRefs.startButton.classList.toggle("primary", !motionState.running);
-  motionRefs.criticalStateLabel.textContent = critical.label;
-  motionRefs.criticalStateNote.textContent = critical.note;
-  motionRefs.criticalCards.forEach((card) => card.classList.toggle("active", card.dataset.jump === critical.key));
-}
-
-function motionSyncInputs() {
-  motionRefs.initialSpeedInput.value = motionState.initialSpeed;
-  motionRefs.initialSpeedNumber.value = motionState.initialSpeed;
-  motionRefs.accelerationInput.value = motionState.acceleration;
-  motionRefs.accelerationNumber.value = motionState.acceleration;
-  motionRefs.timeInput.value = motionState.time;
-  motionRefs.timeNumber.value = motionState.time.toFixed(2);
-  motionRefs.showPositionToggle.checked = motionState.showPosition;
-  motionRefs.showVelocityToggle.checked = motionState.showVelocity;
-  motionRefs.demoModeToggle.checked = motionState.demoMode;
-  motionRefs.speedButtons.forEach((button) => button.classList.toggle("active", Number(button.dataset.speed) === motionState.timeScale));
-  const config = motionModes[motionState.mode];
-  motionRefs.presetTitle.textContent = config.title;
-  motionRefs.modeGoal.textContent = config.goal;
-  motionRefs.modePrompt.textContent = config.prompt;
-  motionRefs.modeFormula.textContent = config.formula;
-  window.physicsTypesetMath?.();
-  motionRefs.presetButtons.forEach((button) => button.classList.toggle("active", button.dataset.mode === motionState.mode));
-}
-
-function motionRender() {
-  motionCtx.clearRect(0, 0, motionWidth, motionHeight);
-  motionCtx.fillStyle = "#fbfcfa";
-  motionCtx.fillRect(0, 0, motionWidth, motionHeight);
-  motionDrawTrack();
-  motionDrawText("x-t 图像", 58, 166, "#121f24", 14, "700");
-  motionDrawText("v-t 图像", 548, 166, "#121f24", 14, "700");
-  motionDrawChart(96, 188, 390, 250, "position", "#0d7168", "x / m", motionState.showPosition);
-  motionDrawChart(586, 188, 330, 250, "velocity", "#1f78b4", "v / (m/s)", motionState.showVelocity);
-  const cursorX1 = 96 + (390 * motionState.time) / motionState.duration;
-  const cursorX2 = 586 + (330 * motionState.time) / motionState.duration;
-  motionCtx.strokeStyle = "rgba(201, 107, 41, 0.7)";
-  motionCtx.setLineDash([6, 5]);
-  motionCtx.beginPath();
-  motionCtx.moveTo(cursorX1, 188);
-  motionCtx.lineTo(cursorX1, 438);
-  motionCtx.moveTo(cursorX2, 188);
-  motionCtx.lineTo(cursorX2, 438);
-  motionCtx.stroke();
-  motionCtx.setLineDash([]);
-  motionDrawText("同一时刻", cursorX1 - 22, 466, "#c96b29", 11, "700");
-  motionSyncReadouts();
-}
-
-function motionSetValue(key, value) {
-  const limits = { initialSpeed: [-5, 5], acceleration: [-3, 3], time: [0, motionState.duration] };
-  motionState[key] = motionClamp(Number(value) || 0, limits[key][0], limits[key][1]);
-  if (key === "time") motionState.running = false;
-  motionSyncInputs();
-  motionRender();
-}
-
-function motionBindPair(range, number, key) {
-  range.addEventListener("input", () => motionSetValue(key, range.value));
-  number.addEventListener("change", () => motionSetValue(key, number.value));
-}
-
-function motionApplyMode(mode) {
-  const config = motionModes[mode];
-  motionState.mode = mode;
-  motionState.initialSpeed = config.initialSpeed;
-  motionState.acceleration = config.acceleration;
-  motionState.time = 0;
-  motionState.running = false;
-  motionSyncInputs();
-  motionRender();
-}
-
-function motionFrame(now) {
-  if (motionState.running) {
-    if (motionLastFrame === null) motionLastFrame = now;
-    motionState.time += ((now - motionLastFrame) / 1000) * motionState.timeScale;
-    if (motionState.time >= motionState.duration) {
-      motionState.time = motionState.duration;
-      motionState.running = false;
-    }
-    motionLastFrame = now;
-    motionRender();
-  } else {
-    motionLastFrame = null;
-  }
-  requestAnimationFrame(motionFrame);
-}
-
-motionBindPair(motionRefs.initialSpeedInput, motionRefs.initialSpeedNumber, "initialSpeed");
-motionBindPair(motionRefs.accelerationInput, motionRefs.accelerationNumber, "acceleration");
-motionBindPair(motionRefs.timeInput, motionRefs.timeNumber, "time");
-motionRefs.startButton.addEventListener("click", () => { motionState.running = true; motionRender(); });
-motionRefs.pauseButton.addEventListener("click", () => { motionState.running = false; motionRender(); });
-motionRefs.resetButton.addEventListener("click", () => { motionState.time = 0; motionState.running = false; motionRender(); motionSyncInputs(); });
-motionRefs.presetButtons.forEach((button) => button.addEventListener("click", () => motionApplyMode(button.dataset.mode)));
-motionRefs.criticalCards.forEach((card) => card.addEventListener("click", () => {
-  if (card.dataset.jump === "turn") motionApplyMode("brake");
-  else motionState.time = card.dataset.jump === "area" ? 4 : 2;
-  motionState.running = false;
-  motionRender();
-  motionSyncInputs();
-}));
-motionRefs.showPositionToggle.addEventListener("change", () => { motionState.showPosition = motionRefs.showPositionToggle.checked; motionRender(); });
-motionRefs.showVelocityToggle.addEventListener("change", () => { motionState.showVelocity = motionRefs.showVelocityToggle.checked; motionRender(); });
-motionRefs.demoModeToggle.addEventListener("change", () => { motionState.demoMode = motionRefs.demoModeToggle.checked; document.body.classList.toggle("demo-mode", motionState.demoMode); motionRender(); });
-motionRefs.speedButtons.forEach((button) => button.addEventListener("click", () => { motionState.timeScale = Number(button.dataset.speed); motionSyncInputs(); }));
-motionSyncInputs();
-motionRender();
-requestAnimationFrame(motionFrame);
+function motionStatus(){const p=motionAt(),dx=p.x-motionState.x0;if(motionState.mode==="uniform")return{nature:p.v>=0?"速度不变 · 正方向":"速度不变 · 负方向",explain:"相等时间内通过相等位移",formula:`Δx = vt = ${motionFmt(dx)} m`};if(motionState.mode==="accelerated")return{nature:"速度线性增加",explain:"x-t 切线斜率随时间增大",formula:`v = v₀+at = ${motionFmt(p.v)} m/s`};if(motionState.mode==="reversal"){const turn=-motionState.v0/motionState.a;if(Math.abs(p.time-turn)<.04)return{nature:"转向瞬间 · v=0",explain:"位置达到最大值，但 a 仍为负",formula:`t转 = -v₀/a = ${motionFmt(turn)} s`};return{nature:p.v>0?"减速前进":"反向加速",explain:p.v>0?"速度为正但逐渐减小":"v-t 位于时间轴下方，位移开始减少",formula:`Δx = ∫vdt = ${motionFmt(dx)} m`};}return{nature:p.time<2?"阶段一 · 匀加速":p.time<4?"阶段二 · 匀速":p.time<5.5?"阶段三 · 减速":"阶段三 · 反向",explain:"各段速度连续，加速度在分界点跃变",formula:`分段面积和 = ${motionFmt(dx)} m`};}
+function motionSetProgress(input){const p=(+input.value-+input.min)/(+input.max-+input.min)*100;input.style.setProperty("--range-progress",`${p}%`);}function motionSync(){const p=motionAt(),mode=motionModes[motionState.mode],guide=motionGuide[motionState.guideStep],status=motionStatus(),piece=motionState.mode==="piecewise";motionRefs.positionValue.textContent=`${motionFmt(motionState.x0)} m`;motionRefs.initialSpeedValue.textContent=`${motionFmt(motionState.v0)} m/s`;motionRefs.accelerationValue.textContent=`${motionFmt(motionState.a)} m/s²`;motionRefs.timeValue.textContent=`t = ${motionFmt(motionState.time)} s`;motionRefs.modeTitle.textContent=mode.title;motionRefs.modeGoal.textContent=mode.goal;motionRefs.stateBadge.textContent=status.nature;motionRefs.stageHint.textContent=mode.hint;motionRefs.positionMetric.textContent=`${motionFmt(p.x)} m`;motionRefs.velocityMetric.textContent=`${motionFmt(p.v)} m/s`;motionRefs.accelerationMetric.textContent=`${motionFmt(p.a)} m/s²`;motionRefs.distanceMetric.textContent=`${motionFmt(motionDistance())} m`;motionRefs.motionNature.textContent=status.nature;motionRefs.motionExplanation.textContent=status.explain;motionRefs.positionChartStatus.textContent=`切线斜率 = ${motionFmt(p.v)} m/s`;motionRefs.velocityChartStatus.textContent=`面积 = ${motionFmt(p.x-motionState.x0)} m`;motionRefs.stepIndex.textContent=`0${motionState.guideStep+1}`;motionRefs.stepTitle.textContent=guide.title;motionRefs.stepPrompt.textContent=guide.prompt;motionRefs.formulaReadout.textContent=status.formula;motionRefs.playButton.textContent=motionState.running?"播放中…":"▶ 播放";motionRefs.positionInput.disabled=piece;motionRefs.initialSpeedInput.disabled=piece;motionRefs.accelerationInput.disabled=piece;[motionRefs.positionInput,motionRefs.initialSpeedInput,motionRefs.accelerationInput].forEach(i=>i.closest(".control-section").classList.toggle("piecewise-lock",piece));motionRefs.positionInput.value=motionState.x0;motionRefs.initialSpeedInput.value=motionState.v0;motionRefs.accelerationInput.value=motionState.a;motionRefs.timeInput.value=motionState.time;motionRefs.sceneTabs.forEach(b=>b.classList.toggle("is-active",b.dataset.mode===motionState.mode));motionRefs.routeSteps.forEach((b,i)=>b.classList.toggle("is-active",i===motionState.guideStep));motionRefs.scaleButtons.forEach(b=>b.classList.toggle("is-active",Number(b.dataset.scale)===motionState.timeScale));[motionRefs.positionInput,motionRefs.initialSpeedInput,motionRefs.accelerationInput,motionRefs.timeInput].forEach(motionSetProgress);motionDrawTrack();motionDrawPositionChart();motionDrawVelocityChart();}
+function motionSetState(changes){if(changes.x0!==undefined)motionState.x0=motionClamp(changes.x0,-5,5);if(changes.v0!==undefined)motionState.v0=motionClamp(changes.v0,-5,5);if(changes.a!==undefined)motionState.a=motionClamp(changes.a,-3,3);if(changes.time!==undefined)motionState.time=motionClamp(changes.time,0,motionState.duration);if(changes.timeScale!==undefined)motionState.timeScale=Number(changes.timeScale);if(changes.running!==undefined)motionState.running=!!changes.running;motionSync();}function motionSetMode(mode){motionState.mode=mode;motionState.time=0;motionState.running=false;motionState.keyIndex=0;Object.assign(motionState,motionModes[mode].defaults);motionSync();}
+[[motionRefs.positionInput,"x0"],[motionRefs.initialSpeedInput,"v0"],[motionRefs.accelerationInput,"a"]].forEach(([input,key])=>input.addEventListener("input",()=>{motionState.time=0;motionSetState({[key]:input.value,running:false});}));motionRefs.timeInput.addEventListener("input",()=>motionSetState({time:motionRefs.timeInput.value,running:false}));motionRefs.sceneTabs.forEach(b=>b.addEventListener("click",()=>motionSetMode(b.dataset.mode)));motionRefs.routeSteps.forEach((b,i)=>b.addEventListener("click",()=>{motionState.guideStep=i;motionSync();}));motionRefs.scaleButtons.forEach(b=>b.addEventListener("click",()=>motionSetState({timeScale:b.dataset.scale})));motionRefs.playButton.addEventListener("click",()=>motionSetState({running:true}));motionRefs.pauseButton.addEventListener("click",()=>motionSetState({running:false}));motionRefs.keyButton.addEventListener("click",()=>{const keys=motionState.mode==="reversal"?[4]:motionState.mode==="piecewise"?[2,4,5.5,6]:[3];motionState.time=keys[motionState.keyIndex%keys.length];motionState.keyIndex++;motionState.running=false;motionSync();});motionRefs.resetButton.addEventListener("click",()=>{motionState.guideStep=0;motionState.timeScale=1;motionSetMode("uniform");});[[motionRefs.showGhostsToggle,"showGhosts"],[motionRefs.showTangentToggle,"showTangent"],[motionRefs.showAreaToggle,"showArea"],[motionRefs.showAccelerationToggle,"showAcceleration"]].forEach(([input,key])=>input.addEventListener("change",()=>{motionState[key]=input.checked;motionSync();}));function motionProbe(e,canvas){const r=canvas.getBoundingClientRect(),left=43,right=14,time=(e.clientX-r.left-left)/(r.width-left-right)*motionState.duration;motionSetState({time,running:false});}[[motionRefs.positionChart,"position"],[motionRefs.velocityChart,"velocity"]].forEach(([canvas,key])=>{canvas.addEventListener("pointerdown",e=>{motionState.dragging=key;canvas.setPointerCapture(e.pointerId);motionProbe(e,canvas);});canvas.addEventListener("pointermove",e=>{if(motionState.dragging===key)motionProbe(e,canvas);});canvas.addEventListener("pointerup",e=>{motionState.dragging=null;canvas.releasePointerCapture(e.pointerId);});});motionRefs.guideButton.addEventListener("click",()=>motionRefs.guideDialog.showModal());motionRefs.stepButton.addEventListener("click",()=>{motionState.guideStep=(motionState.guideStep+1)%3;motionSync();});motionRefs.focusButton.addEventListener("click",()=>{const active=document.body.classList.toggle("focus-mode");motionRefs.focusButton.setAttribute("aria-pressed",String(active));});motionRefs.fullscreenButton.addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());window.addEventListener("resize",motionSync);let motionLast=performance.now();function motionFrame(now){const dt=Math.min(.05,(now-motionLast)/1000);motionLast=now;if(motionState.running){motionState.time+=dt*motionState.timeScale;if(motionState.time>=motionState.duration){motionState.time=motionState.duration;motionState.running=false;}motionSync();}requestAnimationFrame(motionFrame);}window.motionLab={at:motionAt,distance:motionDistance,samples:motionSamples,getState:()=>({...motionState}),setState:motionSetState,setMode:motionSetMode};motionSync();requestAnimationFrame(motionFrame);

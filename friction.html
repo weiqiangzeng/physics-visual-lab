@@ -1,26 +1,124 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>静摩擦力与滑动摩擦力可视化实验台</title><link rel="stylesheet" href="./styles.css?v=math-controls-3" /><link rel="stylesheet" href="./platform.css?v=workspace-2" /><link rel="stylesheet" href="./model-lab.css?v=friction-fix-1" /></head>
-  <body class="model-lab friction-lab">
-    <main class="app"><section class="workspace"><div class="stage">
-      <div class="stage-head"><div class="stage-title"><h1>静摩擦力与滑动摩擦力可视化实验台</h1><span class="demo-badge" id="demoBadge">教学演示中</span></div><div class="actions"><a class="ghost-link" href="./index.html">实验目录</a><button id="startButton" class="primary" type="button">逐渐增大外力</button><button id="pauseButton" type="button">暂停</button><button id="resetButton" type="button">重置</button></div></div>
-      <p class="stage-subtitle">增大外力，观察静摩擦到滑动摩擦的转变。</p>
-      <section class="lesson-guide" aria-label="当前观察任务"><div class="guide-main"><span class="preset-label">观察任务</span><strong id="modeGoal">找到最大静摩擦力</strong><p id="modePrompt">让外力从 0 增大，比较外力、摩擦力和加速度的读数。</p></div><div class="guide-formula" id="modeFormula">\(0 \le f_{\mathrm{静}} \le \mu_s N\)</div></section>
-      <details class="teaching-route compact-guidance" aria-label="观察提示"><summary>展开观察提示</summary><div><span class="preset-label">观察路线</span><ol><li>增大外力，找到最大静摩擦力。</li><li>继续增力，比较滑动摩擦力和加速度。</li></ol></div><div><span class="preset-label">关键问题</span><ul><li>静止时摩擦力一定等于 \(\mu N\) 吗？</li><li>两种摩擦力何时切换？</li></ul></div></details>
-      <div class="preset-bar"><div class="preset-copy"><span class="preset-label">观察模式</span><strong id="presetTitle">逐渐增大外力</strong></div><div class="preset-buttons"><button class="preset-button active" type="button" data-mode="increase">逐渐增大外力</button><button class="preset-button" type="button" data-mode="threshold">临界状态</button><button class="preset-button" type="button" data-mode="slide">滑动后比较</button></div></div>
-      <div class="canvas-wrap main-canvas"><canvas id="frictionCanvas" class="lab-canvas" width="980" height="540" aria-label="摩擦力响应和物体受力图"></canvas></div>
-      <section class="critical-strip" aria-label="摩擦力关键状态"><article class="critical-card" id="staticCard" role="button" tabindex="0" data-jump="static"><span>静止阶段</span><strong>\(f_{\text{静}} = F_{\text{外}}\)</strong><p>摩擦力随外力需要变化。</p></article><article class="critical-card" id="limitCard" role="button" tabindex="0" data-jump="limit"><span>临界状态</span><strong>\(f_{\max} = \mu_s N\)</strong><p>再增大外力就会开始滑动。</p></article><article class="critical-card" id="slideCard" role="button" tabindex="0" data-jump="slide"><span>滑动阶段</span><strong>\(f_{\text{滑}} \approx \mu_k N\)</strong><p>摩擦力不再随外力线性增加。</p></article><article class="critical-now"><span>当前观察</span><strong id="criticalStateLabel">静止</strong><p id="criticalStateNote">外力被静摩擦力完全抵消。</p></article></section>
-      <div class="stage-readouts"><article class="stage-readout"><span>F外</span><strong id="appliedMetric">0.00 N</strong></article><article class="stage-readout"><span>f</span><strong id="frictionMetric">0.00 N</strong></article><article class="stage-readout"><span>fmax</span><strong id="maxStaticMetric">0.00 N</strong></article><article class="stage-readout"><span>a</span><strong id="accelMetric">0.00 m/s²</strong></article><article class="stage-readout"><span>状态</span><strong id="stateMetric">静止</strong></article></div>
-    </div><aside class="controls"><div class="controls-overview"><div><span class="preset-label">实验控制</span><h2>接触面参数</h2></div><div class="overview-badges"><span class="overview-badge" id="overviewForce">0.00 N</span><span class="overview-badge" id="overviewState">静止</span></div></div>
-      <details class="section-panel" open><summary class="section-summary"><span>核心参数</span></summary><div class="section-body">
-        <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">质量</span><span class="label-math">\(m / \mathrm{kg}\)</span></div><strong id="massValue">1.00 kg</strong></div><input id="massInput" type="range" min="0.5" max="5" step="0.1" value="1" /><div class="inline-edit"><input id="massNumber" class="number-input" type="number" min="0.5" max="5" step="0.1" value="1" /><span class="input-unit">\(\mathrm{kg}\)</span></div></label>
-        <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">静摩擦因数</span><span class="label-math">\(\mu_s\)</span></div><strong id="staticMuValue">0.50</strong></div><input id="staticMuInput" type="range" min="0.1" max="1" step="0.01" value="0.5" /><div class="inline-edit"><input id="staticMuNumber" class="number-input" type="number" min="0.1" max="1" step="0.01" value="0.5" /></div></label>
-        <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">滑动摩擦因数</span><span class="label-math">\(\mu_k\)</span></div><strong id="kineticMuValue">0.35</strong></div><input id="kineticMuInput" type="range" min="0.05" max="0.8" step="0.01" value="0.35" /><div class="inline-edit"><input id="kineticMuNumber" class="number-input" type="number" min="0.05" max="0.8" step="0.01" value="0.35" /></div></label>
-        <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title">目标外力</span><span class="label-math">\(F_{\text{外}} / \mathrm{N}\)</span></div><strong id="forceValue">5.00 N</strong></div><input id="forceInput" type="range" min="0" max="12" step="0.1" value="5" /><div class="inline-edit"><input id="forceNumber" class="number-input" type="number" min="0" max="12" step="0.1" value="5" /><span class="input-unit">\(\mathrm{N}\)</span></div></label>
-      </div></details>
-      <details class="section-panel" open><summary class="section-summary"><span>显示与播放</span></summary><div class="section-body"><section class="display-panel"><div class="toggle-grid"><label class="toggle-item"><input id="showVectorsToggle" type="checkbox" checked /><span>显示受力箭头</span></label><label class="toggle-item"><input id="showGraphToggle" type="checkbox" checked /><span>显示响应曲线</span></label><label class="toggle-item"><input id="demoModeToggle" type="checkbox" /><span>教学演示模式</span></label></div></section></div></details>
-      <details class="section-panel" open><summary class="section-summary"><span>关键公式</span></summary><div class="section-body"><div class="formula-panel"><strong>\(f_{\mathrm{max}} = \mu_s N\)</strong><strong>\(f_{\mathrm{滑}} = \mu_k N\)</strong></div></div></details>
-    </aside></section></main>
-    <script src="./friction.js?v=friction-fix-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-2"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#151817" />
+    <title>摩擦力实验室</title>
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
+    <link rel="stylesheet" href="./platform.css?v=workspace-3" />
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./friction.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab friction-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark" aria-hidden="true">Φ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>力学 · 实验 02</span><strong>摩擦力的突变</strong></div>
+      <div class="connection-state"><i aria-hidden="true"></i>模型已连接</div>
+      <div class="actions topbar-actions">
+        <button id="guideButton" class="toolbar-button" type="button">实验指南</button>
+        <button id="stepButton" class="toolbar-button" type="button">分步演示</button>
+        <button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button>
+        <button id="fullscreenButton" class="toolbar-button icon-command" type="button" title="全屏" aria-label="全屏">⛶</button>
+      </div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">MECHANICS / 02</span><h1>摩擦力<br />的突变</h1><p>从接触状态出发，观察静摩擦自适应、最大静摩擦和滑动摩擦之间的切换。</p></div>
+        <div class="rail-section">
+          <span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="adaptive"><span>01</span><strong>自适应</strong><i>f静随需要改变</i></button>
+          <button class="scene-tab" type="button" data-mode="threshold"><span>02</span><strong>临界状态</strong><i>找到 f静,max</i></button>
+          <button class="scene-tab" type="button" data-mode="slide"><span>03</span><strong>滑动与停下</strong><i>状态具有延续性</i></button>
+          <button class="scene-tab" type="button" data-mode="compare"><span>04</span><strong>参数对照</strong><i>改变 μ 与 m</i></button>
+        </div>
+        <div class="rail-section experiment-route">
+          <span class="rail-label">判断路径</span>
+          <button class="route-step is-active" type="button" data-guide-step="0"><b>1</b><span>判断接触状态<small>静止还是相对滑动</small></span></button>
+          <button class="route-step" type="button" data-guide-step="1"><b>2</b><span>选择摩擦模型<small>静摩擦不能先写 μN</small></span></button>
+          <button class="route-step" type="button" data-guide-step="2"><b>3</b><span>计算运动变化<small>由合力判断加减速</small></span></button>
+        </div>
+        <div class="rail-equation"><span>分段模型</span><strong>f<sub>静</sub> ≤ μ<sub>s</sub>N</strong><strong>f<sub>滑</sub> = μ<sub>k</sub>N</strong><small>先判断状态，再选公式</small></div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>接触面参数</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section">
+          <div class="control-label"><span>质量 <i>m</i></span><strong id="massValue">2.00 kg</strong></div>
+          <input id="massInput" class="range-input mass-range" type="range" min="0.5" max="5" step="0.1" value="2" aria-label="质量" />
+        </section>
+        <section class="control-section coefficient-controls">
+          <div class="control-label"><span>静摩擦因数 <i>μs</i></span><strong id="staticMuValue">0.50</strong></div>
+          <input id="staticMuInput" class="range-input static-range" type="range" min="0.1" max="1" step="0.01" value="0.5" aria-label="静摩擦因数" />
+          <div class="control-label kinetic-label"><span>滑动摩擦因数 <i>μk</i></span><strong id="kineticMuValue">0.30</strong></div>
+          <input id="kineticMuInput" class="range-input kinetic-range" type="range" min="0.05" max="0.8" step="0.01" value="0.3" aria-label="滑动摩擦因数" />
+          <p class="parameter-note" id="coefficientNote">保持 μk ≤ μs，体现起动后的摩擦力突降。</p>
+        </section>
+        <section class="control-section">
+          <div class="control-label"><span>目标外力 <i>F外</i></span><strong id="forceValue">14.0 N</strong></div>
+          <input id="forceInput" class="range-input force-range" type="range" min="0" max="30" step="0.1" value="14" aria-label="目标外力" />
+          <button id="thresholdButton" class="secondary-command full-command" type="button">定位最大静摩擦力</button>
+        </section>
+        <section class="control-section playback-controls">
+          <div class="section-headline"><span class="section-kicker">外力扫描</span><strong id="timeValue">t = 0.00 s</strong></div>
+          <div class="playback-row"><button id="scanButton" class="primary-command" type="button">▶ 从零扫描</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="restartButton" class="secondary-command" type="button">↺ 重播</button></div>
+          <label class="speed-row" for="rampRateInput"><span>增力速率</span><strong id="rampRateValue">3.0 N/s</strong></label>
+          <input id="rampRateInput" class="range-input rate-range" type="range" min="1" max="10" step="0.5" value="3" aria-label="增力速率" />
+        </section>
+        <section class="control-section overlay-controls">
+          <span class="section-kicker">分析叠加层</span>
+          <div class="toggle-grid">
+            <label><input id="showForcesToggle" type="checkbox" checked /><span>分力箭头</span></label>
+            <label><input id="showNetToggle" type="checkbox" checked /><span>合力箭头</span></label>
+            <label><input id="showContactToggle" type="checkbox" checked /><span>接触微区</span></label>
+            <label><input id="showTrailToggle" type="checkbox" checked /><span>运动轨迹</span></label>
+          </div>
+        </section>
+        <div class="control-actions"><button id="recordButton" class="primary-command" type="button">记录当前点</button><button id="clearDataButton" class="secondary-command" type="button">清空记录</button></div>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景">
+          <button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="adaptive"><span>01</span><strong>自适应</strong><i>f静随需要改变</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="threshold"><span>02</span><strong>临界</strong><i>找到 f静,max</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="slide"><span>03</span><strong>滑动</strong><i>观察停下</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="compare"><span>04</span><strong>对照</strong><i>改变 μ 与 m</i></button>
+        </nav>
+        <header class="stage-head">
+          <div class="stage-title"><span class="stage-breadcrumb">摩擦力 / <b id="modeTitle">静摩擦自适应</b></span><h2 id="modeGoal">静止时，摩擦力恰好抵消外力</h2></div>
+          <div class="stage-status"><span id="stateBadge" class="state-badge">静摩擦</span><span id="stageHint" class="drag-hint">拖动外力滑块或开始扫描</span></div>
+        </header>
+        <section class="instrument-stage" aria-label="摩擦力受力与运动场景">
+          <canvas id="frictionCanvas" width="900" height="470" aria-label="粗糙水平面上物块的受力和接触状态"></canvas>
+          <aside class="live-readouts" aria-label="实时读数">
+            <div class="readout-head"><span>LIVE DATA</span><i aria-hidden="true"></i></div>
+            <dl>
+              <div><dt>外力 <i>F外</i></dt><dd id="appliedMetric">0.00 N</dd></div>
+              <div><dt>摩擦力 <i>f</i></dt><dd id="frictionMetric">0.00 N</dd></div>
+              <div><dt>最大静摩擦 <i>fs,max</i></dt><dd id="maxStaticMetric">9.80 N</dd></div>
+              <div><dt>加速度 <i>a</i></dt><dd id="accelerationMetric">0.00 m/s²</dd></div>
+            </dl>
+            <div class="law-check"><span>状态判断</span><strong id="stateNature">F外 ≤ fs,max</strong><small id="stateExplanation">静摩擦按需要取值，不等于固定的 μsN</small></div>
+          </aside>
+        </section>
+        <section class="analysis-grid" aria-label="数据图像">
+          <article class="chart-panel"><header><div><span>FRICTION RESPONSE</span><h3>摩擦力 f – 外力 F外</h3></div><strong id="responseStatus">临界值 9.80 N</strong></header><canvas id="responseChart" width="620" height="230" aria-label="摩擦力随外力变化的分段响应图"></canvas></article>
+          <article class="chart-panel"><header><div><span id="secondaryKicker">ACCELERATION RESPONSE</span><h3 id="secondaryTitle">加速度 a – 外力 F外</h3></div><strong id="sampleStatus">0 个记录点</strong></header><canvas id="secondaryChart" width="620" height="230" aria-label="加速度响应或速度时间图"></canvas></article>
+        </section>
+        <footer class="observation-bar">
+          <span class="step-index" id="stepIndex">01</span>
+          <div><strong id="stepTitle">先判断接触状态</strong><p id="stepPrompt">物块静止时，静摩擦力会在 0 到最大值之间自适应。</p></div>
+          <div class="formula-state"><span id="formulaLabel">当前关系</span><strong id="formulaReadout">f静 = F外 = 0.00 N</strong></div>
+        </footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>摩擦力判断指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>先判状态</b><span>接触面没有相对滑动时，摩擦力按平衡或动力学需要确定。</span></li><li><b>寻找上限</b><span>静摩擦只能增长到 μsN；达到上限并不等于已经滑动。</span></li><li><b>切换模型</b><span>一旦滑动，摩擦力改用 μkN；即使降低外力，也要等物块停下才回到静摩擦。</span></li><li><b>核对运动</b><span>比较外力和滑动摩擦力，由合力判断加速、减速或停下。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+
+    <script src="./friction.js?v=flagship-1"></script>
+    <script src="./url-state.js?v=protocol-v1"></script>
+    <script src="./learning-records.js?v=protocol-v1"></script>
+    <script src="./platform.js?v=workspace-31"></script>
   </body>
 </html>

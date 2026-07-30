@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" /><meta name="theme-color" content="#101412" />
+  <title>电容器与电场能量实验室</title>
+  <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" /><link rel="stylesheet" href="./circular-critical.css?v=flagship-1" /><link rel="stylesheet" href="./capacitor.css?v=flagship-1" />
+</head>
+<body class="flagship-lab circular-critical-lab capacitor-lab">
+  <header class="lab-topbar"><a class="lab-brand" href="./index.html"><span class="brand-mark">∿</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a><div class="topbar-title"><span>电场 · 实验 03</span><strong>电容器与电场能量</strong></div><div class="connection-state"><i></i><span>电荷与能量账本已连接</span></div><div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button">⛶</button></div></header>
+  <main class="lab-shell">
+    <nav class="lesson-rail"><div class="rail-heading"><span class="eyebrow">CAPACITOR / 03</span><h1>电容器<br />与电场能量</h1><p>先确定电源连接状态，再追踪几何、介质、电荷、电压、场强和储能。</p></div>
+      <div class="rail-section"><span class="rail-label">实验场景</span>
+        <button class="scene-tab is-active" data-mode="geometry"><span>01</span><strong>几何与电容</strong><i>C 由结构和介质决定</i></button>
+        <button class="scene-tab" data-mode="constraint"><span>02</span><strong>连接状态</strong><i>固定 U 或固定 Q</i></button>
+        <button class="scene-tab" data-mode="dielectric"><span>03</span><strong>插入介质</strong><i>极化、吸引力与能量</i></button>
+        <button class="scene-tab" data-mode="breakdown"><span>04</span><strong>储能边界</strong><i>电场能密度与击穿</i></button>
+      </div>
+      <div class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+        <button class="route-step is-active"><b>1</b><span>先认结构量<small>C=εA/d 与带电状态无关</small></span></button>
+        <button class="route-step"><b>2</b><span>再定约束量<small>接电源 U 不变，断开后 Q 不变</small></span></button>
+        <button class="route-step"><b>3</b><span>最后核能量<small>电池功、外力功与 ΔW 圈账</small></span></button>
+      </div>
+      <div class="rail-equation"><span>平行板近似</span><strong>C=ε₀κA/d</strong><strong>W=QU/2</strong><small>忽略边缘效应；极板尺寸和电荷数量按教学可见性缩放</small></div>
+    </nav>
+    <aside class="controls">
+      <div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>结构、介质与边界</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+      <section class="control-section">
+        <div class="control-label"><span>极板面积 <i>A</i></span><strong id="areaValue">200 cm²</strong></div><input id="areaInput" class="range-input area-range" type="range" min="50" max="500" step="5" value="200" />
+        <div class="control-label"><span>极板间距 <i>d</i></span><strong id="distanceValue">2.00 mm</strong></div><input id="distanceInput" class="range-input distance-range" type="range" min=".5" max="8" step=".05" value="2" />
+        <div class="control-label"><span>电源电压 <i>U₀</i></span><strong id="voltageValue">120 V</strong></div><input id="voltageInput" class="range-input voltage-range" type="range" min="20" max="3000" step="10" value="120" />
+      </section>
+      <section class="control-section"><div class="control-label"><span>连接状态</span><strong id="constraintValue">接电源 · U固定</strong></div><div class="segmented-control"><button type="button" class="is-active" data-constraint="battery">接电源</button><button type="button" data-constraint="isolated">断开电源</button></div></section>
+      <section class="control-section">
+        <div class="control-label"><span>相对介电常数 <i>κ</i></span><strong id="kappaValue">4.00</strong></div><input id="kappaInput" class="range-input kappa-range" type="range" min="1" max="10" step=".1" value="4" />
+        <div class="control-label"><span>介质插入比例 <i>x/L</i></span><strong id="fractionValue">0%</strong></div><input id="fractionInput" class="range-input fraction-range" type="range" min="0" max="1" step=".005" value="0" />
+      </section>
+      <section class="control-section"><span class="section-kicker">典型状态</span><div class="critical-presets"><button data-preset="baseline" type="button">初始真空</button><button data-preset="double-distance" type="button">板距加倍</button><button data-preset="dielectric" type="button">插满介质</button><button data-preset="breakdown" type="button">击穿临界</button></div></section>
+      <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showChargesToggle" type="checkbox" checked /><span>极板电荷</span></label><label><input id="showFieldToggle" type="checkbox" checked /><span>场强箭头</span></label><label><input id="showDipolesToggle" type="checkbox" checked /><span>介质极化</span></label><label><input id="showEnergyToggle" type="checkbox" checked /><span>能量密度</span></label></div></section>
+    </aside>
+    <section class="stage">
+      <nav class="mobile-scene-tabs"><button class="scene-tab mobile-scene-tab is-active" data-mode="geometry"><span>01</span><strong>几何</strong></button><button class="scene-tab mobile-scene-tab" data-mode="constraint"><span>02</span><strong>约束</strong></button><button class="scene-tab mobile-scene-tab" data-mode="dielectric"><span>03</span><strong>介质</strong></button><button class="scene-tab mobile-scene-tab" data-mode="breakdown"><span>04</span><strong>边界</strong></button></nav>
+      <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">电场 / <b id="modeTitle">几何与电容</b></span><h2 id="modeGoal">改变面积和板距，辨认电容器自身的结构属性</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge is-battery">接电源 · U固定</span><span id="stageHint" class="drag-hint">先看 C，再看带电状态怎样响应</span></div></header>
+      <section class="instrument-stage"><canvas id="capacitorCanvas" width="900" height="470"></canvas><aside class="live-readouts"><div class="readout-head"><span>CAPACITOR STATE</span><i></i></div><dl>
+        <div><dt id="metric1Label">电容 C</dt><dd id="metric1">88.542 pF</dd></div><div><dt id="metric2Label">电荷 Q</dt><dd id="metric2">10.625 nC</dd></div><div><dt id="metric3Label">电压 U</dt><dd id="metric3">120 V</dd></div><div><dt id="metric4Label">场强 E</dt><dd id="metric4">60.0 kV/m</dd></div><div><dt id="metric5Label">储能 W</dt><dd id="metric5">0.638 μJ</dd></div><div><dt id="metric6Label">极板吸力</dt><dd id="metric6">0.319 mN</dd></div>
+      </dl><div class="law-check"><span>当前物理判断</span><strong id="natureText">电容只由几何与介质决定</strong><small id="explanationText">接电源时 U 固定，电池负责交换电荷</small></div></aside></section>
+      <section class="analysis-grid"><article class="chart-panel"><header><div><span>RESPONSE / PARAMETER</span><h3 id="relationTitle">电容随板距变化</h3></div><strong id="relationStatus">C∝1/d</strong></header><canvas id="relationChart" width="620" height="230"></canvas></article><article class="chart-panel"><header><div><span>ENERGY LEDGER</span><h3 id="energyTitle">电荷、电压与储能</h3></div><strong id="energyStatus">ΔW=W电池+W外</strong></header><canvas id="energyChart" width="620" height="230"></canvas></article></section>
+      <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先认结构量</strong><p id="stepPrompt">电容器尚未接电时，是否已经具有电容？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">C=ε₀κA/d</strong></div></footer>
+    </section>
+  </main>
+  <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>电容器与电场能量指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>结构</b><span>平行板电容取决于面积、板距和介质，不取决于此刻带了多少电荷。</span></li><li><b>约束</b><span>接电源时电压固定，断开电源后极板自由电荷固定；改变结构前必须先确定约束。</span></li><li><b>介质</b><span>介质极化削弱同一自由电荷产生的电场，提高电容，并受到向电容器内部的吸引力。</span></li><li><b>能量</b><span>电容器能量变化不总等于外力功，接电源时还要计入电池交换的能量。</span></li><li><b>边界</b><span>模型忽略边缘效应、漏电与击穿后的放电细节；达到击穿场强后理想绝缘模型失效。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+  <script src="./capacitor-model.js?v=flagship-1"></script><script src="./capacitor.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+</body>
+</html>

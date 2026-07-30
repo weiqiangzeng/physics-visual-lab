@@ -7,8 +7,8 @@
     <title>双缝干涉实验室</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=workspace-3" />
-    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-1" />
-    <link rel="stylesheet" href="./double-slit.css?v=flagship-1" />
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./double-slit.css?v=photon-2" />
   </head>
   <body class="flagship-lab double-slit-lab">
     <header class="lab-topbar">
@@ -16,7 +16,7 @@
         <span class="brand-mark" aria-hidden="true">Φ</span>
         <span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span>
       </a>
-      <div class="topbar-title"><span>光学 · 实验 02</span><strong>双缝干涉</strong></div>
+      <div class="topbar-title"><span>光学 · 实验 03</span><strong>双缝干涉</strong></div>
       <div class="connection-state"><i aria-hidden="true"></i>模型已连接</div>
       <div class="actions topbar-actions">
         <button id="guideButton" class="toolbar-button" type="button">实验指南</button>
@@ -38,6 +38,7 @@
           <button class="scene-tab is-active" type="button" data-mode="spacing"><span>01</span><strong>条纹间距</strong><i>测量 β</i></button>
           <button class="scene-tab" type="button" data-mode="path"><span>02</span><strong>路程差</strong><i>判断明暗</i></button>
           <button class="scene-tab" type="button" data-mode="compare"><span>03</span><strong>参数规律</strong><i>建立关系</i></button>
+          <button class="scene-tab" type="button" data-mode="photon"><span>04</span><strong>单光子</strong><i>概率累积</i></button>
         </div>
         <div class="rail-section experiment-route">
           <span class="rail-label">探究路径</span>
@@ -94,27 +95,49 @@
           </div>
         </section>
 
-        <div class="control-actions">
+        <section id="photonControls" class="control-section photon-controls" hidden>
+          <div class="section-headline"><span class="section-kicker">路径信息</span><strong id="photonCount">0 次探测</strong></div>
+          <div class="segmented-control" role="group" aria-label="路径信息状态">
+            <button class="is-active" type="button" data-path-measurement="off" aria-pressed="true">不测路径</button>
+            <button type="button" data-path-measurement="on" aria-pressed="false">测量路径</button>
+          </div>
+          <div class="photon-command-row">
+            <button id="photonPlayButton" class="primary-command" type="button" aria-pressed="false">▶ 播放</button>
+            <button id="photonStepButton" class="secondary-command" type="button">单发</button>
+            <button id="photonBurstButton" class="secondary-command" type="button">+100</button>
+            <button id="clearPhotonsButton" class="secondary-command" type="button" title="清空光子落点" aria-label="清空光子落点">清空</button>
+          </div>
+          <label class="photon-speed" for="photonSpeedInput"><span>发射速率</span><strong id="photonSpeedValue">20 /s</strong></label>
+          <input id="photonSpeedInput" class="range-input" type="range" min="5" max="80" step="5" value="20" aria-label="光子发射速率" />
+        </section>
+
+        <div id="macroActions" class="control-actions">
           <button id="darkButton" class="secondary-command" type="button">定位首个暗纹</button>
           <button id="recordButton" class="primary-command" type="button">记录参数</button>
         </div>
       </aside>
 
       <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景">
+          <button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="spacing"><span>01</span><strong>条纹间距</strong><i>测量 β</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="path"><span>02</span><strong>路程差</strong><i>判断明暗</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="compare"><span>03</span><strong>参数规律</strong><i>建立关系</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="photon"><span>04</span><strong>单光子</strong><i>概率累积</i></button>
+        </nav>
         <header class="stage-head">
           <div class="stage-title"><span class="stage-breadcrumb">双缝干涉 / <b id="modeTitle">条纹间距</b></span><h2 id="modeGoal">测量相邻亮纹之间的距离</h2></div>
-          <div class="stage-status"><span id="stateBadge" class="state-badge">中央亮纹</span><span class="drag-hint">拖动屏上探针测量位置</span></div>
+          <div class="stage-status"><span id="stateBadge" class="state-badge">中央亮纹</span><span id="stageHint" class="drag-hint">拖动屏上探针测量位置</span></div>
         </header>
 
         <section class="instrument-stage" aria-label="双缝干涉光路和观察屏">
-          <canvas id="doubleSlitCanvas" width="900" height="470" aria-label="可拖动探针的双缝干涉装置"></canvas>
+          <canvas id="doubleSlitCanvas" width="900" height="470" aria-label="双缝干涉装置与单光子探测画面"></canvas>
           <aside class="live-readouts" aria-label="实时读数">
             <div class="readout-head"><span>LIVE DATA</span><i aria-hidden="true"></i></div>
             <dl>
-              <div><dt>条纹间距 <i>β</i></dt><dd id="spacingMetric">2.40 mm</dd></div>
-              <div><dt>探针位置 <i>y</i></dt><dd id="positionMetric">0.00 mm</dd></div>
-              <div><dt>路程差 <i>Δr/λ</i></dt><dd id="pathMetric">0.000</dd></div>
-              <div><dt>相对光强 <i>I/I₀</i></dt><dd id="intensityMetric">1.000</dd></div>
+              <div><dt id="spacingMetricLabel">条纹间距 <i>β</i></dt><dd id="spacingMetric">2.40 mm</dd></div>
+              <div><dt id="positionMetricLabel">探针位置 <i>y</i></dt><dd id="positionMetric">0.00 mm</dd></div>
+              <div><dt id="pathMetricLabel">路程差 <i>Δr/λ</i></dt><dd id="pathMetric">0.000</dd></div>
+              <div><dt id="intensityMetricLabel">相对光强 <i>I/I₀</i></dt><dd id="intensityMetric">1.000</dd></div>
             </dl>
             <div class="law-check"><span>明暗判定</span><strong id="fringeOrder">m = 0</strong><small id="fringeState">相长干涉 · 亮纹</small></div>
           </aside>
@@ -126,8 +149,8 @@
             <canvas id="intensityChart" width="620" height="230" aria-label="屏上光强分布图"></canvas>
           </article>
           <article class="chart-panel">
-            <header><div><span>FRINGE SPACING</span><h3>β – λ 关系</h3></div><button id="clearDataButton" type="button">清空数据</button></header>
-            <canvas id="spacingChart" width="620" height="230" aria-label="条纹间距与波长关系图"></canvas>
+            <header><div><span id="secondaryChartKicker">FRINGE SPACING</span><h3 id="secondaryChartTitle">β – λ 关系</h3></div><button id="clearDataButton" type="button">清空数据</button></header>
+            <canvas id="spacingChart" width="620" height="230" aria-label="条纹间距关系图或单光子落点统计图"></canvas>
           </article>
         </section>
 
@@ -147,14 +170,15 @@
           <li><b>解释</b><span>比较 Δr/λ：整数对应相长干涉，半整数对应相消干涉。</span></li>
           <li><b>测量</b><span>改变 λ、L 或 d，每次只改变一个参数并记录 β。</span></li>
           <li><b>拓展</b><span>改变单缝宽度 a，观察外层条纹如何受到衍射包络抑制。</span></li>
+          <li><b>微观</b><span>逐个发射光子，比较无路径信息与测量路径时的落点统计。</span></li>
         </ol>
         <button class="primary-command" value="close">开始实验</button>
       </form>
     </dialog>
 
-    <script src="./double-slit.js?v=flagship-1"></script>
+    <script src="./double-slit.js?v=photon-5"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=workspace-3"></script>
+    <script src="./platform.js?v=workspace-31"></script>
   </body>
 </html>

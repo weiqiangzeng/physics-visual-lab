@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="theme-color" content="#101412" />
+    <title>静电平衡与静电感应实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./circular-critical.css?v=flagship-1" />
+    <link rel="stylesheet" href="./electrostatic-conductor.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab circular-critical-lab electrostatic-conductor-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">∿</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>电场 · 实验 02</span><strong>静电平衡与静电感应</strong></div>
+      <div class="connection-state"><i></i><span>导体边界模型已连接</span></div>
+      <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div>
+    </header>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">CONDUCTOR / 02</span><h1>静电平衡<br />与静电感应</h1><p>追踪自由电荷重排，核对导体内部场强、表面电荷、等势条件、屏蔽与接地边界。</p></div>
+        <div class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" data-mode="redistribution"><span>01</span><strong>电荷重排</strong><i>内部场驱动自由电荷</i></button>
+          <button class="scene-tab" data-mode="induction"><span>02</span><strong>球面感应</strong><i>孤立中性与接地边界</i></button>
+          <button class="scene-tab" data-mode="shielding"><span>03</span><strong>静电屏蔽</strong><i>外场中导体内部 E=0</i></button>
+          <button class="scene-tab" data-mode="cavity"><span>04</span><strong>带电空腔</strong><i>内外表面电荷账本</i></button>
+        </div>
+        <div class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active"><b>1</b><span>先看电荷运动<small>内部场不为零就继续重排</small></span></button>
+          <button class="route-step"><b>2</b><span>再查边界条件<small>E内=0，Et=0，表面等势</small></span></button>
+          <button class="route-step"><b>3</b><span>最后做电荷账本<small>接地和空腔改变电荷来源</small></span></button>
+        </div>
+        <div class="rail-equation"><span>静电平衡条件</span><strong>E内=0 · Eₜ=0</strong><strong>σ=ε₀Eₙ</strong><small>电荷尺寸、重排时间和场线密度按教学可见性缩放</small></div>
+      </nav>
+      <aside class="controls" aria-label="实验控制">
+        <div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>外场、边界与探针</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section id="fieldSection" class="control-section">
+          <div class="control-label"><span>外加场强 <i>E₀</i></span><strong id="fieldValue">1000 V/m</strong></div><input id="fieldInput" class="range-input field-range" type="range" min="100" max="3000" step="50" value="1000" aria-label="外加电场强度" />
+          <div class="control-label"><span>导体球半径 <i>a</i></span><strong id="radiusValue">1.00 m</strong></div><input id="radiusInput" class="range-input radius-range" type="range" min="0.5" max="2" step="0.05" value="1" aria-label="导体球半径" />
+        </section>
+        <section id="inductionSection" class="control-section" hidden>
+          <div class="control-label"><span>外部点电荷 <i>q</i></span><strong id="chargeValue">+1.00 nC</strong></div><input id="chargeInput" class="range-input charge-range" type="range" min="-3" max="3" step="0.1" value="1" aria-label="外部点电荷" />
+          <div class="control-label"><span>距离比 <i>d/a</i></span><strong id="distanceValue">2.00</strong></div><input id="distanceInput" class="range-input distance-range" type="range" min="1.2" max="4" step="0.05" value="2" aria-label="点电荷距离比" />
+          <div class="control-label"><span>导体边界</span><strong id="boundaryValue">孤立中性</strong></div><div class="segmented-control"><button type="button" data-boundary="isolated" class="is-active">孤立中性</button><button type="button" data-boundary="grounded">接地</button></div>
+        </section>
+        <section id="probeSection" class="control-section">
+          <div class="control-label"><span>探针半径比 <i>r/a</i></span><strong id="probeRadiusValue">0.50</strong></div><input id="probeRadiusInput" class="range-input probe-range" type="range" min="0.05" max="3.5" step="0.01" value="0.5" aria-label="探针半径比" />
+          <div class="control-label"><span>探针方位角 <i>θ</i></span><strong id="probeAngleValue">0°</strong></div><input id="probeAngleInput" class="range-input angle-range" type="range" min="0" max="360" step="1" value="0" aria-label="探针方位角" />
+        </section>
+        <section id="cavitySection" class="control-section" hidden>
+          <div class="control-label"><span>空腔内电荷 <i>q</i></span><strong id="cavityChargeValue">+2.00 nC</strong></div><input id="cavityChargeInput" class="range-input charge-range" type="range" min="-5" max="5" step="0.1" value="2" aria-label="空腔内电荷" />
+          <div class="control-label"><span>导体净电荷 <i>Q</i></span><strong id="conductorChargeValue">0.00 nC</strong></div><input id="conductorChargeInput" class="range-input conductor-range" type="range" min="-5" max="5" step="0.1" value="0" aria-label="导体净电荷" />
+        </section>
+        <section class="control-section"><span class="section-kicker">典型状态</span><div class="critical-presets"><button type="button" data-preset="start">刚加外场</button><button type="button" data-preset="equilibrium">静电平衡</button><button type="button" data-preset="grounded">接地感应</button><button type="button" data-preset="gauss">空腔账本</button></div></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">重排进度</span><strong id="playbackValue">已暂停 · 0%</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button">▶ 运行</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 平衡态</button></div><input id="progressInput" class="range-input progress-range" type="range" min="0" max="1" step="0.001" value="0" aria-label="电荷重排进度" /></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showChargesToggle" type="checkbox" checked /><span>表面电荷</span></label><label><input id="showFieldToggle" type="checkbox" checked /><span>场线与矢量</span></label><label><input id="showEquipotentialToggle" type="checkbox" checked /><span>等势边界</span></label><label><input id="showProbeToggle" type="checkbox" checked /><span>探针与高斯面</span></label></div></section>
+      </aside>
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" data-mode="redistribution"><span>01</span><strong>重排</strong></button><button class="scene-tab mobile-scene-tab" data-mode="induction"><span>02</span><strong>感应</strong></button><button class="scene-tab mobile-scene-tab" data-mode="shielding"><span>03</span><strong>屏蔽</strong></button><button class="scene-tab mobile-scene-tab" data-mode="cavity"><span>04</span><strong>空腔</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">电场 / <b id="modeTitle">电荷重排</b></span><h2 id="modeGoal">观察自由电荷怎样移动，直到抵消导体内部电场</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge is-moving">正在重排</span><span id="stageHint" class="drag-hint">拖动重排进度，对照表面电荷与内部剩余场强</span></div></header>
+        <section class="instrument-stage" aria-label="静电平衡与静电感应实验装置">
+          <canvas id="conductorCanvas" width="900" height="470" aria-label="导体电荷重排、感应、屏蔽与空腔动画"></canvas>
+          <aside class="live-readouts" aria-label="实时导体状态读数"><div class="readout-head"><span>CONDUCTOR STATE</span><i></i></div><dl>
+            <div><dt id="metric1Label">重排进度</dt><dd id="metric1">0.0%</dd></div><div><dt id="metric2Label">内部场强 E内</dt><dd id="metric2">1000 V/m</dd></div><div><dt id="metric3Label">左表面 σ</dt><dd id="metric3">0 C/m²</dd></div><div><dt id="metric4Label">右表面 σ</dt><dd id="metric4">0 C/m²</dd></div><div><dt id="metric5Label">导体净电荷</dt><dd id="metric5">0 C</dd></div><div><dt id="metric6Label">平衡条件</dt><dd id="metric6">未满足</dd></div>
+          </dl><div class="law-check"><span>当前物理判断</span><strong id="conductorNature">内部场仍推动自由电荷移动</strong><small id="conductorExplanation">教学动画时间已放大，真实金属重排通常极快</small></div></aside>
+        </section>
+        <section class="analysis-grid" aria-label="表面电荷和边界分析">
+          <article class="chart-panel"><header><div><span>SURFACE CHARGE / ANGLE</span><h3 id="surfaceTitle">表面电荷分布</h3></div><strong id="surfaceStatus">净感应电荷为零</strong></header><canvas id="surfaceChart" width="620" height="230" aria-label="导体表面电荷密度角分布图"></canvas></article>
+          <article class="chart-panel"><header><div><span>FIELD / POTENTIAL LEDGER</span><h3 id="ledgerTitle">内部场衰减</h3></div><strong id="ledgerStatus">E内→0</strong></header><canvas id="ledgerChart" width="620" height="230" aria-label="导体场强、电势或电荷账本图"></canvas></article>
+        </section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先看电荷运动</strong><p id="stepPrompt">只要导体内部场强不为零，自由电子会发生什么？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">E内→0</strong></div></footer>
+      </section>
+    </main>
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>静电平衡与静电感应指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>重排</b><span>导体内部只要存在电场，自由电荷就会继续定向移动；达到静电平衡后导体材料内部场强为零。</span></li><li><b>边界</b><span>静电平衡导体是等势体，表面切向场为零；紧贴表面的法向场满足 σ=ε₀Eₙ。</span></li><li><b>感应</b><span>孤立中性导体的总感应电荷仍为零；接地导体可以同大地交换电荷，因此导体净电荷不必为零。</span></li><li><b>屏蔽</b><span>封闭导体能屏蔽外部静电场，使导体材料和无内部电荷的封闭空腔保持零场；空腔内放入电荷后空腔场不再为零。</span></li><li><b>边界</b><span>球面场景采用理想导体、静态点电荷和球对称几何；镜像电荷是求解工具，不是导体内部真实存在的粒子。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./electrostatic-conductor-model.js?v=flagship-1"></script>
+    <script src="./electrostatic-conductor.js?v=flagship-1"></script>
+    <script src="./url-state.js?v=protocol-v1"></script>
+    <script src="./learning-records.js?v=protocol-v1"></script>
+    <script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

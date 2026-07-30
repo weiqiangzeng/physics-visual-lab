@@ -706,6 +706,16 @@
   background: rgba(123, 63, 160, 0.12);
 }
 
+.subject-tag.thermal {
+  color: #a34437;
+  background: rgba(201, 91, 68, 0.12);
+}
+
+.subject-tag.modern {
+  color: #315f8f;
+  background: rgba(49, 95, 143, 0.12);
+}
+
 .experiment-card h3 {
   margin: 18px 0 8px;
   font-size: 1.12rem;

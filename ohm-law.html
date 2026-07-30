@@ -1,60 +1,56 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>欧姆定律对照实验</title>
-    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
-    <link rel="stylesheet" href="./platform.css?v=workspace-2" />
-    <link rel="stylesheet" href="./model-lab.css?v=friction-fix-1" />
-    <link rel="stylesheet" href="./ohm-law.css?v=ohm-compare-1" />
-  </head>
-  <body class="model-lab ohm-law-lab">
-    <main class="app">
-      <section class="workspace">
-        <div class="stage">
-          <div class="stage-head">
-            <div class="stage-title"><h1>欧姆定律对照实验</h1></div>
-            <div class="actions"><a class="ghost-link" href="./index.html">实验目录</a><button id="resetButton" type="button">重置</button></div>
-          </div>
-          <p class="stage-subtitle">只改变一个量，直接比较两只电流表。</p>
-
-          <div class="comparison-mode" role="group" aria-label="对照方式">
-            <button class="active" type="button" data-mode="voltage" aria-pressed="true">保持电阻，改变电压</button>
-            <button type="button" data-mode="resistance" aria-pressed="false">保持电压，改变电阻</button>
-          </div>
-
-          <div class="canvas-wrap main-canvas"><canvas id="ohmCanvas" class="lab-canvas" width="980" height="520" aria-label="两组欧姆定律对照电路"></canvas></div>
-
-          <section class="comparison-conclusion" aria-live="polite">
-            <div><span id="changedRatioLabel">电压倍数</span><strong id="changedRatio">2.00 倍</strong></div>
-            <div class="relation-arrow" aria-hidden="true">→</div>
-            <div><span>电流倍数</span><strong id="currentRatio">2.00 倍</strong></div>
-            <p id="conclusionText">电阻相同时，电流随电压同比例变化。</p>
-          </section>
-
-          <div class="circuit-readouts">
-            <article><span>电路 A</span><strong id="circuitAMetric">U = 3.00 V　R = 6.00 Ω　I = 0.50 A</strong></article>
-            <article><span>电路 B</span><strong id="circuitBMetric">U = 6.00 V　R = 6.00 Ω　I = 1.00 A</strong></article>
-          </div>
-        </div>
-
-        <aside class="controls">
-          <div class="controls-overview"><div><span class="preset-label">控制变量</span><h2 id="controlTitle">保持电阻相同</h2></div><div class="overview-badges"><span class="overview-badge" id="overviewRelation">I 同比变化</span></div></div>
-
-          <details class="section-panel" open><summary class="section-summary"><span>实验参数</span></summary><div class="section-body">
-            <div class="baseline-note"><span>电路 A 基准</span><strong id="baselineText">Uₐ = 3.00 V</strong></div>
-
-            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title" id="commonLabel">共同电阻</span><span class="label-math" id="commonMath">\(R / \Omega\)</span></div><strong id="commonValue">6.00 Ω</strong></div><input id="commonInput" type="range" min="1" max="12" step="0.1" value="6" /><div class="inline-edit"><input id="commonNumber" class="number-input" type="number" min="1" max="12" step="0.1" value="6" /><span class="input-unit" id="commonUnit">\(\Omega\)</span></div></label>
-
-            <label class="control"><div class="label-row"><div class="label-copy"><span class="label-title" id="compareLabel">电路 B 电压</span><span class="label-math" id="compareMath">\(U_B / \mathrm{V}\)</span></div><strong id="compareValue">6.00 V</strong></div><input id="compareInput" type="range" min="0" max="12" step="0.1" value="6" /><div class="inline-edit"><input id="compareNumber" class="number-input" type="number" min="0" max="12" step="0.1" value="6" /><span class="input-unit" id="compareUnit">\(\mathrm{V}\)</span></div></label>
-          </div></details>
-
-          <details class="section-panel" open><summary class="section-summary"><span>关键公式</span></summary><div class="section-body"><div class="formula-panel"><strong>\(I = \frac{U}{R}\)</strong><strong id="relationFormula">\(R\text{ 相同}:\ \frac{I_B}{I_A}=\frac{U_B}{U_A}\)</strong></div></div></details>
-          <details class="section-panel"><summary class="section-summary"><span>适用条件</span></summary><div class="section-body"><p class="ohm-condition">温度不变的定值电阻。灯泡、二极管等非欧姆元件不适用。</p></div></details>
-        </aside>
-      </section>
-    </main>
-    <script src="./ohm-law-model.js?v=ohm-compare-1"></script><script src="./ohm-law.js?v=ohm-compare-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-2"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#151817" />
+  <title>欧姆定律实验室</title>
+  <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
+  <link rel="stylesheet" href="./platform.css?v=workspace-3" />
+  <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+  <link rel="stylesheet" href="./ohm-law.css?v=flagship-2" />
+</head>
+<body class="flagship-lab ohm-lab">
+  <header class="lab-topbar">
+    <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">Φ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+    <div class="topbar-title"><span>恒定电流 · 实验 01</span><strong>欧姆定律</strong></div>
+    <div class="connection-state"><i></i>模型已连接</div>
+    <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button">实验指南</button><button id="stepButton" class="toolbar-button">分步演示</button><button id="focusButton" class="toolbar-button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" title="全屏" aria-label="全屏">⛶</button></div>
+  </header>
+  <main class="lab-shell">
+    <nav class="lesson-rail" aria-label="实验学习路径">
+      <div class="rail-heading"><span class="eyebrow">CURRENT / 01</span><h1>欧姆<br />定律</h1><p>用控制变量建立 U、I、R 的关系，并从载流子运动理解电流变化。</p></div>
+      <div class="rail-section"><span class="rail-label">实验场景</span>
+        <button class="scene-tab is-active" data-mode="voltage"><span>01</span><strong>改变电压</strong><i>保持电阻，观察 I-U</i></button>
+        <button class="scene-tab" data-mode="resistance"><span>02</span><strong>改变电阻</strong><i>保持电压，观察 I-R</i></button>
+        <button class="scene-tab" data-mode="characteristic"><span>03</span><strong>伏安特性</strong><i>扫描并记录数据点</i></button>
+        <button class="scene-tab" data-mode="boundary"><span>04</span><strong>适用边界</strong><i>定值电阻与灯丝对照</i></button>
+      </div>
+      <div class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+        <button class="route-step is-active"><b>1</b><span>只改变一个量<small>先控制其余变量</small></span></button>
+        <button class="route-step"><b>2</b><span>读取电表示数<small>比较倍数关系</small></span></button>
+        <button class="route-step"><b>3</b><span>检查适用条件<small>区分定值与非欧姆元件</small></span></button>
+      </div>
+      <div class="rail-equation"><span>核心模型</span><strong>I = U / R</strong><strong>R = U / I</strong><small>定值电阻且温度不变</small></div>
+    </nav>
+    <aside class="controls" aria-label="实验控制">
+      <div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>电路参数</h2></div><button id="resetButton" class="reset-button">重置</button></div>
+      <section class="control-section"><div class="control-label"><span>电源电压 <i>U</i></span><strong id="voltageValue">6.00 V</strong></div><input id="voltageInput" class="range-input voltage-range" type="range" min="0" max="12" step="0.1" value="6" aria-label="电源电压" /></section>
+      <section class="control-section"><div class="control-label"><span>电阻 <i>R</i></span><strong id="resistanceValue">6.00 Ω</strong></div><input id="resistanceInput" class="range-input resistance-range" type="range" min="1" max="12" step="0.1" value="6" aria-label="电阻" /></section>
+      <section class="control-section compare-control"><div class="control-label"><span id="compareLabel">对照电压 <i>U₂</i></span><strong id="compareValue">3.00 V</strong></div><input id="compareInput" class="range-input compare-range" type="range" min="0" max="12" step="0.1" value="3" aria-label="对照参数" /></section>
+      <section class="control-section component-control"><span class="section-kicker">被测元件</span><div class="segmented-control"><button class="component-button is-active" data-component="resistor">定值电阻</button><button class="component-button" data-component="lamp">小灯泡</button></div></section>
+      <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">微观载流子</span><strong id="timeValue">t = 0.00 s</strong></div><div class="playback-row"><button id="playButton" class="primary-command">▶ 播放</button><button id="pauseButton" class="secondary-command">Ⅱ 暂停</button><button id="recordButton" class="secondary-command">＋ 记录</button></div><input id="timeInput" class="range-input time-range" type="range" min="0" max="4" step="0.01" value="0" aria-label="观察时刻" /></section>
+      <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showElectronsToggle" type="checkbox" checked /><span>电子漂移</span></label><label><input id="showFieldToggle" type="checkbox" checked /><span>电场方向</span></label><label><input id="showConventionalToggle" type="checkbox" checked /><span>电流方向</span></label><label><input id="showHeatToggle" type="checkbox" checked /><span>热效应</span></label></div></section>
+    </aside>
+    <section class="stage">
+      <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" data-mode="voltage"><span>01</span><strong>电压</strong></button><button class="scene-tab mobile-scene-tab" data-mode="resistance"><span>02</span><strong>电阻</strong></button><button class="scene-tab mobile-scene-tab" data-mode="characteristic"><span>03</span><strong>伏安</strong></button><button class="scene-tab mobile-scene-tab" data-mode="boundary"><span>04</span><strong>边界</strong></button></nav>
+      <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">欧姆定律 / <b id="modeTitle">改变电压</b></span><h2 id="modeGoal">电阻不变时，电流与电压成正比</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">定值电阻</span><span id="stageHint" class="drag-hint">调节电压并比较电流</span></div></header>
+      <section class="instrument-stage"><canvas id="ohmCanvas" width="900" height="470" aria-label="欧姆定律电路与微观载流子场景"></canvas><aside class="live-readouts"><div class="readout-head"><span>LIVE DATA</span><i></i></div><dl><div><dt>电压 <i>U</i></dt><dd id="voltageMetric">6.00 V</dd></div><div><dt>电流 <i>I</i></dt><dd id="currentMetric">1.00 A</dd></div><div><dt>电阻 <i>R</i></dt><dd id="resistanceMetric">6.00 Ω</dd></div><div><dt>功率 <i>P</i></dt><dd id="powerMetric">6.00 W</dd></div></dl><div class="law-check"><span>关系判断</span><strong id="lawNature">I / U 保持不变</strong><small id="lawExplanation">斜率 1/R 表示导体的电导</small></div></aside></section>
+      <section class="analysis-grid"><article class="chart-panel"><header><div><span>CHARACTERISTIC</span><h3 id="primaryChartTitle">电流—电压关系</h3></div><strong id="primaryChartStatus">斜率 = 0.167 S</strong></header><canvas id="primaryChart" width="620" height="230"></canvas></article><article class="chart-panel"><header><div><span>COMPARISON</span><h3 id="secondaryChartTitle">电流倍数对照</h3></div><button id="clearButton">清空记录</button></header><canvas id="secondaryChart" width="620" height="230"></canvas></article></section>
+      <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">只改变一个量</strong><p id="stepPrompt">保持电阻不变，逐步改变电压。</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">I = 6.00 / 6.00 = 1.00 A</strong></div></footer>
+    </section>
+  </main>
+  <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>欧姆定律探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>控制变量</b><span>研究电流与某一因素的关系时，保持其他因素不变。</span></li><li><b>图像</b><span>定值电阻的 I-U 图像是过原点直线，斜率等于 1/R。</span></li><li><b>微观</b><span>电子平均漂移方向与约定电流方向相反，电压增大时漂移更快。</span></li><li><b>边界</b><span>灯丝温度升高后电阻变化，不能继续用一个固定 R 描述整条曲线。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+  <script src="./ohm-law-model.js?v=ohm-compare-1"></script><script src="./ohm-law.js?v=flagship-2"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+</body>
 </html>

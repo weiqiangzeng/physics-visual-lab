@@ -1,0 +1,56 @@
+.electrostatic-conductor-lab {
+  --critical-cyan:#64c7d8;
+  --critical-green:#7ad699;
+  --critical-amber:#efb950;
+  --critical-red:#ff786e;
+  --critical-violet:#b59ae5;
+}
+.electrostatic-conductor-lab .field-range,
+.electrostatic-conductor-lab .probe-range {
+  background:linear-gradient(90deg,var(--critical-cyan) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.electrostatic-conductor-lab .radius-range,
+.electrostatic-conductor-lab .distance-range {
+  background:linear-gradient(90deg,var(--critical-violet) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.electrostatic-conductor-lab .charge-range,
+.electrostatic-conductor-lab .angle-range {
+  background:linear-gradient(90deg,var(--critical-amber) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.electrostatic-conductor-lab .conductor-range {
+  background:linear-gradient(90deg,var(--critical-green) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%);
+}
+.electrostatic-conductor-lab #conductorCanvas {
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:280px;
+  cursor:crosshair;
+  touch-action:none;
+}
+.electrostatic-conductor-lab .state-badge.is-moving {
+  color:var(--critical-amber);
+  border-color:rgba(239,185,80,.5);
+  background:rgba(239,185,80,.08);
+}
+.electrostatic-conductor-lab .state-badge.is-balanced {
+  color:var(--critical-green);
+  border-color:rgba(122,214,153,.5);
+  background:rgba(122,214,153,.08);
+}
+.electrostatic-conductor-lab .state-badge.is-grounded {
+  color:var(--critical-cyan);
+  border-color:rgba(100,199,216,.5);
+  background:rgba(100,199,216,.08);
+}
+.electrostatic-conductor-lab .state-badge.is-cavity {
+  color:var(--critical-violet);
+  border-color:rgba(181,154,229,.5);
+  background:rgba(181,154,229,.08);
+}
+@media (max-width:820px) {
+  .electrostatic-conductor-lab #conductorCanvas {
+    min-height:300px;
+    aspect-ratio:1.35;
+  }
+}

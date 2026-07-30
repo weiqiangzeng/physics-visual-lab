@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>光电效应实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./photoelectric.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab photoelectric-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">hν</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>近代物理 · 实验 01</span><strong>光电效应</strong></div><div class="connection-state"><i></i><span>模型已连接</span></div>
+      <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div>
+    </header>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">PHOTOELECTRIC / 01</span><h1>光电效应</h1><p>把单个光子事件、电子逸出和宏观光电流放在同一实验中。</p></div>
+        <section class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="threshold"><span>01</span><strong>截止频率</strong><i>低频强光仍不能逸出</i></button>
+          <button class="scene-tab" type="button" data-mode="intensity"><span>02</span><strong>频率与光强</strong><i>能量与数量各由谁决定</i></button>
+          <button class="scene-tab" type="button" data-mode="stopping"><span>03</span><strong>遏止电压</strong><i>反向电场筛选最大初动能</i></button>
+          <button class="scene-tab" type="button" data-mode="materials"><span>04</span><strong>材料对照</strong><i>逸出功改变截止条件</i></button>
+        </section>
+        <section class="rail-section experiment-route"><span class="rail-label">探究路径</span><button class="route-step is-active" type="button"><b>1</b><span>先判断能否逸出<small>一份光子能量必须够大</small></span></button><button class="route-step" type="button"><b>2</b><span>再区分能量与数量<small>频率和光强不是同一量</small></span></button><button class="route-step" type="button"><b>3</b><span>最后测最大初动能<small>用遏止电压反推能量</small></span></button></section>
+        <div class="rail-equation"><span>爱因斯坦光电方程</span><strong>hν = W₀ + Eₖₘₐₓ</strong><strong>eU꜀ = Eₖₘₐₓ</strong><small>粒子数量与时间按教学可见性缩放，不表示真实光子通量</small></div>
+      </nav>
+      <aside class="controls" aria-label="实验控制">
+        <div class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>光源与光电管</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section"><div class="control-label"><span>入射波长 <i>λ</i></span><strong id="wavelengthValue">400 nm</strong></div><input id="wavelengthInput" class="range-input wavelength-range" type="range" min="180" max="750" step="5" value="400" aria-label="入射波长" /><p class="control-note" id="spectralNote">紫光 · ν = 7.495×10¹⁴ Hz</p></section>
+        <section class="control-section"><div class="control-label"><span>归一化光强 <i>S</i></span><strong id="intensityValue">60%</strong></div><input id="intensityInput" class="range-input intensity-range" type="range" min="0" max="100" step="5" value="60" aria-label="归一化光强" /><p class="control-note">控制代表性光子到达率，不改变单个光子能量</p></section>
+        <section class="control-section"><div class="control-label"><span>极板电压 <i>U</i></span><strong id="voltageValue">0.00 V</strong></div><input id="voltageInput" class="range-input voltage-range" type="range" min="-5" max="5" step="0.01" value="0" aria-label="极板电压" /><p class="control-note">正值加速收集，负值阻碍光电子到达阳极</p></section>
+        <section class="control-section segmented-section"><span class="section-kicker">阴极材料</span><div class="material-options" role="group" aria-label="阴极材料"><button type="button" data-material="cesium">Cs</button><button class="is-active" type="button" data-material="sodium">Na</button><button type="button" data-material="calcium">Ca</button><button type="button" data-material="zinc">Zn</button></div><p class="control-note" id="materialNote">钠 · W₀ = 2.28 eV</p></section>
+        <section class="control-section preset-section"><span class="section-kicker">典型对照</span><div class="photo-presets"><button type="button" data-preset="violet">紫光发射</button><button type="button" data-preset="red">红光强照</button><button type="button" data-preset="dim">弱光对照</button><button type="button" data-preset="zinc">锌板紫外</button></div></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">事件动画</span><strong id="timeValue">运行中 · 0.0 s</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="true">▶ 运行中</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 截止波长</button></div><div class="rate-options" role="group" aria-label="播放速度"><button class="is-active" type="button" data-rate="0.5">0.5× 慢放</button><button type="button" data-rate="1">1× 标准</button></div></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showPhotonsToggle" type="checkbox" checked /><span>光子波包</span></label><label><input id="showElectronsToggle" type="checkbox" checked /><span>光电子轨迹</span></label><label><input id="showEnergyToggle" type="checkbox" checked /><span>能量账本</span></label><label><input id="showFieldToggle" type="checkbox" checked /><span>电场方向</span></label><label><input id="showEventsToggle" type="checkbox" checked /><span>事件计数</span></label></div></section>
+      </aside>
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="threshold"><span>01</span><strong>截止</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="intensity"><span>02</span><strong>光强</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="stopping"><span>03</span><strong>遏止</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="materials"><span>04</span><strong>材料</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">近代物理 / <b id="modeTitle">截止频率</b></span><h2 id="modeGoal">只有单个光子能量超过逸出功，电子才可能逸出</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">发生光电效应</span><span id="stageHint" class="drag-hint">拖动波长，跨过当前材料的截止条件</span></div></header>
+        <section class="instrument-stage" aria-label="光电管与光子电子事件"><canvas id="photoCanvas" width="900" height="470" aria-label="光子照射阴极并释放电子的光电管场景"></canvas><aside class="live-readouts" aria-label="实时光电效应读数"><div class="readout-head"><span>PHOTOELECTRIC STATE</span><i aria-hidden="true"></i></div><dl><div><dt>光子能量 <i>hν</i></dt><dd id="photonMetric">3.100 eV</dd></div><div><dt>逸出功 <i>W₀</i></dt><dd id="workMetric">2.280 eV</dd></div><div><dt>最大初动能</dt><dd id="kineticMetric">0.820 eV</dd></div><div><dt>遏止电压 <i>U꜀</i></dt><dd id="stoppingMetric">0.820 V</dd></div><div><dt>最大速率 <i>vₘₐₓ</i></dt><dd id="speedMetric">5.37×10⁵ m/s</dd></div><div><dt>光电流 <i>I</i></dt><dd id="currentMetric">5.904 nA</dd></div></dl><div class="law-check"><span>当前判据</span><strong id="photoNature">hν &gt; W₀</strong><small id="photoExplanation">一份光子能量足以克服钠的逸出功</small></div></aside></section>
+        <section class="analysis-grid" aria-label="光电子能量与伏安特性"><article class="chart-panel"><header><div><span>EINSTEIN EQUATION</span><h3>最大初动能-频率</h3></div><strong id="energyChartStatus">斜率 h · 截止频率 5.51×10¹⁴ Hz</strong></header><canvas id="energyChart" width="620" height="230" aria-label="最大初动能随光频率变化图"></canvas></article><article class="chart-panel"><header><div><span>CURRENT-VOLTAGE</span><h3>光电管伏安特性</h3></div><strong id="currentChartStatus">U꜀ = 0.820 V · Iₛ = 7.20 nA</strong></header><canvas id="currentChart" width="620" height="230" aria-label="光电流随极板电压变化图"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先判断能否逸出</strong><p id="stepPrompt">把低频光增强很多，为什么仍不能释放一个电子？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">3.100 = 2.280 + 0.820 eV</strong></div></footer>
+      </section>
+    </main>
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>光电效应探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>一对一能量交换</b><span>基础模型中一个光子把整份能量 hν 交给一个电子，电子先克服逸出功，余量成为最大初动能。</span></li><li><b>截止条件</b><span>当 hν&lt;W₀ 时不发生光电子发射；提高低频光的强度只增加不够能量的光子数量。</span></li><li><b>光强作用</b><span>本实验把光强解释为归一化光子到达率，因此主要改变饱和光电流和动画事件数，不改变 Eₖₘₐₓ。</span></li><li><b>遏止电压</b><span>反向电压恰好使最快光电子也不能到达阳极时，eU꜀=Eₖₘₐₓ。</span></li><li><b>材料差异</b><span>材料逸出功不同，对应不同截止频率和截止波长；相同入射光不一定让所有材料都发射。</span></li><li><b>教学近似</b><span>伏安曲线的收集效率和屏幕粒子数量按教学目的简化，能量、截止条件和遏止电压使用解析关系。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./photoelectric-model.js?v=flagship-1"></script><script src="./photoelectric.js?v=flagship-2"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

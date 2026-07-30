@@ -1,0 +1,40 @@
+.projectile-lab { --projectile-x:#64c7d9; --projectile-y:#f2b84b; --projectile-path:#69d18e; --projectile-alt:#b58ce5; --projectile-gravity:#ff7a68; }
+.projectile-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
+.projectile-lab .instrument-stage { background:#0c0f0e; }
+.projectile-lab #projectileCanvas { display:block; width:100%; height:100%; min-height:280px; cursor:crosshair; touch-action:none; }
+.projectile-lab .live-readouts dd { font-size:15px; }
+.projectile-lab .speed-range { background:linear-gradient(90deg,var(--projectile-path) 0 var(--range-progress,43%),#4a514c var(--range-progress,43%) 100%); }
+.projectile-lab .angle-range { background:linear-gradient(90deg,var(--projectile-y) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%); }
+.projectile-lab .gravity-range { background:linear-gradient(90deg,var(--projectile-gravity) 0 var(--range-progress,57%),#4a514c var(--range-progress,57%) 100%); }
+.projectile-lab .target-range { background:linear-gradient(90deg,var(--projectile-alt) 0 var(--range-progress,56%),#4a514c var(--range-progress,56%) 100%); }
+.projectile-lab .time-range { margin-top:14px; background:linear-gradient(90deg,var(--projectile-x) 0 var(--range-progress,0%),#4a514c var(--range-progress,0%) 100%); }
+.projectile-lab .scale-range { background:linear-gradient(90deg,var(--lab-amber) 0 var(--range-progress,43%),#4a514c var(--range-progress,43%) 100%); }
+.projectile-lab .angle-presets,.projectile-lab .planet-row { display:grid; grid-template-columns:repeat(3,1fr); margin-top:2px; }
+.projectile-lab .angle-presets button,.projectile-lab .planet-row button { min-height:27px; border:1px solid var(--lab-line); color:var(--lab-muted); background:#171b18; cursor:pointer; font-size:9px; }
+.projectile-lab .angle-presets button + button,.projectile-lab .planet-row button + button { border-left:0; }
+.projectile-lab .angle-presets button.is-active,.projectile-lab .planet-row button.is-active { color:#102017; border-color:var(--projectile-path); background:var(--projectile-path); }
+.projectile-lab .solution-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:7px; }
+.projectile-lab .parameter-note { min-height:27px; margin:8px 0 0; color:var(--lab-muted); font-size:9px; line-height:1.45; }
+.projectile-lab .playback-controls .section-headline > strong { color:var(--projectile-x); font:10px ui-monospace,monospace; }
+.projectile-lab .playback-row { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:6px; margin-top:9px; }
+.projectile-lab .playback-row button { min-width:0; padding:0 5px; }
+.projectile-lab .speed-row { display:flex; justify-content:space-between; color:var(--lab-muted); font-size:9px; }
+.projectile-lab .speed-row strong { color:var(--lab-text); font-family:ui-monospace,monospace; }
+.projectile-lab .state-badge.is-apex { color:var(--projectile-y); border-color:rgba(242,184,75,.45); background:rgba(242,184,75,.08); }
+.projectile-lab .state-badge.is-falling { color:var(--projectile-gravity); border-color:rgba(255,122,104,.45); background:rgba(255,122,104,.08); }
+.projectile-lab .state-badge.is-landed { color:var(--projectile-alt); border-color:rgba(181,140,229,.45); background:rgba(181,140,229,.08); }
+.projectile-lab .mobile-scene-tabs { display:none; }
+
+@media (max-width:1120px) {
+  .projectile-lab .mobile-scene-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin:-10px -10px 10px; border-bottom:1px solid var(--lab-line); background:#121513; }
+  .projectile-lab .mobile-scene-tab { grid-template-columns:22px minmax(0,1fr); min-height:50px; padding:8px; border-left:0; border-bottom:2px solid transparent; }
+  .projectile-lab .mobile-scene-tab.is-active { border-bottom-color:var(--projectile-path); }
+}
+@media (max-width:820px) { .projectile-lab #projectileCanvas { min-height:300px; aspect-ratio:1.35; } .projectile-lab .analysis-grid { min-height:340px; } }
+@media (max-width:520px) {
+  .projectile-lab .mobile-scene-tab { display:flex; align-items:center; justify-content:center; gap:5px; min-height:44px; padding:7px 3px; }
+  .projectile-lab .mobile-scene-tab > span { grid-row:auto; padding:0; }
+  .projectile-lab .mobile-scene-tab i { display:none; }
+  .projectile-lab .mobile-scene-tab strong { font-size:10px; white-space:nowrap; }
+  .projectile-lab .playback-row { grid-template-columns:1fr 1fr 1fr; }
+}

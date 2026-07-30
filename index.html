@@ -18,24 +18,28 @@
           </div>
         </header>
 
-        <section class="course-panel simple-catalog" aria-labelledby="courseTitle">
+        <section class="course-panel simple-catalog"
+          aria-labelledby="courseTitle">
           <div class="section-heading">
             <div>
               <span class="platform-kicker">实验目录</span>
               <h2 id="courseTitle">运动学与力学基础</h2>
-              <p id="moduleDescription" class="module-description">用坐标、时间、图像和误差理解运动描述。</p>
+              <p id="moduleDescription"
+                class="module-description">用坐标、时间、图像和误差理解运动描述。</p>
             </div>
             <div class="progress-summary" aria-label="实验完成进度">
-              <strong id="progressCount">0 / 9</strong>
+              <strong id="progressCount">0 / 30</strong>
               <span>已完成实验</span>
-              <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
+              <div class="progress-track"
+                aria-hidden="true"><span id="progressFill"></span></div>
             </div>
           </div>
 
           <div class="catalog-tools" aria-label="实验目录工具">
             <label class="catalog-search">
               <span>搜索实验</span>
-              <input id="experimentSearch" type="search" placeholder="名称、章节或公式" autocomplete="off" />
+              <input id="experimentSearch" type="search"
+                placeholder="名称、章节或公式" autocomplete="off" />
             </label>
             <label class="catalog-filter">
               <span>学科方向</span>
@@ -47,107 +51,462 @@
                 <option value="optics">光学</option>
               </select>
             </label>
-            <div class="catalog-result"><strong id="experimentResultCount">3 个实验</strong><span>当前目录</span></div>
+            <div
+              class="catalog-result"><strong id="experimentResultCount">4 个目录条目</strong><span>当前目录</span></div>
           </div>
 
           <div class="recent-lesson" aria-label="最近访问实验">
             <div><span class="platform-kicker">最近访问</span><p id="recentLessonNote">打开任意实验后，这里会保留最近入口。</p></div>
-            <a id="recentLessonLink" class="recent-lesson-link" href="./index.html" hidden>继续实验<span aria-hidden="true">→</span></a>
+            <a id="recentLessonLink" class="recent-lesson-link"
+              href="./index.html"
+              hidden>继续实验<span aria-hidden="true">→</span></a>
           </div>
 
           <div class="module-tabs" role="tablist" aria-label="物理模型目录">
-            <button type="button" role="tab" data-module="kinematics" aria-selected="true">一 运动学与力学基础</button>
-            <button type="button" role="tab" data-module="forces" aria-selected="false">二 相互作用与牛顿运动定律</button>
-            <button type="button" role="tab" data-module="curved-motion" aria-selected="false">三 曲线运动与万有引力</button>
-            <button type="button" role="tab" data-module="energy" aria-selected="false">四 功和机械能</button>
-            <button type="button" role="tab" data-module="electric-field" aria-selected="false">五 电场与电荷</button>
-            <button type="button" role="tab" data-module="current" aria-selected="false">六 恒定电流与电路</button>
-            <button type="button" role="tab" data-module="magnetic-field" aria-selected="false">七 磁场与电磁感应</button>
-            <button type="button" role="tab" data-module="momentum" aria-selected="false">八 动量与碰撞</button>
-            <button type="button" role="tab" data-module="waves" aria-selected="false">九 机械振动与机械波</button>
-            <button type="button" role="tab" data-module="optics" aria-selected="false">十 光学</button>
-            <button type="button" role="tab" data-module="thermal" aria-selected="false">十一 热学与气体</button>
-            <button type="button" role="tab" data-module="modern-physics" aria-selected="false">十二 原子物理与近代物理</button>
+            <button type="button" role="tab" data-module="kinematics"
+              aria-selected="true">一 运动学与力学基础</button>
+            <button type="button" role="tab" data-module="forces"
+              aria-selected="false">二 相互作用与牛顿运动定律</button>
+            <button type="button" role="tab" data-module="curved-motion"
+              aria-selected="false">三 曲线运动与万有引力</button>
+            <button type="button" role="tab" data-module="energy"
+              aria-selected="false">四 功和机械能</button>
+            <button type="button" role="tab" data-module="electric-field"
+              aria-selected="false">五 电场与电荷</button>
+            <button type="button" role="tab" data-module="current"
+              aria-selected="false">六 恒定电流与电路</button>
+            <button type="button" role="tab" data-module="magnetic-field"
+              aria-selected="false">七 磁场与电磁感应</button>
+            <button type="button" role="tab" data-module="momentum"
+              aria-selected="false">八 动量与碰撞</button>
+            <button type="button" role="tab" data-module="waves"
+              aria-selected="false">九 机械振动与机械波</button>
+            <button type="button" role="tab" data-module="optics"
+              aria-selected="false">十 光学</button>
+            <button type="button" role="tab" data-module="thermal"
+              aria-selected="false">十一 热学与气体</button>
+            <button type="button" role="tab" data-module="modern-physics"
+              aria-selected="false">十二 原子物理与近代物理</button>
           </div>
 
-          <p id="volumeEmpty" class="volume-empty" hidden>本模块暂未开放实验。</p>
+          <p id="volumeEmpty" class="volume-empty"
+            hidden>本模块暂未开放实验。</p>
 
           <div class="experiment-grid">
-            <article class="experiment-card" data-lesson-card="motion-graphs.html" data-modules="kinematics">
-              <div class="card-topline"><span class="chapter-tag">模型一 · 运动描述</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card"
+              data-lesson-card="motion-graphs.html" data-modules="kinematics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型一 · 运动描述</span><span class="subject-tag mechanics">力学</span></div>
               <h3>运动图像</h3>
               <p class="card-focus">斜率对应速度，面积对应位移。</p>
-              <a class="card-link" href="./motion-graphs.html" data-lesson-link="motion-graphs.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./motion-graphs.html"
+                data-lesson-link="motion-graphs.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="friction.html" data-modules="forces">
-              <div class="card-topline"><span class="chapter-tag">模型二 · 相互作用</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card featured"
+              data-lesson-card="vertical-motion.html" data-modules="kinematics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型一 · 竖直匀变速</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>自由落体与竖直上抛</h3>
+              <p
+                class="card-focus">连接真空同落、最高点、参考系与空气阻力边界。</p>
+              <a class="card-link" href="./vertical-motion.html"
+                data-lesson-link="vertical-motion.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card" data-lesson-card="friction.html"
+              data-modules="forces">
+              <div
+                class="card-topline"><span class="chapter-tag">模型二 · 相互作用</span><span class="subject-tag mechanics">力学</span></div>
               <h3>静摩擦力与滑动摩擦力</h3>
               <p class="card-focus">f静 ≤ μsN；f滑 = μkN。</p>
-              <a class="card-link" href="./friction.html" data-lesson-link="friction.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./friction.html"
+                data-lesson-link="friction.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="newton-laws.html" data-modules="forces">
-              <div class="card-topline"><span class="chapter-tag">模型二 · 牛顿运动定律</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="newton-laws.html"
+              data-modules="forces">
+              <div
+                class="card-topline"><span class="chapter-tag">模型二 · 牛顿运动定律</span><span class="subject-tag mechanics">力学</span></div>
               <h3>牛顿第二定律</h3>
               <p class="card-focus">F合 = ma。</p>
-              <a class="card-link" href="./newton-laws.html" data-lesson-link="newton-laws.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./newton-laws.html"
+                data-lesson-link="newton-laws.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="projectile.html" data-modules="curved-motion">
-              <div class="card-topline"><span class="chapter-tag">模型三 · 抛体运动</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card featured"
+              data-lesson-card="interaction.html" data-modules="forces">
+              <div
+                class="card-topline"><span class="chapter-tag">模型二 · 力与相互作用</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>力与相互作用</h3>
+              <p class="card-focus">矢量合成、胡克定律、第三定律与连接体整体法。</p>
+              <a class="card-link" href="./interaction.html"
+                data-lesson-link="interaction.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card" data-lesson-card="projectile.html"
+              data-modules="curved-motion">
+              <div
+                class="card-topline"><span class="chapter-tag">模型三 · 抛体运动</span><span class="subject-tag mechanics">力学</span></div>
               <h3>抛体运动分解</h3>
               <p class="card-focus">vx = v0 cosθ；最高点 vy = 0。</p>
-              <a class="card-link" href="./projectile.html" data-lesson-link="projectile.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./projectile.html"
+                data-lesson-link="projectile.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="circular.html" data-modules="curved-motion">
-              <div class="card-topline"><span class="chapter-tag">模型三 · 圆周运动</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="circular.html"
+              data-modules="curved-motion">
+              <div
+                class="card-topline"><span class="chapter-tag">模型三 · 圆周运动</span><span class="subject-tag mechanics">力学</span></div>
               <h3>圆周运动与向心力</h3>
               <p class="card-focus">ac = v²/r；Fc = mv²/r。</p>
-              <a class="card-link" href="./circular.html" data-lesson-link="circular.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./circular.html"
+                data-lesson-link="circular.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="ohm-law.html" data-modules="current">
-              <div class="card-topline"><span class="chapter-tag">模型六 · 电路与测量</span><span class="subject-tag electromagnetism">电学</span></div>
+            <article class="experiment-card featured"
+              data-lesson-card="circular-critical.html"
+              data-modules="curved-motion">
+              <div
+                class="card-topline"><span class="chapter-tag">模型三 · 圆周运动临界</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>生活中的圆周运动与临界条件</h3>
+              <p
+                class="card-focus">比较向心需求、摩擦上限、支持力归零与失去接触。</p>
+              <a class="card-link" href="./circular-critical.html"
+                data-lesson-link="circular-critical.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="orbital.html" data-modules="curved-motion">
+              <div
+                class="card-topline"><span class="chapter-tag">模型三 · 万有引力与宇宙航行</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>卫星轨道与宇宙航行</h3>
+              <p
+                class="card-focus">连接圆轨道标度、同步条件、霍曼转移与逃逸能量。</p>
+              <a class="card-link" href="./orbital.html"
+                data-lesson-link="orbital.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="work-propulsion.html" data-modules="energy momentum">
+              <div
+                class="card-topline"><span class="chapter-tag">模型四 · 功率与推进</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>功率与推进</h3>
+              <p class="card-focus">连接功、动能定理、瞬时功率、反冲与理想火箭方程。</p>
+              <a class="card-link" href="./work-propulsion.html"
+                data-lesson-link="work-propulsion.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="mechanical-energy.html" data-modules="energy">
+              <div
+                class="card-topline"><span class="chapter-tag">模型四 · 功和机械能</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>机械能守恒与能量转化</h3>
+              <p class="card-focus">统一追踪 K、Uᵍ、Uˢ、内能和系统边界。</p>
+              <a class="card-link" href="./mechanical-energy.html"
+                data-lesson-link="mechanical-energy.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="electric-field.html"
+              data-modules="electric-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型五 · 电场与电荷</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>电场强度与电势</h3>
+              <p class="card-focus">统一观察 E、V、F、U 与静电场做功。</p>
+              <a class="card-link" href="./electric-field.html"
+                data-lesson-link="electric-field.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="electrostatic-conductor.html"
+              data-modules="electric-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型五 · 静电导体</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>静电平衡与静电感应</h3>
+              <p class="card-focus">追踪表面电荷重排、接地边界、静电屏蔽与空腔电荷账本。</p>
+              <a class="card-link" href="./electrostatic-conductor.html"
+                data-lesson-link="electrostatic-conductor.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="capacitor.html" data-modules="electric-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型五 · 静电场能量</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>电容器与电场能量</h3>
+              <p class="card-focus">比较固定 U 与固定 Q，追踪介质极化、能量交换和击穿边界。</p>
+              <a class="card-link" href="./capacitor.html"
+                data-lesson-link="capacitor.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card" data-lesson-card="ohm-law.html"
+              data-modules="current">
+              <div
+                class="card-topline"><span class="chapter-tag">模型六 · 电路与测量</span><span class="subject-tag electromagnetism">电学</span></div>
               <h3>欧姆定律</h3>
               <p class="card-focus">同一组 U、R 同步生成读数与 I-U 图像。</p>
-              <a class="card-link" href="./ohm-law.html" data-lesson-link="ohm-law.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./ohm-law.html"
+                data-lesson-link="ohm-law.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="oscillation.html" data-modules="waves">
-              <div class="card-topline"><span class="chapter-tag">模型九 · 机械振动</span><span class="subject-tag mechanics">力学</span></div>
-              <h3>简谐振动</h3>
-              <p class="card-focus">观察 x、v、a 的相位关系。</p>
-              <a class="card-link" href="./oscillation.html" data-lesson-link="oscillation.html">打开实验<span aria-hidden="true">→</span></a>
+            <article class="experiment-card featured"
+              data-lesson-card="circuit-applications.html" data-modules="current">
+              <div
+                class="card-topline"><span class="chapter-tag">模型六 · 电路应用</span><span class="subject-tag electromagnetism">电学</span></div>
+              <h3>电路应用与传感器</h3>
+              <p class="card-focus">串并联拓扑、实际功率、电能累计与传感器分压。</p>
+              <a class="card-link" href="./circuit-applications.html"
+                data-lesson-link="circuit-applications.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="waves.html" data-modules="waves">
-              <div class="card-topline"><span class="chapter-tag">模型九 · 机械波</span><span class="subject-tag waves">波动</span></div>
-              <h3>波的叠加与驻波</h3>
-              <p class="card-focus">y = y1 + y2；定位节点和腹部。</p>
-              <a class="card-link" href="./waves.html" data-lesson-link="waves.html">打开实验<span aria-hidden="true">→</span></a>
+            <article class="experiment-card featured"
+              data-lesson-card="power-source.html" data-modules="current">
+              <div
+                class="card-topline"><span class="chapter-tag">模型六 · 真实电源</span><span class="subject-tag electromagnetism">电学</span></div>
+              <h3>闭合电路与电源内阻</h3>
+              <p class="card-focus">统一核对电动势、路端电压、内耗、输出功率和负载匹配。</p>
+              <a class="card-link" href="./power-source.html"
+                data-lesson-link="power-source.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card featured" data-lesson-card="charged-particle.html" data-modules="magnetic-field">
-              <div class="card-topline"><span class="chapter-tag">模型七 · 磁场与复合场</span><span class="subject-tag electromagnetism">电磁学</span></div>
+            <article class="experiment-card featured"
+              data-lesson-card="magnetic-field.html"
+              data-modules="magnetic-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型七 · 电流的磁场</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>电流的磁场</h3>
+              <p
+                class="card-focus">连接右手定则、场强标度、矢量叠加与螺线管边缘效应。</p>
+              <a class="card-link" href="./magnetic-field.html"
+                data-lesson-link="magnetic-field.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="charged-particle.html"
+              data-modules="magnetic-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型七 · 磁场与复合场</span><span class="subject-tag electromagnetism">电磁学</span></div>
               <h3>带电粒子在复合场中的运动</h3>
               <p class="card-focus">比较电场力、磁场力与恒力。</p>
-              <a class="card-link" href="./charged-particle.html" data-lesson-link="charged-particle.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./charged-particle.html"
+                data-lesson-link="charged-particle.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card featured" data-lesson-card="refraction.html" data-modules="optics">
-              <div class="card-topline"><span class="chapter-tag">模型十 · 光学</span><span class="subject-tag optics">光学</span></div>
+            <article class="experiment-card featured"
+              data-lesson-card="mass-spectrometer.html"
+              data-modules="magnetic-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型七 · 复合场与质谱</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>速度选择器与质谱仪</h3>
+              <p class="card-focus">从正交场选速到磁偏转半径，读取同位素质荷比。</p>
+              <a class="card-link" href="./mass-spectrometer.html"
+                data-lesson-link="mass-spectrometer.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="electromagnetic-induction.html"
+              data-modules="magnetic-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型七 · 磁场与电磁感应</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>电磁感应与楞次定律</h3>
+              <p class="card-focus">同步观察 Φ、dΦ/dt、ε、I 与感应磁场方向。</p>
+              <a class="card-link" href="./electromagnetic-induction.html"
+                data-lesson-link="electromagnetic-induction.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="alternating-current.html"
+              data-modules="magnetic-field">
+              <div
+                class="card-topline"><span class="chapter-tag">模型七 · 交变电流与输电</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>交变电流、变压器与远距离输电</h3>
+              <p
+                class="card-focus">连接交流发电、有效值、理想变压器和高压输电线损。</p>
+              <a class="card-link" href="./alternating-current.html"
+                data-lesson-link="alternating-current.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="electromagnetic-oscillation.html"
+              data-modules="magnetic-field waves">
+              <div
+                class="card-topline"><span class="chapter-tag">模型七 · 电磁振荡与波</span><span class="subject-tag electromagnetism">电磁学</span></div>
+              <h3>LC 电磁振荡与电磁波</h3>
+              <p
+                class="card-focus">连接场能交换、固有频率、调谐选频和 E-B 空间传播。</p>
+              <a class="card-link" href="./electromagnetic-oscillation.html"
+                data-lesson-link="electromagnetic-oscillation.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="collision.html" data-modules="momentum">
+              <div
+                class="card-topline"><span class="chapter-tag">模型八 · 动量与碰撞</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>一维碰撞与动量守恒</h3>
+              <p class="card-focus">比较碰撞前后总动量、动能与恢复系数。</p>
+              <a class="card-link" href="./collision.html"
+                data-lesson-link="collision.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card" data-lesson-card="oscillation.html"
+              data-modules="waves">
+              <div
+                class="card-topline"><span class="chapter-tag">模型九 · 机械振动</span><span class="subject-tag mechanics">力学</span></div>
+              <h3>简谐振动</h3>
+              <p class="card-focus">观察 x、v、a 的相位关系。</p>
+              <a class="card-link" href="./oscillation.html"
+                data-lesson-link="oscillation.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="resonance.html" data-modules="waves">
+              <div
+                class="card-topline"><span class="chapter-tag">模型九 · 机械振动</span><span class="subject-tag waves">振动</span></div>
+              <h3>受迫振动与共振</h3>
+              <p class="card-focus">比较幅频、相频、平均功率、阻尼带宽与瞬态建立。</p>
+              <a class="card-link" href="./resonance.html"
+                data-lesson-link="resonance.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card" data-lesson-card="waves.html"
+              data-modules="waves">
+              <div
+                class="card-topline"><span class="chapter-tag">模型九 · 机械波</span><span class="subject-tag waves">波动</span></div>
+              <h3>波的叠加与驻波</h3>
+              <p class="card-focus">y = y1 + y2；定位节点和腹部。</p>
+              <a class="card-link" href="./waves.html"
+                data-lesson-link="waves.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="refraction.html" data-modules="optics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十 · 光学</span><span class="subject-tag optics">光学</span></div>
               <h3>折射与全反射</h3>
               <p class="card-focus">验证斯涅尔定律，寻找临界角和全反射。</p>
-              <a class="card-link" href="./refraction.html" data-lesson-link="refraction.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./refraction.html"
+                data-lesson-link="refraction.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card featured" data-lesson-card="double-slit.html" data-modules="optics">
-              <div class="card-topline"><span class="chapter-tag">模型十 · 光学</span><span class="subject-tag optics">光学</span></div>
+            <article class="experiment-card featured"
+              data-lesson-card="lens.html" data-modules="optics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十 · 光学</span><span class="subject-tag optics">光学</span></div>
+              <h3>凸透镜成像</h3>
+              <p class="card-focus">追踪主光线，验证 1/f = 1/u + 1/v。</p>
+              <a class="card-link" href="./lens.html"
+                data-lesson-link="lens.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="double-slit.html" data-modules="optics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十 · 光学</span><span class="subject-tag optics">光学</span></div>
               <h3>双缝干涉</h3>
               <p class="card-focus">观察亮暗条纹，验证 β = λL/d。</p>
-              <a class="card-link" href="./double-slit.html" data-lesson-link="double-slit.html">打开实验<span aria-hidden="true">→</span></a>
+              <a class="card-link" href="./double-slit.html"
+                data-lesson-link="double-slit.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="ideal-gas.html" data-modules="thermal">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十一 · 热学与气体</span><span class="subject-tag thermal">热学</span></div>
+              <h3>理想气体与分子运动</h3>
+              <p
+                class="card-focus">连接器壁碰撞、速率分布和 p-V-T 过程定律。</p>
+              <a class="card-link" href="./ideal-gas.html"
+                data-lesson-link="ideal-gas.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="matter-phase.html" data-modules="thermal">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十一 · 物态与热运动</span><span class="subject-tag thermal">热学</span></div>
+              <h3>物态与热运动</h3>
+              <p class="card-focus">连接分子热运动、布朗统计、完整加热曲线和相变潜热。</p>
+              <a class="card-link" href="./matter-phase.html"
+                data-lesson-link="matter-phase.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="thermodynamics.html" data-modules="thermal">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十一 · 热力学与热机</span><span class="subject-tag thermal">热学</span></div>
+              <h3>热力学第一定律与热机</h3>
+              <p
+                class="card-focus">连接过程路径、能量账本、循环净功和卡诺效率上限。</p>
+              <a class="card-link" href="./thermodynamics.html"
+                data-lesson-link="thermodynamics.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="photoelectric.html"
+              data-modules="modern-physics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十二 · 近代物理</span><span class="subject-tag modern">近代物理</span></div>
+              <h3>光电效应</h3>
+              <p class="card-focus">区分频率、光强、最大初动能与遏止电压。</p>
+              <a class="card-link" href="./photoelectric.html"
+                data-lesson-link="photoelectric.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="bohr.html" data-modules="modern-physics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十二 · 近代物理</span><span class="subject-tag modern">近代物理</span></div>
+              <h3>玻尔模型与原子能级</h3>
+              <p
+                class="card-focus">连接离散能级、共振吸收、发射跃迁与氢原子线状光谱。</p>
+              <a class="card-link" href="./bohr.html"
+                data-lesson-link="bohr.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="matter-wave.html" data-modules="modern-physics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十二 · 近代物理</span><span class="subject-tag modern">近代物理</span></div>
+              <h3>物质波与波粒二象性</h3>
+              <p
+                class="card-focus">连接德布罗意波长、电子加速、晶体衍射与单粒子统计落点。</p>
+              <a class="card-link" href="./matter-wave.html"
+                data-lesson-link="matter-wave.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="radioactive-decay.html"
+              data-modules="modern-physics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十二 · 近代物理</span><span class="subject-tag modern">近代物理</span></div>
+              <h3>放射性衰变与半衰期</h3>
+              <p
+                class="card-focus">连接单核随机事件、指数衰减和有限样本涨落。</p>
+              <a class="card-link" href="./radioactive-decay.html"
+                data-lesson-link="radioactive-decay.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="binding-energy.html"
+              data-modules="modern-physics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十二 · 近代物理</span><span class="subject-tag modern">近代物理</span></div>
+              <h3>质量亏损与结合能</h3>
+              <p
+                class="card-focus">连接核子静质量、平均结合能曲线与核反应 Q 值。</p>
+              <a class="card-link" href="./binding-energy.html"
+                data-lesson-link="binding-energy.html">打开实验<span aria-hidden="true">→</span></a>
+            </article>
+
+            <article class="experiment-card featured"
+              data-lesson-card="nuclear-reaction.html"
+              data-modules="modern-physics">
+              <div
+                class="card-topline"><span class="chapter-tag">模型十二 · 近代物理</span><span class="subject-tag modern">近代物理</span></div>
+              <h3>核裂变与核聚变</h3>
+              <p
+                class="card-focus">连接单次放能、链式增殖、临界控制与 D-T 聚变条件。</p>
+              <a class="card-link" href="./nuclear-reaction.html"
+                data-lesson-link="nuclear-reaction.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
           </div>
 
@@ -168,6 +527,6 @@
     <script src="./platform-protocol.js?v=protocol-v1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=workspace-3"></script>
+    <script src="./platform.js?v=workspace-31"></script>
   </body>
 </html>

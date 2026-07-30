@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#151817" />
+    <title>凸透镜成像实验室</title>
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
+    <link rel="stylesheet" href="./platform.css?v=workspace-3" />
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./lens.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab lens-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录">
+        <span class="brand-mark" aria-hidden="true">Φ</span>
+        <span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span>
+      </a>
+      <div class="topbar-title"><span>光学 · 实验 02</span><strong>凸透镜成像</strong></div>
+      <div class="connection-state"><i aria-hidden="true"></i>模型已连接</div>
+      <div class="actions topbar-actions">
+        <button id="guideButton" class="toolbar-button" type="button">实验指南</button>
+        <button id="stepButton" class="toolbar-button" type="button">分步演示</button>
+        <button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button>
+        <button id="fullscreenButton" class="toolbar-button icon-command" type="button" title="全屏" aria-label="全屏">⛶</button>
+      </div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading">
+          <span class="eyebrow">OPTICS / 02</span>
+          <h1>凸透镜<br />成像</h1>
+          <p>从主光线作图到光屏验证，把物距、像距、放大率和成像性质连接起来。</p>
+        </div>
+        <div class="rail-section">
+          <span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="regions"><span>01</span><strong>五个区域</strong><i>跨越 f 与 2f</i></button>
+          <button class="scene-tab" type="button" data-mode="rays"><span>02</span><strong>主光线</strong><i>几何作图</i></button>
+          <button class="scene-tab" type="button" data-mode="screen"><span>03</span><strong>光屏验证</strong><i>承接实像</i></button>
+          <button class="scene-tab" type="button" data-mode="relation"><span>04</span><strong>成像规律</strong><i>记录数据</i></button>
+        </div>
+        <div class="rail-section experiment-route">
+          <span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button" data-guide-step="0"><b>1</b><span>先预测<small>判断像的虚实和正倒</small></span></button>
+          <button class="route-step" type="button" data-guide-step="1"><b>2</b><span>画主光线<small>寻找真实会聚位置</small></span></button>
+          <button class="route-step" type="button" data-guide-step="2"><b>3</b><span>光屏验证<small>检验实像能否承接</small></span></button>
+        </div>
+        <div class="rail-equation">
+          <span>薄透镜模型</span>
+          <strong>1/f = 1/u + 1/v</strong>
+          <small>实像 v &gt; 0，虚像 v &lt; 0</small>
+        </div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="control-heading">
+          <div><span class="eyebrow">CONTROL</span><h2>成像参数</h2></div>
+          <button id="resetButton" class="reset-button" type="button">重置</button>
+        </div>
+
+        <section class="control-section">
+          <div class="control-label"><span>焦距 <i>f</i></span><strong id="focalValue">10.0 cm</strong></div>
+          <input id="focalInput" class="range-input" type="range" min="5" max="20" step="0.5" value="10" aria-label="焦距" />
+        </section>
+
+        <section class="control-section">
+          <div class="control-label"><span>物距 <i>u</i></span><strong id="objectDistanceValue">30.0 cm</strong></div>
+          <input id="objectDistanceInput" class="range-input object-distance-range" type="range" min="3" max="60" step="0.5" value="30" aria-label="物距" />
+          <div class="number-stepper">
+            <button type="button" data-nudge="-0.5" aria-label="减小物距">−</button>
+            <input id="objectDistanceNumber" type="number" min="3" max="60" step="0.5" value="30" aria-label="输入物距" />
+            <span>cm</span>
+            <button type="button" data-nudge="0.5" aria-label="增大物距">+</button>
+          </div>
+        </section>
+
+        <section class="control-section">
+          <div class="control-label"><span>物高 <i>h</i></span><strong id="objectHeightValue">4.0 cm</strong></div>
+          <input id="objectHeightInput" class="range-input" type="range" min="1" max="8" step="0.5" value="4" aria-label="物高" />
+        </section>
+
+        <section class="control-section preset-section">
+          <span class="section-kicker">典型位置</span>
+          <div class="position-presets" role="group" aria-label="典型物距位置">
+            <button type="button" data-region="far">u &gt; 2f</button>
+            <button type="button" data-region="double">u = 2f</button>
+            <button type="button" data-region="middle">f &lt; u &lt; 2f</button>
+            <button type="button" data-region="focus">u = f</button>
+            <button type="button" data-region="near">u &lt; f</button>
+          </div>
+        </section>
+
+        <section id="screenControls" class="control-section screen-controls">
+          <div class="control-label"><span>光屏位置 <i>s</i></span><strong id="screenValue">15.0 cm</strong></div>
+          <input id="screenInput" class="range-input screen-range" type="range" min="5" max="60" step="0.5" value="15" aria-label="光屏位置" />
+          <div class="screen-status"><span>清晰度</span><strong id="focusQuality">100%</strong></div>
+        </section>
+
+        <section class="control-section overlay-controls">
+          <span class="section-kicker">分析叠加层</span>
+          <div class="toggle-grid">
+            <label><input id="showRaysToggle" type="checkbox" checked /><span>主光线</span></label>
+            <label><input id="showExtensionsToggle" type="checkbox" checked /><span>反向延长线</span></label>
+            <label><input id="showMarkersToggle" type="checkbox" checked /><span>焦点标记</span></label>
+            <label><input id="showScreenToggle" type="checkbox" checked /><span>光屏</span></label>
+          </div>
+        </section>
+
+        <div class="control-actions">
+          <button id="alignScreenButton" class="secondary-command" type="button">光屏对焦</button>
+          <button id="recordButton" class="primary-command" type="button">记录参数</button>
+        </div>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景">
+          <button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="regions"><span>01</span><strong>五个区域</strong><i>跨越 f 与 2f</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="rays"><span>02</span><strong>主光线</strong><i>几何作图</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="screen"><span>03</span><strong>光屏验证</strong><i>承接实像</i></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="relation"><span>04</span><strong>成像规律</strong><i>记录数据</i></button>
+        </nav>
+        <header class="stage-head">
+          <div class="stage-title"><span class="stage-breadcrumb">凸透镜成像 / <b id="modeTitle">五个区域</b></span><h2 id="modeGoal">拖动物体跨越 2f 和 f，观察像的突变与连续变化</h2></div>
+          <div class="stage-status"><span id="stateBadge" class="state-badge">倒立 · 缩小 · 实像</span><span id="dragHint" class="drag-hint">拖动物体或光屏</span></div>
+        </header>
+
+        <section class="instrument-stage" aria-label="凸透镜成像光具座">
+          <canvas id="lensCanvas" width="900" height="470" aria-label="可拖动物体和光屏的凸透镜成像光具座"></canvas>
+          <aside class="live-readouts" aria-label="实时读数">
+            <div class="readout-head"><span>LIVE DATA</span><i aria-hidden="true"></i></div>
+            <dl>
+              <div><dt>物距 <i>u</i></dt><dd id="objectMetric">30.0 cm</dd></div>
+              <div><dt>像距 <i>v</i></dt><dd id="imageMetric">15.0 cm</dd></div>
+              <div><dt>放大率 <i>m</i></dt><dd id="magnificationMetric">−0.50</dd></div>
+              <div><dt>像高 <i>h′</i></dt><dd id="imageHeightMetric">−2.0 cm</dd></div>
+            </dl>
+            <div class="law-check"><span>成像判定</span><strong id="imageNature">倒立 · 缩小</strong><small id="imageReality">实像，可由光屏承接</small></div>
+          </aside>
+        </section>
+
+        <section class="analysis-grid" aria-label="数据图像">
+          <article class="chart-panel">
+            <header><div><span>IMAGE DISTANCE</span><h3>像距 v – 物距 u</h3></div><strong id="curveStatus">u &gt; 2f</strong></header>
+            <canvas id="distanceChart" width="620" height="230" aria-label="像距随物距变化图像"></canvas>
+          </article>
+          <article class="chart-panel">
+            <header><div><span>RECIPROCAL PLOT</span><h3>1/v – 1/u 验证</h3></div><button id="clearDataButton" type="button">清空数据</button></header>
+            <canvas id="reciprocalChart" width="620" height="230" aria-label="薄透镜公式倒数关系图"></canvas>
+          </article>
+        </section>
+
+        <footer class="observation-bar">
+          <span class="step-index" id="stepIndex">01</span>
+          <div><strong id="stepTitle">先预测</strong><p id="stepPrompt">物体从 2f 外向透镜移动时，实像会向哪里移动、怎样变化？</p></div>
+          <div class="formula-state"><span id="formulaLabel">当前关系</span><strong id="formulaReadout">1/10.0 = 1/30.0 + 1/15.0</strong></div>
+        </footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog">
+      <form method="dialog">
+        <header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>凸透镜成像探究指南</h2></div><button aria-label="关闭指南">×</button></header>
+        <ol>
+          <li><b>预测</b><span>先根据物距与焦距的关系，判断像的虚实、正倒和大小。</span></li>
+          <li><b>作图</b><span>追踪平行光线、过光心光线和过焦点光线，寻找交点。</span></li>
+          <li><b>验证</b><span>移动光屏到理论像距；实像能够清晰承接，虚像不能。</span></li>
+          <li><b>建模</b><span>记录多组数据，用倒数图像检验 1/f = 1/u + 1/v。</span></li>
+        </ol>
+        <button class="primary-command" value="close">开始实验</button>
+      </form>
+    </dialog>
+
+    <script src="./lens.js?v=flagship-2"></script>
+    <script src="./url-state.js?v=protocol-v1"></script>
+    <script src="./learning-records.js?v=protocol-v1"></script>
+    <script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

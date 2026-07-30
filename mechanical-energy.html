@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>机械能守恒实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./mechanical-energy.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab energy-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">Φ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>功和机械能 · 实验 01</span><strong>机械能守恒与能量转化</strong></div>
+      <div class="connection-state"><i></i><span>模型已连接</span></div>
+      <div class="actions topbar-actions">
+        <a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button>
+      </div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">ENERGY / 01</span><h1>机械能守恒<br />与能量转化</h1><p>同一份能量账本连接物体运动、能量柱、过程曲线和系统边界。</p></div>
+        <section class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="gravity"><span>01</span><strong>重力交换</strong><i>高度降低，速度增大</i></button>
+          <button class="scene-tab" type="button" data-mode="rough"><span>02</span><strong>粗糙斜面</strong><i>机械能转化为内能</i></button>
+          <button class="scene-tab" type="button" data-mode="spring"><span>03</span><strong>弹簧蓄能</strong><i>动能与弹性势能</i></button>
+          <button class="scene-tab" type="button" data-mode="boundary"><span>04</span><strong>系统边界</strong><i>守恒取决于系统选择</i></button>
+        </section>
+        <section class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button"><b>1</b><span>先预测转化<small>速度变小时能量去了哪里</small></span></button>
+          <button class="route-step" type="button"><b>2</b><span>核对能量账本<small>逐项相加而不是只看动能</small></span></button>
+          <button class="route-step" type="button"><b>3</b><span>选择系统边界<small>判断哪些能量属于系统内部</small></span></button>
+        </section>
+        <div class="rail-equation"><span>能量模型</span><strong>E<sub>k</sub> = ½mv²</strong><strong>U<sub>g</sub> = mgh · U<sub>s</sub> = ½kx²</strong><small>机械能不一定守恒；把内能计入后总能量仍守恒</small></div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>能量参数</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section"><div class="control-label"><span>物体质量 <i>m</i></span><strong id="massValue">2.00 kg</strong></div><input id="massInput" class="range-input mass-range" type="range" min="0.5" max="5" step="0.1" value="2" aria-label="物体质量" /></section>
+        <section class="control-section"><div class="control-label"><span id="positionLabel">初始高度 <i>h₀</i></span><strong id="positionValue">4.00 m</strong></div><input id="positionInput" class="range-input position-range" type="range" min="1" max="6" step="0.1" value="4" aria-label="初始高度或形变量" /></section>
+        <section class="control-section"><div class="control-label"><span>初速度 <i>v₀</i></span><strong id="speedValue">0.00 m/s</strong></div><input id="speedInput" class="range-input speed-range" type="range" min="0" max="6" step="0.1" value="0" aria-label="初速度" /></section>
+        <section id="frictionSection" class="control-section"><div class="control-label"><span>摩擦因数 <i>μ</i></span><strong id="frictionValue">0.18</strong></div><input id="frictionInput" class="range-input friction-range" type="range" min="0" max="0.5" step="0.01" value="0.18" aria-label="摩擦因数" /><p id="frictionNote" class="control-note">重力交换场景不计阻力</p></section>
+        <section id="springSection" class="control-section"><div class="control-label"><span>弹簧劲度系数 <i>k</i></span><strong id="springValue">32.0 N/m</strong></div><input id="springInput" class="range-input spring-range" type="range" min="10" max="80" step="1" value="32" aria-label="弹簧劲度系数" /><p id="springNote" class="control-note">切换到弹簧场景后参与计算</p></section>
+        <section class="control-section preset-section"><span class="section-kicker">典型组合</span><div class="energy-presets"><button type="button" data-preset="drop">自由下落</button><button type="button" data-preset="rough">粗糙减速</button><button type="button" data-preset="spring">弹簧释放</button></div></section>
+        <section id="boundarySection" class="control-section boundary-control" hidden><span class="section-kicker">系统边界</span><div class="boundary-options" role="group" aria-label="系统边界"><button type="button" data-boundary="object">仅物体</button><button type="button" data-boundary="earth">物体+地球</button><button class="is-active" type="button" data-boundary="full">再含斜面</button></div><p id="boundaryNote" class="control-note">系统内含物体、地球与斜面</p></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">时间控制</span><strong id="timeValue">t = 0.00 s</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="false">▶ 播放</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 能量平分</button></div><input id="timeInput" class="range-input time-range" type="range" min="0" max="1" step="0.001" value="0" aria-label="观察时刻" /><div class="rate-options" role="group" aria-label="播放速度"><button class="is-active" type="button" data-rate="0.5">0.5× 慢放</button><button type="button" data-rate="1">1× 标准</button></div></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showVelocityToggle" type="checkbox" checked /><span>速度箭头</span></label><label><input id="showForceToggle" type="checkbox" checked /><span>力与功</span></label><label><input id="showFlowToggle" type="checkbox" checked /><span>能量流向</span></label><label><input id="showReferenceToggle" type="checkbox" checked /><span>参考位置</span></label></div></section>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="gravity"><span>01</span><strong>重力</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="rough"><span>02</span><strong>摩擦</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="spring"><span>03</span><strong>弹簧</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="boundary"><span>04</span><strong>边界</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">能量转化 / <b id="modeTitle">重力交换</b></span><h2 id="modeGoal">下降过程中，重力势能转化为动能</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">释放前</span><span id="stageHint" class="drag-hint">拖动物体或时间轴，逐时刻核对能量</span></div></header>
+        <section class="instrument-stage" aria-label="机械能运动场景与实时能量账本"><canvas id="energyCanvas" width="900" height="470" aria-label="可拖动过程位置的机械能场景"></canvas><aside class="live-readouts" aria-label="实时能量读数"><div class="readout-head"><span>ENERGY LEDGER</span><i aria-hidden="true"></i></div><dl><div><dt>动能 <i>Eₖ</i></dt><dd id="kineticMetric">0.00 J</dd></div><div><dt>重力势能 <i>Uᵍ</i></dt><dd id="gravityMetric">78.40 J</dd></div><div><dt>弹性势能 <i>Uˢ</i></dt><dd id="elasticMetric">0.00 J</dd></div><div><dt>内能 <i>Eᵢ</i></dt><dd id="internalMetric">0.00 J</dd></div></dl><div class="law-check"><span>守恒核对</span><strong id="mechanicalMetric">E机 = 78.40 J</strong><small id="totalMetric">E总 = 78.40 J，残差 0.000 J</small></div></aside></section>
+        <section class="analysis-grid" aria-label="能量账本与过程图像"><article class="chart-panel"><header><div><span>ENERGY ACCOUNT</span><h3>初态与当前能量账本</h3></div><strong id="ledgerStatus">K + Uᵍ = 78.40 J</strong></header><canvas id="ledgerChart" width="620" height="230" aria-label="初态与当前能量堆叠图"></canvas></article><article class="chart-panel"><header><div><span>ENERGY HISTORY</span><h3>各类能量随过程变化</h3></div><strong id="historyStatus">机械能保持 100.0%</strong></header><canvas id="historyChart" width="620" height="230" aria-label="机械能与内能过程曲线"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先预测转化</strong><p id="stepPrompt">物体下降时速度增大，减少的重力势能是否等于增加的动能？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">K + Uᵍ = 78.40 J</strong></div></footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>机械能与系统边界指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>机械能</b><span>动能、重力势能和弹性势能的和叫机械能；只有保守力做功时机械能守恒。</span></li><li><b>摩擦</b><span>斜面场景简化取 μs=μk=μ；滑动摩擦把机械能转化为物体与接触面的内能。</span></li><li><b>零势能面</b><span>势能数值依赖参考位置，但同一过程中势能变化和运动结果不依赖零面的选择。</span></li><li><b>系统边界</b><span>系统选得不同，重力功、摩擦功可能表现为外界做功，也可能表现为系统内部能量转化。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./mechanical-energy.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

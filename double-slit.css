@@ -19,8 +19,44 @@
 .double-slit-lab .color-swatch.blue { background:#5da9ff; }
 .double-slit-lab .state-badge.is-dark { color:#b58ce5; border-color:rgba(181,140,229,.45); background:rgba(181,140,229,.08); }
 .double-slit-lab .state-badge.is-transition { color:var(--lab-amber); border-color:rgba(244,196,78,.4); background:rgba(244,196,78,.08); }
+.double-slit-lab.photon-mode #doubleSlitCanvas { cursor:default; }
+.double-slit-lab .photon-controls[hidden] { display:none; }
+.double-slit-lab .photon-controls .section-headline > strong { color:var(--lab-cyan); font-family:ui-monospace,monospace; font-size:10px; font-variant-numeric:tabular-nums; }
+.double-slit-lab .photon-command-row { display:grid; grid-template-columns:1.15fr repeat(3,1fr); gap:6px; margin-top:9px; }
+.double-slit-lab .photon-command-row button { min-width:0; min-height:32px; padding:0 5px; white-space:nowrap; }
+.double-slit-lab .photon-speed { display:flex; align-items:center; justify-content:space-between; margin-top:12px; color:var(--lab-muted); font-size:10px; }
+.double-slit-lab .photon-speed strong { color:var(--lab-text); font-family:ui-monospace,monospace; font-size:10px; }
+.double-slit-lab .photon-controls .range-input { margin-bottom:3px; }
+.double-slit-lab .state-badge.is-photon { color:var(--lab-cyan); border-color:rgba(100,199,217,.45); background:rgba(100,199,217,.08); }
+.double-slit-lab .mobile-scene-tabs { display:none; }
+
+@media (max-width:1120px) {
+  .double-slit-lab .mobile-scene-tabs {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    margin:-10px -10px 10px;
+    border-bottom:1px solid var(--lab-line);
+    background:#121513;
+  }
+  .double-slit-lab .mobile-scene-tab {
+    grid-template-columns:22px minmax(0,1fr);
+    min-height:50px;
+    padding:8px;
+    border-left:0;
+    border-bottom:2px solid transparent;
+  }
+  .double-slit-lab .mobile-scene-tab.is-active { border-bottom-color:var(--lab-cyan); }
+}
 
 @media (max-width:820px) {
   .double-slit-lab #doubleSlitCanvas { min-height:300px; aspect-ratio:1.35; }
   .double-slit-lab .analysis-grid { min-height:340px; }
+}
+
+@media (max-width:520px) {
+  .double-slit-lab .mobile-scene-tab { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:7px 4px; }
+  .double-slit-lab .mobile-scene-tab > span { grid-row:auto; padding:0; }
+  .double-slit-lab .mobile-scene-tab i { display:none; }
+  .double-slit-lab .mobile-scene-tab strong { font-size:11px; white-space:nowrap; }
+  .double-slit-lab .photon-command-row { grid-template-columns:1fr 1fr; }
 }

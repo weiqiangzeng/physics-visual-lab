@@ -184,3 +184,6 @@
     padding: 56px 20px;
   }
 }
+.model-page #modelLabLink[hidden] {
+  display: none;
+}

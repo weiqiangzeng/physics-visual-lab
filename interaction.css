@@ -1,0 +1,8 @@
+.interaction-lab{--force-cyan:#64c7d8;--force-green:#7ad699;--force-amber:#efb950;--force-red:#ff786e;--force-violet:#b59ae5}
+.interaction-lab .force-range,.interaction-lab .mass-range{background:linear-gradient(90deg,var(--force-cyan) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%)}
+.interaction-lab .angle-range,.interaction-lab .spring-range{background:linear-gradient(90deg,var(--force-amber) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%)}
+.interaction-lab #interactionCanvas{display:block;width:100%;height:100%;min-height:280px}
+.interaction-lab .state-badge.is-balanced{color:var(--force-green);border-color:rgba(122,214,153,.5);background:rgba(122,214,153,.08)}
+.interaction-lab .state-badge.is-limit{color:var(--force-red);border-color:rgba(255,120,110,.55);background:rgba(255,120,110,.1)}
+.interaction-lab .state-badge.is-vector{color:var(--force-cyan);border-color:rgba(100,199,216,.5);background:rgba(100,199,216,.08)}
+@media(max-width:820px){.interaction-lab #interactionCanvas{min-height:300px;aspect-ratio:1.35}}

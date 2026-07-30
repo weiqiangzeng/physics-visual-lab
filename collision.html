@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#151817" />
+    <title>一维碰撞与动量守恒实验室</title>
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
+    <link rel="stylesheet" href="./platform.css?v=workspace-3" />
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./collision.css?v=flagship-2" />
+  </head>
+  <body class="flagship-lab collision-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark" aria-hidden="true">Φ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>动量 · 实验 01</span><strong>一维碰撞与动量守恒</strong></div>
+      <div class="connection-state"><i aria-hidden="true"></i>模型已连接</div>
+      <div class="actions topbar-actions"><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" title="全屏" aria-label="全屏">⛶</button></div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">MOMENTUM / 01</span><h1>一维碰撞<br />与动量守恒</h1><p>把碰撞前后的速度、动量和动能放在同一时间线上，分清“动量守恒”和“动能守恒”。</p></div>
+        <div class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="elastic"><span>01</span><strong>弹性碰撞</strong><i>动量与动能都守恒</i></button>
+          <button class="scene-tab" type="button" data-mode="stick"><span>02</span><strong>完全非弹性</strong><i>粘在一起继续运动</i></button>
+          <button class="scene-tab" type="button" data-mode="restitution"><span>03</span><strong>恢复系数</strong><i>连续比较 0 ≤ e ≤ 1</i></button>
+          <button class="scene-tab" type="button" data-mode="center"><span>04</span><strong>质心参考系</strong><i>总动量化为零</i></button>
+        </div>
+        <div class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button" data-guide-step="0"><b>1</b><span>先预测速度<small>质量不同，谁会反弹</small></span></button>
+          <button class="route-step" type="button" data-guide-step="1"><b>2</b><span>核对总动量<small>比较碰撞前后总量</small></span></button>
+          <button class="route-step" type="button" data-guide-step="2"><b>3</b><span>追踪能量去向<small>损失转化为内能</small></span></button>
+        </div>
+        <div class="rail-equation"><span>一维碰撞模型</span><strong>m₁u₁ + m₂u₂ = m₁v₁ + m₂v₂</strong><strong>v₂ − v₁ = e(u₁ − u₂)</strong><small>封闭系统中总动量守恒；只有 e = 1 时动能守恒</small></div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>碰撞参数</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section cart-one-control"><div class="control-label"><span>小车 A 质量 <i>m₁</i></span><strong id="mass1Value">1.00 kg</strong></div><input id="mass1Input" class="range-input mass-one-range" type="range" min="0.5" max="5" step="0.1" value="1" aria-label="小车A质量" /><div class="control-label velocity-label"><span>初速度 <i>u₁</i></span><strong id="velocity1Value">4.00 m/s</strong></div><input id="velocity1Input" class="range-input velocity-one-range" type="range" min="-2" max="6" step="0.1" value="4" aria-label="小车A初速度" /></section>
+        <section class="control-section cart-two-control"><div class="control-label"><span>小车 B 质量 <i>m₂</i></span><strong id="mass2Value">2.00 kg</strong></div><input id="mass2Input" class="range-input mass-two-range" type="range" min="0.5" max="5" step="0.1" value="2" aria-label="小车B质量" /><div class="control-label velocity-label"><span>初速度 <i>u₂</i></span><strong id="velocity2Value">0.00 m/s</strong></div><input id="velocity2Input" class="range-input velocity-two-range" type="range" min="-4" max="4" step="0.1" value="0" aria-label="小车B初速度" /></section>
+        <section class="control-section restitution-control"><div class="control-label"><span>恢复系数 <i>e</i></span><strong id="restitutionValue">1.00</strong></div><input id="restitutionInput" class="range-input restitution-range" type="range" min="0" max="1" step="0.02" value="1" aria-label="恢复系数" /><p id="restitutionNote" class="control-note">弹性碰撞固定 e = 1</p></section>
+        <section class="control-section preset-section"><span class="section-kicker">典型组合</span><div class="collision-presets"><button type="button" data-preset="equal">等质量交换</button><button type="button" data-preset="heavy">撞重车</button><button type="button" data-preset="opposite">相向碰撞</button></div></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">时间控制</span><strong id="timeValue">t = 0.00 s</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="false">▶ 播放</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="collisionButton" class="secondary-command" type="button">◎ 碰撞时刻</button></div><input id="timeInput" class="range-input time-range" type="range" min="0" max="4" step="0.01" value="0" aria-label="观察时刻" /></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showVelocityToggle" type="checkbox" checked /><span>速度箭头</span></label><label><input id="showGhostsToggle" type="checkbox" checked /><span>碰撞前后残影</span></label><label><input id="showCenterToggle" type="checkbox" checked /><span>质心位置</span></label><label><input id="showMomentumToggle" type="checkbox" checked /><span>动量标注</span></label></div></section>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="elastic"><span>01</span><strong>弹性</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="stick"><span>02</span><strong>粘连</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="restitution"><span>03</span><strong>恢复系数</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="center"><span>04</span><strong>质心系</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">一维碰撞 / <b id="modeTitle">弹性碰撞</b></span><h2 id="modeGoal">总动量和总动能同时守恒</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">碰撞前</span><span id="stageHint" class="drag-hint">拖动小车上的速度箭头改变初速度</span></div></header>
+        <section class="instrument-stage" aria-label="一维碰撞轨道与实时守恒量"><canvas id="collisionCanvas" width="900" height="470" aria-label="可拖动初速度的一维碰撞场景"></canvas><aside class="live-readouts" aria-label="实时读数"><div class="readout-head"><span>CONSERVATION</span><i aria-hidden="true"></i></div><dl><div><dt>碰前总动量 <i>P₀</i></dt><dd id="momentumBeforeMetric">4.00 kg·m/s</dd></div><div><dt>碰后总动量 <i>P₁</i></dt><dd id="momentumAfterMetric">4.00 kg·m/s</dd></div><div><dt>碰前动能 <i>K₀</i></dt><dd id="energyBeforeMetric">8.00 J</dd></div><div><dt>碰后动能 <i>K₁</i></dt><dd id="energyAfterMetric">8.00 J</dd></div></dl><div class="law-check"><span>守恒核对</span><strong id="conservationNature">ΔP = 0</strong><small id="conservationExplanation">弹性碰撞中 ΔK = 0</small></div></aside></section>
+        <section class="analysis-grid" aria-label="碰撞前后数据图像"><article class="chart-panel"><header><div><span>MOMENTUM BALANCE</span><h3>碰撞前后动量分配</h3></div><strong id="momentumChartStatus">总动量保持 4.00 kg·m/s</strong></header><canvas id="momentumChart" width="620" height="230" aria-label="碰撞前后两车动量条形图"></canvas></article><article class="chart-panel"><header><div><span>ENERGY RETENTION</span><h3>恢复系数与动能保留率</h3></div><strong id="energyChartStatus">K₁ / K₀ = 100.0%</strong></header><canvas id="energyChart" width="620" height="230" aria-label="恢复系数与碰撞后动能关系图"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先预测速度</strong><p id="stepPrompt">A 撞上更重的 B 后，A 会继续向前还是反弹？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">v₁ = −1.33 m/s，v₂ = 2.67 m/s</strong></div></footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>一维碰撞探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>系统</b><span>把两辆小车作为系统；轨道水平且外力冲量可忽略时，总动量守恒。</span></li><li><b>恢复系数</b><span>e 描述分离相对速度与接近相对速度之比；e = 1 为弹性碰撞，e = 0 为完全非弹性碰撞。</span></li><li><b>能量</b><span>非弹性碰撞损失的机械能转化为形变、内能和声能，不是能量消失。</span></li><li><b>质心系</b><span>质心参考系中碰撞前后总动量均为零，更容易看出内部相互作用只重新分配动量。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./collision.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

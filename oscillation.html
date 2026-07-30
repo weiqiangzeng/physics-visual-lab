@@ -1,282 +1,30 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>简谐振动可视化实验台</title>
-    <link rel="stylesheet" href="./oscillation.css?v=20260702-scrub" />
-    <link rel="stylesheet" href="./platform.css?v=workspace-2" />
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#151817" />
+    <title>简谐运动实验室</title>
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" /><link rel="stylesheet" href="./platform.css?v=workspace-3" /><link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" /><link rel="stylesheet" href="./oscillation.css?v=flagship-1" />
   </head>
-  <body>
-    <main class="app">
-      <section class="workspace">
-        <div class="stage">
-          <div class="stage-head">
-            <div class="stage-title">
-              <h1>简谐振动可视化实验台</h1>
-              <span class="demo-badge" id="demoBadge">教学演示中</span>
-            </div>
-            <div class="actions">
-              <a class="ghost-link" href="./index.html">实验目录</a>
-              <button id="startButton" class="primary" type="button">开始</button>
-              <button id="pauseButton" type="button">暂停</button>
-              <button id="resetButton" type="button">重置</button>
-            </div>
-          </div>
-          <p class="stage-subtitle">同步观察位移、速度、加速度和能量。</p>
-
-          <section class="lesson-guide" aria-label="当前观察任务">
-            <div class="guide-main">
-              <span class="preset-label">观察任务</span>
-              <strong id="modeGoal">观察位移、速度、加速度之间的相位关系</strong>
-              <p id="modePrompt">注意质点经过平衡位置时速度最大，经过端点时速度为 0、加速度最大。</p>
-            </div>
-            <div class="guide-formula" id="modeFormula">\(x = A\cos(\omega t + \varphi)\)</div>
-          </section>
-          <details class="teaching-route compact-guidance" aria-label="观察提示"><summary>展开观察提示</summary>
-            <div>
-              <span class="preset-label">观察路线</span>
-              <ol>
-                <li>先点击端点和平衡位置，比较 x、v、a 的读数。</li>
-                <li>再拖动时间条，观察相位圆和真实运动如何同步。</li>
-                <li>最后看能量条，判断动能和势能在哪里最大。</li>
-              </ol>
-            </div>
-            <div>
-              <span class="preset-label">典型问题</span>
-              <ul>
-                <li>经过平衡位置时加速度为什么为 0？</li>
-                <li>端点速度为 0，为什么加速度最大？</li>
-              </ul>
-            </div>
-          </details>
-
-          <div class="canvas-wrap main-canvas">
-            <canvas id="motionCanvas" width="980" height="390" aria-label="弹簧振子运动"></canvas>
-          </div>
-
-          <section class="critical-strip" aria-label="简谐振动关键位置">
-            <article class="critical-card" id="leftCriticalCard" role="button" tabindex="0" data-jump="left">
-              <span>左端点 -A</span>
-              <strong>v = 0</strong>
-              <p>加速度指向平衡位置，势能最大。点击定位。</p>
-            </article>
-            <article class="critical-card" id="centerCriticalCard" role="button" tabindex="0" data-jump="center">
-              <span>平衡位置 O</span>
-              <strong>|v| 最大</strong>
-              <p>加速度为 0，动能最大。点击定位。</p>
-            </article>
-            <article class="critical-card" id="rightCriticalCard" role="button" tabindex="0" data-jump="right">
-              <span>右端点 +A</span>
-              <strong>v = 0</strong>
-              <p>加速度指向平衡位置，势能最大。点击定位。</p>
-            </article>
-            <article class="critical-now">
-              <span>当前观察</span>
-              <strong id="criticalStateLabel">右端点附近</strong>
-              <p id="criticalStateNote">此时速度接近 0，回复力和加速度最大。</p>
-            </article>
-          </section>
-
-          <div class="stage-readouts">
-            <article class="stage-readout">
-              <span>x</span>
-              <strong id="stageXMetric">0 m</strong>
-            </article>
-            <article class="stage-readout">
-              <span>v</span>
-              <strong id="stageVMetric">0 m/s</strong>
-            </article>
-            <article class="stage-readout">
-              <span>a</span>
-              <strong id="stageAMetric">0 m/s²</strong>
-            </article>
-            <article class="stage-readout">
-              <span>T</span>
-              <strong id="stagePeriodMetric">0 s</strong>
-            </article>
-            <article class="stage-readout">
-              <span>E</span>
-              <strong id="stageEnergyMetric">0 J</strong>
-            </article>
-          </div>
-
-          <section class="visual-grid">
-            <div class="visual-panel graph-panel">
-              <div class="panel-head">
-                <span class="preset-label">时间图像</span>
-                <strong>x / v / a</strong>
-              </div>
-              <canvas id="graphCanvas" width="980" height="300" aria-label="简谐振动时间图像"></canvas>
-            </div>
-            <div class="visual-panel phase-panel">
-              <div class="panel-head">
-                <span class="preset-label">相位图</span>
-                <strong>参考圆</strong>
-              </div>
-              <canvas id="phaseCanvas" width="420" height="300" aria-label="简谐振动相位参考圆"></canvas>
-            </div>
-            <div class="visual-panel energy-panel">
-              <div class="panel-head">
-                <span class="preset-label">能量转换</span>
-                <strong>K + U = E</strong>
-              </div>
-              <div class="energy-bars">
-                <div class="energy-row">
-                  <span>动能 K</span>
-                  <div class="energy-track"><i id="kineticBar"></i></div>
-                  <strong id="kineticMetric">0 J</strong>
-                </div>
-                <div class="energy-row">
-                  <span>势能 U</span>
-                  <div class="energy-track"><i id="potentialBar"></i></div>
-                  <strong id="potentialMetric">0 J</strong>
-                </div>
-                <div class="energy-row total-row">
-                  <span>总能量 E</span>
-                  <div class="energy-track"><i id="totalBar"></i></div>
-                  <strong id="totalMetric">0 J</strong>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <aside class="controls">
-          <div class="controls-overview">
-            <div>
-              <span class="preset-label">实验控制</span>
-              <h2>振动参数</h2>
-            </div>
-            <div class="overview-badges">
-              <span class="overview-badge" id="overviewSpeed">1x</span>
-              <span class="overview-badge" id="overviewTime">0.00 s</span>
-            </div>
-          </div>
-
-          <details class="section-panel" open>
-            <summary class="section-summary">
-              <span>核心参数</span>
-            </summary>
-            <div class="section-body">
-              <label class="control">
-                <div class="label-row">
-                  <div class="label-copy">
-                    <span class="label-title">质量</span>
-                    <span class="label-math">\(m / \mathrm{kg}\)</span>
-                  </div>
-                  <strong id="massValue">1.00 kg</strong>
-                </div>
-                <input id="massInput" type="range" min="0.2" max="5" step="0.1" value="1" />
-                <div class="inline-edit">
-                  <input id="massNumber" class="number-input" type="number" min="0.2" max="5" step="0.1" value="1" />
-                  <span class="input-unit">\(\mathrm{kg}\)</span>
-                </div>
-              </label>
-
-              <label class="control">
-                <div class="label-row">
-                  <div class="label-copy">
-                    <span class="label-title">劲度系数</span>
-                    <span class="label-math">\(k / (\mathrm{N/m})\)</span>
-                  </div>
-                  <strong id="springValue">16.0 N/m</strong>
-                </div>
-                <input id="springInput" type="range" min="1" max="80" step="0.5" value="16" />
-                <div class="inline-edit">
-                  <input id="springNumber" class="number-input" type="number" min="1" max="80" step="0.5" value="16" />
-                  <span class="input-unit">\(\mathrm{N/m}\)</span>
-                </div>
-              </label>
-
-              <label class="control">
-                <div class="label-row">
-                  <div class="label-copy">
-                    <span class="label-title">振幅</span>
-                    <span class="label-math">\(A / \mathrm{m}\)</span>
-                  </div>
-                  <strong id="amplitudeValue">0.80 m</strong>
-                </div>
-                <input id="amplitudeInput" type="range" min="0.1" max="2" step="0.05" value="0.8" />
-                <div class="inline-edit">
-                  <input id="amplitudeNumber" class="number-input" type="number" min="0.1" max="2" step="0.05" value="0.8" />
-                  <span class="input-unit">\(\mathrm{m}\)</span>
-                </div>
-              </label>
-
-              <label class="control">
-                <div class="label-row">
-                  <div class="label-copy">
-                    <span class="label-title">初相位</span>
-                    <span class="label-math">\(\phi / {}^\circ\)</span>
-                  </div>
-                  <strong id="phaseValue">0°</strong>
-                </div>
-                <input id="phaseInput" type="range" min="-180" max="180" step="5" value="0" />
-                <div class="inline-edit">
-                  <input id="phaseNumber" class="number-input" type="number" min="-180" max="180" step="5" value="0" />
-                  <span class="input-unit">\({}^\circ\)</span>
-                </div>
-              </label>
-
-              <label class="control time-control">
-                <div class="label-row">
-                  <div class="label-copy">
-                    <span class="label-title">观察时刻</span>
-                    <span class="label-math">\(t / \mathrm{s}\)</span>
-                  </div>
-                  <strong id="timeValue">0.00 s</strong>
-                </div>
-                <input id="timeInput" type="range" min="0" max="1.57" step="0.01" value="0" />
-                <div class="inline-edit">
-                  <input id="timeNumber" class="number-input" type="number" min="0" max="1.57" step="0.01" value="0" />
-                  <span class="input-unit">\(\mathrm{s}\)，拖动会暂停</span>
-                </div>
-              </label>
-            </div>
-          </details>
-
-          <details class="section-panel">
-            <summary class="section-summary">
-              <span>显示与播放</span>
-            </summary>
-            <div class="section-body">
-              <section class="display-panel">
-                <div class="toggle-grid">
-                  <label class="toggle-item">
-                    <input id="showVectorsToggle" type="checkbox" checked />
-                    <span>显示速度和加速度</span>
-                  </label>
-                  <label class="toggle-item">
-                    <input id="showGraphsToggle" type="checkbox" checked />
-                    <span>显示图像</span>
-                  </label>
-                  <label class="toggle-item">
-                    <input id="demoModeToggle" type="checkbox" />
-                    <span>教学演示模式</span>
-                  </label>
-                </div>
-              </section>
-              <section class="display-panel">
-                <div class="speed-panel">
-                  <span class="speed-label">播放速度</span>
-                  <div class="speed-buttons">
-                    <button class="speed-button" type="button" data-speed="0.25">0.25x</button>
-                    <button class="speed-button" type="button" data-speed="0.5">0.5x</button>
-                    <button class="speed-button active" type="button" data-speed="1">1x</button>
-                    <button class="speed-button" type="button" data-speed="2">2x</button>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </details>
-        </aside>
+  <body class="flagship-lab oscillation-lab">
+    <header class="lab-topbar"><a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark" aria-hidden="true">Φ</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a><div class="topbar-title"><span>振动与波 · 实验 01</span><strong>简谐运动</strong></div><div class="connection-state"><i aria-hidden="true"></i>模型已连接</div><div class="actions topbar-actions"><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" title="全屏" aria-label="全屏">⛶</button></div></header>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径"><div class="rail-heading"><span class="eyebrow">OSCILLATION / 01</span><h1>简谐<br />运动</h1><p>同步观察振子、相位圆、三条时间曲线和机械能交换。</p></div><div class="rail-section"><span class="rail-label">实验场景</span><button class="scene-tab is-active" type="button" data-mode="phase"><span>01</span><strong>相位关系</strong><i>x、v、a 相差四分之一周期</i></button><button class="scene-tab" type="button" data-mode="positions"><span>02</span><strong>关键位置</strong><i>端点与平衡位置</i></button><button class="scene-tab" type="button" data-mode="energy"><span>03</span><strong>能量交换</strong><i>K + U = E</i></button><button class="scene-tab" type="button" data-mode="projection"><span>04</span><strong>圆周投影</strong><i>参考圆生成简谐运动</i></button></div><div class="rail-section experiment-route"><span class="rail-label">探究路径</span><button class="route-step is-active" type="button" data-guide-step="0"><b>1</b><span>判断回复力<small>F 与 x 反向且成正比</small></span></button><button class="route-step" type="button" data-guide-step="1"><b>2</b><span>比较三个量<small>在端点和中心逐一核对</small></span></button><button class="route-step" type="button" data-guide-step="2"><b>3</b><span>追踪能量<small>动能与势能周期性交换</small></span></button></div><div class="rail-equation"><span>解析模型</span><strong>x = A cos(ωt + φ)</strong><strong>a = -ω²x</strong><small>T = 2π√(m/k)，无阻尼理想模型</small></div></nav>
+      <aside class="controls" aria-label="实验控制"><div class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>振动参数</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section"><div class="control-label"><span>质量 <i>m</i></span><strong id="massValue">1.00 kg</strong></div><input id="massInput" class="range-input mass-range" type="range" min="0.2" max="5" step="0.1" value="1" aria-label="质量" /></section>
+        <section class="control-section"><div class="control-label"><span>劲度系数 <i>k</i></span><strong id="springValue">16.0 N/m</strong></div><input id="springInput" class="range-input spring-range" type="range" min="1" max="80" step="0.5" value="16" aria-label="劲度系数" /></section>
+        <section class="control-section"><div class="control-label"><span>振幅 <i>A</i></span><strong id="amplitudeValue">0.80 m</strong></div><input id="amplitudeInput" class="range-input amplitude-range" type="range" min="0.1" max="2" step="0.05" value="0.8" aria-label="振幅" /></section>
+        <section class="control-section"><div class="control-label"><span>初相位 <i>φ</i></span><strong id="phaseValue">0°</strong></div><input id="phaseInput" class="range-input phase-range" type="range" min="-180" max="180" step="5" value="0" aria-label="初相位" /><div class="position-presets"><button id="leftButton" type="button">左端点</button><button id="centerButton" type="button">平衡位置</button><button id="rightButton" type="button" class="is-active">右端点</button></div></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">时间控制</span><strong id="timeValue">t = 0.00 s</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="false">▶ 播放</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="restartButton" class="secondary-command" type="button">↺ 重播</button></div><input id="timeInput" class="range-input time-range" type="range" min="0" max="1.57" step="0.005" value="0" aria-label="观察时刻" /><label class="speed-row" for="timeScaleInput"><span>时间倍率</span><strong id="timeScaleValue">1.00×</strong></label><input id="timeScaleInput" class="range-input scale-range" type="range" min="0.25" max="2" step="0.25" value="1" aria-label="时间倍率" /></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showVelocityToggle" type="checkbox" checked /><span>速度箭头</span></label><label><input id="showAccelerationToggle" type="checkbox" checked /><span>加速度箭头</span></label><label><input id="showForceToggle" type="checkbox" checked /><span>回复力箭头</span></label><label><input id="showProjectionToggle" type="checkbox" checked /><span>圆周投影</span></label></div></section><div class="control-actions"><button id="recordButton" class="primary-command" type="button">记录参数</button><button id="clearDataButton" class="secondary-command" type="button">清空记录</button></div>
+      </aside>
+      <section class="stage"><nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="phase"><span>01</span><strong>相位</strong><i>x/v/a</i></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="positions"><span>02</span><strong>位置</strong><i>端点/中心</i></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="energy"><span>03</span><strong>能量</strong><i>K/U</i></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="projection"><span>04</span><strong>投影</strong><i>参考圆</i></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">简谐运动 / <b id="modeTitle">相位关系</b></span><h2 id="modeGoal">位移、速度和加速度具有固定相位关系</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">右端点</span><span id="stageHint" class="drag-hint">拖动振子可改变当前相位</span></div></header>
+        <section class="instrument-stage" aria-label="弹簧振子和参考圆场景"><canvas id="motionCanvas" width="900" height="470" aria-label="可拖动的弹簧振子及圆周投影"></canvas><aside class="live-readouts" aria-label="实时读数"><div class="readout-head"><span>LIVE DATA</span><i aria-hidden="true"></i></div><dl><div><dt>位移 <i>x</i></dt><dd id="xMetric">0.80 m</dd></div><div><dt>速度 <i>v</i></dt><dd id="velocityMetric">0.00 m/s</dd></div><div><dt>加速度 <i>a</i></dt><dd id="accelerationMetric">-12.80 m/s²</dd></div><div><dt>周期 <i>T</i></dt><dd id="periodMetric">1.57 s</dd></div></dl><div class="law-check"><span>状态判断</span><strong id="motionNature">v = 0，|a| 最大</strong><small id="motionExplanation">回复力指向平衡位置，弹性势能最大</small></div></aside></section>
+        <section class="analysis-grid" aria-label="振动图像与能量"><article class="chart-panel"><header><div><span>PHASE HISTORY</span><h3>x/A、v/vmax、a/amax</h3></div><strong id="phaseStatus">ω = 4.00 rad/s</strong></header><canvas id="phaseChart" width="620" height="230" aria-label="归一化位移速度加速度随时间变化图"></canvas></article><article class="chart-panel energy-chart"><header><div><span id="secondaryKicker">ENERGY EXCHANGE</span><h3 id="secondaryTitle">动能 K 与势能 U</h3></div><strong id="sampleStatus">0 个记录点</strong></header><canvas id="energyChart" width="620" height="230" aria-label="动能势能或周期参数关系图"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">判断回复力</strong><p id="stepPrompt">位移向右时，回复力和加速度都向左。</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">a = -ω²x = -12.80 m/s²</strong></div></footer>
       </section>
     </main>
-
-    <script src="./oscillation.js?v=20260702-phasecircle"></script>
-    <script src="./url-state.js?v=protocol-v1"></script>
-    <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=workspace-2"></script>
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>简谐运动探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>回复力</b><span>只有回复力与位移成正比、方向相反的理想往复运动才是简谐运动。</span></li><li><b>关键位置</b><span>端点速度为零但加速度最大；平衡位置加速度为零但速度最大。</span></li><li><b>相位</b><span>位移与加速度反相，速度相对位移相差四分之一周期。</span></li><li><b>能量</b><span>无阻尼条件下总机械能不变，动能和弹性势能以半个运动周期为周期交换。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./oscillation.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
   </body>
 </html>

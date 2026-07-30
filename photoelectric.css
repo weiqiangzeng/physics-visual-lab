@@ -1,0 +1,26 @@
+.photoelectric-lab { --photo-photon:#b58ce5; --photo-electron:#64c7d9; --photo-energy:#f2b84b; --photo-threshold:#ff7468; --photo-current:#79d992; }
+.photoelectric-lab .brand-mark { font-size:10px; }
+.photoelectric-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
+.photoelectric-lab .instrument-stage { background:#090d0f; }
+.photoelectric-lab #photoCanvas { display:block; width:100%; height:100%; min-height:280px; cursor:crosshair; touch-action:none; }
+.photoelectric-lab .live-readouts dd { font-size:12px; }
+.photoelectric-lab .wavelength-range { background:linear-gradient(90deg,#b58ce5 0 var(--range-progress,39%),#4a514c var(--range-progress,39%) 100%); }
+.photoelectric-lab .intensity-range { background:linear-gradient(90deg,var(--photo-energy) 0 var(--range-progress,60%),#4a514c var(--range-progress,60%) 100%); }
+.photoelectric-lab .voltage-range { background:linear-gradient(90deg,var(--photo-electron) 0 var(--range-progress,50%),#4a514c var(--range-progress,50%) 100%); }
+.photoelectric-lab .control-note { min-height:14px; margin:2px 0 0; color:var(--lab-muted); font-size:9px; line-height:1.4; }
+.photoelectric-lab .material-options,.photoelectric-lab .rate-options { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:8px; }
+.photoelectric-lab .rate-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.photoelectric-lab .photo-presets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:8px; }
+.photoelectric-lab .material-options button,.photoelectric-lab .rate-options button,.photoelectric-lab .photo-presets button { min-width:0; min-height:30px; padding:0 4px; border:1px solid var(--lab-line); color:var(--lab-muted); background:#171b18; cursor:pointer; font-size:9px; }
+.photoelectric-lab .material-options button+button,.photoelectric-lab .rate-options button+button,.photoelectric-lab .photo-presets button:nth-child(even) { border-left:0; }
+.photoelectric-lab .photo-presets button:nth-child(n+3) { border-top:0; }
+.photoelectric-lab .material-options button:hover,.photoelectric-lab .rate-options button:hover,.photoelectric-lab .photo-presets button:hover,.photoelectric-lab .material-options button.is-active,.photoelectric-lab .rate-options button.is-active { color:#102017; border-color:var(--lab-green); background:var(--lab-green); }
+.photoelectric-lab .playback-row { display:grid; grid-template-columns:1.05fr .9fr 1.4fr; gap:6px; margin-top:9px; }
+.photoelectric-lab .playback-row button { min-width:0; padding:0 5px; }
+.photoelectric-lab .state-badge.is-emitting { color:var(--photo-current); border-color:rgba(121,217,146,.5); background:rgba(121,217,146,.08); }
+.photoelectric-lab .state-badge.is-blocked { color:var(--photo-threshold); border-color:rgba(255,116,104,.5); background:rgba(255,116,104,.08); }
+.photoelectric-lab .state-badge.is-stopped { color:var(--photo-energy); border-color:rgba(242,184,75,.5); background:rgba(242,184,75,.08); }
+.photoelectric-lab .mobile-scene-tabs { display:none; }
+@media(max-width:1120px){.photoelectric-lab .mobile-scene-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:-10px -10px 10px;border-bottom:1px solid var(--lab-line);background:#121513}.photoelectric-lab .mobile-scene-tab{grid-template-columns:22px minmax(0,1fr);min-height:50px;padding:8px;border-left:0;border-bottom:2px solid transparent}.photoelectric-lab .mobile-scene-tab.is-active{border-bottom-color:var(--lab-green)}}
+@media(max-width:820px){.photoelectric-lab #photoCanvas{min-height:300px;aspect-ratio:1.35}.photoelectric-lab .analysis-grid{min-height:340px}}
+@media(max-width:520px){.photoelectric-lab .mobile-scene-tab{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:7px 3px}.photoelectric-lab .mobile-scene-tab>span{grid-row:auto;padding:0}.photoelectric-lab .mobile-scene-tab i{display:none}.photoelectric-lab .mobile-scene-tab strong{font-size:10px;white-space:nowrap}.photoelectric-lab .playback-row{grid-template-columns:1fr .9fr 1.45fr}}

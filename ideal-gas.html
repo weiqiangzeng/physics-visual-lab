@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>理想气体与分子运动实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./ideal-gas.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab ideal-gas-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">pV</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>热学与气体 · 实验 01</span><strong>理想气体与分子运动</strong></div>
+      <div class="connection-state"><i></i><span>模型已连接</span></div>
+      <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div>
+    </header>
+
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">IDEAL GAS / 01</span><h1>理想气体<br />与分子运动</h1><p>把器壁碰撞、分子速率统计和宏观 p-V-T 状态放在同一实验中。</p></div>
+        <section class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" type="button" data-mode="microscopic"><span>01</span><strong>微观压强</strong><i>器壁碰撞形成宏观压强</i></button>
+          <button class="scene-tab" type="button" data-mode="isothermal"><span>02</span><strong>等温压缩</strong><i>T 不变，pV 不变</i></button>
+          <button class="scene-tab" type="button" data-mode="isochoric"><span>03</span><strong>等容加热</strong><i>V 不变，p/T 不变</i></button>
+          <button class="scene-tab" type="button" data-mode="isobaric"><span>04</span><strong>等压膨胀</strong><i>p 不变，V/T 不变</i></button>
+        </section>
+        <section class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active" type="button"><b>1</b><span>先看微观碰撞<small>压强来自动量交换</small></span></button>
+          <button class="route-step" type="button"><b>2</b><span>再锁定不变量<small>每种定律都有约束</small></span></button>
+          <button class="route-step" type="button"><b>3</b><span>最后比较统计量<small>温度对应平均动能</small></span></button>
+        </section>
+        <div class="rail-equation"><span>理想气体状态方程</span><strong>pV = nRT</strong><strong>⟨Eₖ⟩ = 3kT / 2</strong><small>屏幕粒子是统计样本，不代表真实分子数量和真实时间尺度</small></div>
+      </nav>
+
+      <aside class="controls" aria-label="实验控制">
+        <div class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>气体参数</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section class="control-section"><div class="control-label"><span>物质的量 <i>n</i></span><strong id="amountValue">0.10 mol</strong></div><input id="amountInput" class="range-input amount-range" type="range" min="0.02" max="0.30" step="0.01" value="0.10" aria-label="物质的量" /></section>
+        <section class="control-section"><div class="control-label"><span>基准体积 <i>V₀</i></span><strong id="volumeValue">10.0 L</strong></div><input id="volumeInput" class="range-input volume-range" type="range" min="4" max="15" step="0.5" value="10" aria-label="基准体积" /></section>
+        <section class="control-section"><div class="control-label"><span>基准温度 <i>T₀</i></span><strong id="temperatureValue">300 K</strong></div><input id="temperatureInput" class="range-input temperature-range" type="range" min="150" max="450" step="10" value="300" aria-label="基准温度" /><p class="control-note">比例定律必须使用开尔文温度</p></section>
+        <section class="control-section segmented-section"><span class="section-kicker">气体种类</span><div class="species-options" role="group" aria-label="气体种类"><button type="button" data-species="helium">He</button><button class="is-active" type="button" data-species="nitrogen">N₂</button><button type="button" data-species="oxygen">O₂</button></div><p class="control-note">同一 n、V、T 下压强相同，分子速率分布不同</p></section>
+        <section class="control-section preset-section"><span class="section-kicker">典型组合</span><div class="gas-presets"><button type="button" data-preset="room">常温基准</button><button type="button" data-preset="heat">等容加热</button><button type="button" data-preset="compress">等温压缩</button><button type="button" data-preset="helium">氦气对照</button></div></section>
+        <section class="control-section playback-controls"><div class="section-headline"><span class="section-kicker" id="processLabel">分子运动</span><strong id="processValue">运行中 · 0.0 s</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button" aria-pressed="true">▶ 运行中</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 300 K 基准</button></div><input id="processInput" class="range-input process-range" type="range" min="0" max="1" step="0.001" value="0" aria-label="过程进度" disabled /><div class="rate-options" role="group" aria-label="播放速度"><button class="is-active" type="button" data-rate="0.5">0.5× 慢放</button><button type="button" data-rate="1">1× 标准</button></div></section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showVelocityToggle" type="checkbox" checked /><span>速度箭头</span></label><label><input id="showTrailsToggle" type="checkbox" checked /><span>短时轨迹</span></label><label><input id="showCollisionsToggle" type="checkbox" checked /><span>碰撞脉冲</span></label><label><input id="showPressureToggle" type="checkbox" checked /><span>压强箭头</span></label><label><input id="showSampleToggle" type="checkbox" checked /><span>统计样本</span></label></div></section>
+      </aside>
+
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="microscopic"><span>01</span><strong>微观</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="isothermal"><span>02</span><strong>等温</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="isochoric"><span>03</span><strong>等容</strong></button><button class="scene-tab mobile-scene-tab" type="button" data-mode="isobaric"><span>04</span><strong>等压</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">热学 / <b id="modeTitle">微观压强</b></span><h2 id="modeGoal">大量分子撞击器壁形成稳定的宏观压强</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">热平衡</span><span id="stageHint" class="drag-hint">拖动活塞改变体积，观察碰撞频率和压强</span></div></header>
+        <section class="instrument-stage" aria-label="理想气体分子运动与宏观状态"><canvas id="gasCanvas" width="900" height="470" aria-label="可拖动活塞和过程进度的理想气体分子场景"></canvas><aside class="live-readouts" aria-label="实时气体状态读数"><div class="readout-head"><span>GAS STATE</span><i aria-hidden="true"></i></div><dl><div><dt>压强 <i>p</i></dt><dd id="pressureMetric">24.943 kPa</dd></div><div><dt>体积 <i>V</i></dt><dd id="volumeMetric">10.000 L</dd></div><div><dt>温度 <i>T</i></dt><dd id="temperatureMetric">300 K</dd></div><div><dt>物质的量 <i>n</i></dt><dd id="amountMetric">0.100 mol</dd></div><div><dt>方均根速率 <i>vᵣₘₛ</i></dt><dd id="speedMetric">516.8 m/s</dd></div><div><dt>平均平动动能</dt><dd id="kineticMetric">6.213 zJ</dd></div></dl><div class="law-check"><span>当前不变量</span><strong id="gasNature">pV / nT = R</strong><small id="gasExplanation">压强使用完整理想气体方程，屏幕粒子只展示统计机制</small></div></aside></section>
+        <section class="analysis-grid" aria-label="气体状态图与统计图"><article class="chart-panel"><header><div><span>STATE DIAGRAM</span><h3 id="stateChartTitle">p-V 状态图</h3></div><strong id="stateChartStatus">当前等温线 T=300 K</strong></header><canvas id="stateChart" width="620" height="230" aria-label="理想气体压强体积状态图"></canvas></article><article class="chart-panel"><header><div><span id="statisticKicker">MOLECULAR STATISTICS</span><h3 id="statisticTitle">分子速率分布</h3></div><strong id="statisticStatus">N₂ · vᵣₘₛ=516.8 m/s</strong></header><canvas id="statisticChart" width="620" height="230" aria-label="分子速率分布或气体定律不变量图"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先看微观碰撞</strong><p id="stepPrompt">分子没有持续推着器壁，为什么宏观压强仍能保持稳定？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">pV = nRT = 249.434 J</strong></div></footer>
+      </section>
+    </main>
+
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>理想气体探究指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>模型边界</b><span>忽略分子自身体积和分子间作用，把分子与器壁碰撞视为弹性碰撞；宏观状态满足 pV=nRT。</span></li><li><b>压强来源</b><span>器壁在大量离散碰撞中不断获得动量，单位面积单位时间的平均动量交换形成稳定压强。</span></li><li><b>温度意义</b><span>温度对应分子平动动能的统计平均，不是某一个分子的速度，也不与平均速率简单成正比。</span></li><li><b>气体种类</b><span>同一 n、V、T 下理想气体压强与分子质量无关；轻分子的特征速率更大。</span></li><li><b>过程约束</b><span>等温、等容、等压分别固定 T、V、p；比例关系中的温度必须使用开尔文。</span></li><li><b>显示缩放</b><span>屏幕只绘制少量代表性粒子，粒子尺寸、运动速度和碰撞亮点均按教学可见性放大，不代表真实尺度和真实频率。</span></li></ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./ideal-gas-model.js?v=flagship-1"></script><script src="./ideal-gas.js?v=flagship-2"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

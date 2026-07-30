@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="theme-color" content="#101412" />
+    <title>交变电流、变压器与远距离输电实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
+    <link rel="stylesheet" href="./circular-critical.css?v=flagship-1" />
+    <link rel="stylesheet" href="./alternating-current.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab circular-critical-lab alternating-current-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html"
+        aria-label="返回实验目录"><span class="brand-mark">∿</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div
+        class="topbar-title"><span>电磁学 · 实验 04</span><strong>交变电流与输电</strong></div>
+      <div class="connection-state"><i></i><span>交流能量模型已连接</span></div>
+      <div
+        class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button" type="button">实验指南</button><button id="stepButton" class="toolbar-button" type="button">分步演示</button><button id="focusButton" class="toolbar-button" type="button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" type="button" aria-label="全屏">⛶</button></div>
+    </header>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div
+          class="rail-heading"><span class="eyebrow">AC POWER / 04</span><h1>交变电流<br />与输电</h1><p>从旋转线圈到用户负载，用同一波形与功率账本解释有效值、变压和高压输电。</p></div>
+        <div class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" data-mode="generator"><span>01</span><strong>交流发电机</strong><i>转动、磁通与正弦电压</i></button>
+          <button class="scene-tab" data-mode="rms"><span>02</span><strong>有效值</strong><i>用相同热效应定义</i></button>
+          <button class="scene-tab" data-mode="transformer"><span>03</span><strong>理想变压器</strong><i>电压、电流与匝数比</i></button>
+          <button class="scene-tab" data-mode="transmission"><span>04</span><strong>远距离输电</strong><i>固定功率比较 I²R 线损</i></button>
+        </div>
+        <div
+          class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active"><b>1</b><span>先追踪瞬时量<small>线圈相位对应波形位置</small></span></button>
+          <button class="route-step"><b>2</b><span>再核对周期平均<small>平均电压不等于热效应</small></span></button>
+          <button class="route-step"><b>3</b><span>最后做功率账本<small>输入、输出与线路损耗</small></span></button>
+        </div>
+        <div
+          class="rail-equation"><span>交流能量链</span><strong>e=Eₘsinωt</strong><strong>U=Uₘ/√2 · P损=I²R</strong><small>理想变压器改变电压和电流，不凭空产生功率</small></div>
+      </nav>
+      <aside class="controls" aria-label="实验控制">
+        <div
+          class="control-heading"><div><span class="eyebrow">CONTROL</span><h2>波形、变压与输电</h2></div><button id="resetButton" class="reset-button" type="button">重置</button></div>
+        <section id="generatorSection"
+          class="control-section"><div class="control-label"><span>磁感应强度 <i>B</i></span><strong id="fieldValue">0.80 T</strong></div><input id="fieldInput" class="range-input field-range" type="range" min="0.1" max="1.5" step="0.01" value="0.8" aria-label="磁感应强度" /><div class="control-label"><span>线圈匝数 <i>N</i></span><strong id="generatorTurnsValue">200</strong></div><input id="generatorTurnsInput" class="range-input turns-range" type="range" min="20" max="800" step="10" value="200" aria-label="发电机线圈匝数" /><div class="control-label"><span>线圈面积 <i>A</i></span><strong id="areaValue">150 cm²</strong></div><input id="areaInput" class="range-input geometry-range" type="range" min="20" max="400" step="5" value="150" aria-label="线圈面积" /></section>
+        <section id="waveSection"
+          class="control-section"><div class="control-label"><span>频率 <i>f</i></span><strong id="frequencyValue">50.0 Hz</strong></div><input id="frequencyInput" class="range-input frequency-range" type="range" min="10" max="100" step="1" value="50" aria-label="交流频率" /><div id="peakVoltageRow"><div class="control-label"><span>电压峰值 <i>Uₘ</i></span><strong id="peakVoltageValue">311.1 V</strong></div><input id="peakVoltageInput" class="range-input voltage-range" type="range" min="50" max="600" step="1" value="311.127" aria-label="电压峰值" /></div><div id="generalLoadRow"><div class="control-label"><span>负载电阻 <i>R</i></span><strong id="loadValue">100 Ω</strong></div><input id="loadInput" class="range-input load-range" type="range" min="20" max="1000" step="10" value="100" aria-label="负载电阻" /></div></section>
+        <section id="transformerSection" class="control-section"
+          hidden><div class="control-label"><span>原线圈电压 <i>U₁</i></span><strong id="primaryVoltageValue">220 V</strong></div><input id="primaryVoltageInput" class="range-input voltage-range" type="range" min="0" max="500" step="1" value="220" aria-label="原线圈有效电压" /><div class="control-label"><span>原线圈匝数 <i>N₁</i></span><strong id="primaryTurnsValue">200</strong></div><input id="primaryTurnsInput" class="range-input turns-range" type="range" min="50" max="1000" step="10" value="200" aria-label="原线圈匝数" /><div class="control-label"><span>副线圈匝数 <i>N₂</i></span><strong id="secondaryTurnsValue">1000</strong></div><input id="secondaryTurnsInput" class="range-input secondary-range" type="range" min="50" max="3000" step="10" value="1000" aria-label="副线圈匝数" /><div class="control-label"><span>副边负载 <i>R</i></span><strong id="transformerLoadValue">440 Ω</strong></div><input id="transformerLoadInput" class="range-input load-range" type="range" min="20" max="2000" step="10" value="440" aria-label="副边负载" /></section>
+        <section id="transmissionSection" class="control-section"
+          hidden><div class="control-label"><span>输送功率 <i>P</i></span><strong id="sentPowerValue">1.00 MW</strong></div><input id="sentPowerInput" class="range-input power-range" type="range" min="0.1" max="5" step="0.05" value="1" aria-label="输送功率" /><div class="control-label"><span>输电电压 <i>U</i></span><strong id="transmissionVoltageValue">10 kV</strong></div><input id="transmissionVoltageInput" class="range-input voltage-range" type="range" min="10" max="500" step="1" value="10" aria-label="输电电压" /><div class="control-label"><span>线路总电阻 <i>R线</i></span><strong id="lineResistanceValue">20.0 Ω</strong></div><input id="lineResistanceInput" class="range-input load-range" type="range" min="1" max="60" step="0.5" value="20" aria-label="线路总电阻" /></section>
+        <section
+          class="control-section"><span class="section-kicker">典型状态</span><div class="critical-presets"><button type="button" data-preset="peak">峰值时刻</button><button type="button" data-preset="mains">220 V 正弦</button><button type="button" data-preset="stepup">升压 5 倍</button><button type="button" data-preset="grid">200 kV 输电</button></div></section>
+        <section
+          class="control-section playback-controls"><div class="section-headline"><span class="section-kicker">相位控制</span><strong id="playbackValue">已暂停 · 0°</strong></div><div class="playback-row"><button id="playButton" class="primary-command" type="button">▶ 运行</button><button id="pauseButton" class="secondary-command" type="button">Ⅱ 暂停</button><button id="keyButton" class="secondary-command" type="button">◎ 峰值</button></div><input id="phaseInput" class="range-input progress-range" type="range" min="0" max="1" step="0.001" value="0" aria-label="交流相位" /></section>
+        <section
+          class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid"><label><input id="showFieldToggle" type="checkbox" checked /><span>磁通与场</span></label><label><input id="showFlowToggle" type="checkbox" checked /><span>能量流</span></label><label><input id="showRmsToggle" type="checkbox" checked /><span>有效值</span></label><label><input id="showLedgerToggle" type="checkbox" checked /><span>功率账本</span></label></div></section>
+      </aside>
+      <section class="stage">
+        <nav class="mobile-scene-tabs"
+          aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" data-mode="generator"><span>01</span><strong>发电</strong></button><button class="scene-tab mobile-scene-tab" data-mode="rms"><span>02</span><strong>有效值</strong></button><button class="scene-tab mobile-scene-tab" data-mode="transformer"><span>03</span><strong>变压</strong></button><button class="scene-tab mobile-scene-tab" data-mode="transmission"><span>04</span><strong>输电</strong></button></nav>
+        <header class="stage-head">
+          <div
+            class="stage-title"><span class="stage-breadcrumb">电磁学 / <b id="modeTitle">交流发电机</b></span><h2 id="modeGoal">线圈匀速转动，使磁通量与电动势相差四分之一周期</h2></div>
+          <div
+            class="stage-status"><span id="stateBadge" class="state-badge is-safe">磁通最大 · e=0</span><span id="stageHint" class="drag-hint">拖动线圈相位，对照磁通量和电动势波形</span></div>
+        </header>
+        <section class="instrument-stage" aria-label="交变电流与输电实验装置">
+          <canvas id="acCanvas" width="900" height="470"
+            aria-label="交流发电机、有效值、变压器和输电线路动画"></canvas>
+          <aside class="live-readouts" aria-label="实时交流读数">
+            <div class="readout-head"><span>AC POWER STATE</span><i></i></div>
+            <dl>
+              <div>
+                <dt id="metric1Label">线圈相位</dt>
+                <dd id="metric1">0.0°</dd>
+              </div>
+              <div>
+                <dt id="metric2Label">磁通链 <i>NΦ</i></dt>
+                <dd id="metric2">2.400 Wb·匝</dd>
+              </div>
+              <div>
+                <dt id="metric3Label">瞬时电动势 <i>e</i></dt>
+                <dd id="metric3">0.00 V</dd>
+              </div>
+              <div>
+                <dt id="metric4Label">峰值 <i>Eₘ</i></dt>
+                <dd id="metric4">753.98 V</dd>
+              </div>
+              <div>
+                <dt id="metric5Label">有效值 <i>E</i></dt>
+                <dd id="metric5">533.15 V</dd>
+              </div>
+              <div>
+                <dt id="metric6Label">平均功率</dt>
+                <dd id="metric6">2.84 kW</dd>
+              </div>
+            </dl>
+            <div
+              class="law-check"><span>当前物理判断</span><strong id="acNature">磁通量最大，感应电动势为零</strong><small id="acExplanation">磁通量变化率此刻为零</small></div>
+          </aside>
+        </section>
+        <section class="analysis-grid" aria-label="交流波形和功率账本">
+          <article class="chart-panel">
+            <header><div><span>WAVEFORM / PROFILE</span><h3 id="waveTitle">磁通量与电动势</h3></div><strong id="waveStatus">相差 1/4 周期</strong></header>
+            <canvas id="waveChart" width="620" height="230"
+              aria-label="交流波形或输电特性图"></canvas>
+          </article>
+          <article class="chart-panel">
+            <header><div><span>POWER LEDGER</span><h3 id="ledgerTitle">瞬时与平均功率</h3></div><strong id="ledgerStatus">P入=P出+P损</strong></header>
+            <canvas id="powerChart" width="620" height="230"
+              aria-label="交流能量与功率账本图"></canvas>
+          </article>
+        </section>
+        <footer
+          class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先追踪瞬时量</strong><p id="stepPrompt">磁通量最大时，为什么感应电动势反而为零？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">e=NBAωsinωt</strong></div></footer>
+      </section>
+    </main>
+    <dialog id="guideDialog" class="guide-dialog">
+      <form
+        method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>交变电流与输电指南</h2></div><button aria-label="关闭指南">×</button></header><ol><li><b>发电机</b><span>线圈法线与磁场夹角决定磁通量；磁通量的变化率决定电动势，因此两条正弦量相差四分之一周期。</span></li><li><b>有效值</b><span>正弦交流一个周期的电压平均值为零，但平方平均不为零；有效值由同一电阻上的相同平均热功率定义。</span></li><li><b>变压器</b><span>理想变压器满足 U₂/U₁=N₂/N₁、I₂/I₁=N₁/N₂ 和输入输出功率相等；稳恒直流不能持续变压。</span></li><li><b>输电</b><span>固定输送功率时 I=P/U，升高输电电压会降低线路电流，使 P损=I²R 按电压平方的反比下降。</span></li><li><b>边界</b><span>发电机忽略内阻和机械损耗，变压器忽略漏磁与铜铁损；输电线路使用集中总电阻，不代表具体电网设计。</span></li></ol><button class="primary-command" value="close">开始实验</button></form>
+    </dialog>
+    <script src="./alternating-current-model.js?v=flagship-1"></script>
+    <script src="./alternating-current.js?v=flagship-1"></script>
+    <script src="./url-state.js?v=protocol-v1"></script>
+    <script src="./learning-records.js?v=protocol-v1"></script>
+    <script src="./platform.js?v=workspace-31"></script>
+  </body>
+</html>

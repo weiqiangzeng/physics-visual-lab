@@ -2,7 +2,7 @@
 
 ## Scope
 
-第一阶段只增加数据协议、兼容读取和验证，不重写实验页面，不改变物理计算和现有用户界面。
+协议层为 39 个实验提供兼容读取、验证、URL 状态和学习记录基础能力；各实验保留独立物理模型与状态命名。
 
 ## Existing data
 
@@ -14,4 +14,4 @@
 
 ## Optional fields
 
-`parameters`、`observables`、`formulas`、`assumptions`、`boundaries`、`studentTasks` 和 `teacherTasks` 均为可选字段。第一阶段只校验，不强制所有实验接入。
+`parameters`、`observables`、`formulas`、`assumptions`、`boundaries`、`studentTasks` 和 `teacherTasks` 均为可选字段。页面级学生任务与教师路线由平台清单提供，协议数组仍保持向后兼容。
