@@ -701,6 +701,11 @@
   background: rgba(44, 111, 159, 0.12);
 }
 
+.subject-tag.optics {
+  color: #7b3fa0;
+  background: rgba(123, 63, 160, 0.12);
+}
+
 .experiment-card h3 {
   margin: 18px 0 8px;
   font-size: 1.12rem;

@@ -600,7 +600,9 @@
       relations: ["反射角 = 入射角", "n1 sinθ1 = n2 sinθ2", "大于临界角时发生全反射"],
       explore: ["扫描入射角，比较反射角和折射角。", "改变介质折射率，寻找全反射临界角。"],
       misconceptions: "法线不是界面本身；全反射要求光从光密介质射向光疏介质。",
-      prerequisite: "知道光在不同介质中传播时可能改变方向；入射角、反射角和折射角的关系，会通过转动光线直接比较。"
+      prerequisite: "知道光在不同介质中传播时可能改变方向；入射角、反射角和折射角的关系，会通过转动光线直接比较。",
+      status: "open",
+      lab: "refraction.html"
     }),
     model({
       id: "thin-lens-imaging",

@@ -8,7 +8,8 @@
     "ohm-law.html",
     "oscillation.html",
     "waves.html",
-    "charged-particle.html"
+    "charged-particle.html",
+    "refraction.html"
   ];
   const lessonTasks = {
     "motion-graphs.html": [
@@ -50,6 +51,11 @@
       "比较仅电场和仅磁场，观察电场力与磁场力对运动的不同作用。",
       "进入配速法，把速度调到竖直合力接近 0。",
       "用 \\(v = v_{\\mathrm{配}} + v_{\\mathrm{余}}\\) 解释配速漂移与余速圆周运动。"
+    ],
+    "refraction.html": [
+      "先确认入射角和折射角都是从法线量起，再比较两者大小。",
+      "固定两种介质，改变入射角，观察折射角是否按斯涅尔定律变化。",
+      "让光从高折射率介质射向低折射率介质，找到临界角并观察全反射。"
     ]
   };
   const lessonPlans = {
@@ -132,6 +138,16 @@
         "用 v = v配 + v余 解释漂移与圆周分运动。"
       ],
       takeaway: "复合场轨迹取决于各力的方向和大小，配速只消除特定方向的合力。"
+    },
+    "refraction.html": {
+      goal: "建立入射角、折射角、折射率和临界角之间的联系。",
+      prerequisite: "知道光线改变传播介质后可能改变方向，角度从法线量起；折射率如何影响偏折，会通过光路和读数直接观察。",
+      prompts: [
+        "先看法线和两条光线，判断折射光线向法线靠近还是远离。",
+        "固定折射率改变入射角，用读数核对斯涅尔定律。",
+        "切换到高折射率介质射向低折射率介质，寻找临界角和全反射。"
+      ],
+      takeaway: "折射满足 \\(n_1\\sin\\theta_1=n_2\\sin\\theta_2\\)；只有从高折射率介质射向低折射率介质时才可能发生全反射。"
     }
   };
   const curriculumSource = window.physicsCurriculum || { books: [], models: [], categories: ["全部"], statusLabels: {} };
@@ -345,6 +361,7 @@
     const subjectClass = (category) => {
       if (/电磁|电场|电路|磁场/.test(category || "")) return "electromagnetism";
       if (/波|振动/.test(category || "")) return "waves";
+      if (/光学/.test(category || "")) return "optics";
       return "mechanics";
     };
     const modelModules = (model) => courseModules

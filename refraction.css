@@ -1,0 +1,39 @@
+.refraction-lab .main-canvas {
+  background: #fbfcfa;
+}
+
+.refraction-lab #refractionCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 980 / 540;
+}
+
+.refraction-lab .stage-readout strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.refraction-lab .critical-strip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.refraction-lab .critical-card.active {
+  border-color: rgba(13, 113, 104, 0.42);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.refraction-lab .formula-panel {
+  margin-top: 4px;
+}
+
+@media (max-width: 980px) {
+  .refraction-lab .critical-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .refraction-lab .critical-strip {
+    grid-template-columns: 1fr;
+  }
+}
