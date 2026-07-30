@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>高中物理可视化实验</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
-    <link rel="stylesheet" href="./platform.css?v=direct-labs-1" />
+    <link rel="stylesheet" href="./platform.css?v=workspace-2" />
   </head>
   <body class="platform-home">
     <main class="app">
@@ -22,80 +22,114 @@
           <div class="section-heading">
             <div>
               <span class="platform-kicker">实验目录</span>
-              <h2 id="courseTitle">必修第一册</h2>
+              <h2 id="courseTitle">运动学与力学基础</h2>
+              <p id="moduleDescription" class="module-description">用坐标、时间、图像和误差理解运动描述。</p>
+            </div>
+            <div class="progress-summary" aria-label="实验完成进度">
+              <strong id="progressCount">0 / 9</strong>
+              <span>已完成实验</span>
+              <div class="progress-track" aria-hidden="true"><span id="progressFill"></span></div>
             </div>
           </div>
 
-          <div class="volume-tabs" role="tablist" aria-label="教材册次">
-            <button type="button" role="tab" data-volume="required-1" aria-selected="true">必修第一册</button>
-            <button type="button" role="tab" data-volume="required-2" aria-selected="false">必修第二册</button>
-            <button type="button" role="tab" data-volume="required-3" aria-selected="false">必修第三册</button>
-            <button type="button" role="tab" data-volume="selective-1" aria-selected="false">选择性必修第一册</button>
-            <button type="button" role="tab" data-volume="selective-2" aria-selected="false">选择性必修第二册</button>
-            <button type="button" role="tab" data-volume="selective-3" aria-selected="false">选择性必修第三册</button>
+          <div class="catalog-tools" aria-label="实验目录工具">
+            <label class="catalog-search">
+              <span>搜索实验</span>
+              <input id="experimentSearch" type="search" placeholder="名称、章节或公式" autocomplete="off" />
+            </label>
+            <label class="catalog-filter">
+              <span>学科方向</span>
+              <select id="subjectFilter">
+                <option value="all">全部方向</option>
+                <option value="mechanics">力学</option>
+                <option value="electromagnetism">电磁学</option>
+                <option value="waves">波动</option>
+              </select>
+            </label>
+            <div class="catalog-result"><strong id="experimentResultCount">3 个实验</strong><span>当前目录</span></div>
           </div>
 
-          <p id="volumeEmpty" class="volume-empty" hidden>本册暂未开放实验。</p>
+          <div class="recent-lesson" aria-label="最近访问实验">
+            <div><span class="platform-kicker">最近访问</span><p id="recentLessonNote">打开任意实验后，这里会保留最近入口。</p></div>
+            <a id="recentLessonLink" class="recent-lesson-link" href="./index.html" hidden>继续实验<span aria-hidden="true">→</span></a>
+          </div>
+
+          <div class="module-tabs" role="tablist" aria-label="物理模型目录">
+            <button type="button" role="tab" data-module="kinematics" aria-selected="true">一 运动学与力学基础</button>
+            <button type="button" role="tab" data-module="forces" aria-selected="false">二 相互作用与牛顿运动定律</button>
+            <button type="button" role="tab" data-module="curved-motion" aria-selected="false">三 曲线运动与万有引力</button>
+            <button type="button" role="tab" data-module="energy" aria-selected="false">四 功和机械能</button>
+            <button type="button" role="tab" data-module="electric-field" aria-selected="false">五 电场与电荷</button>
+            <button type="button" role="tab" data-module="current" aria-selected="false">六 恒定电流与电路</button>
+            <button type="button" role="tab" data-module="magnetic-field" aria-selected="false">七 磁场与电磁感应</button>
+            <button type="button" role="tab" data-module="momentum" aria-selected="false">八 动量与碰撞</button>
+            <button type="button" role="tab" data-module="waves" aria-selected="false">九 机械振动与机械波</button>
+            <button type="button" role="tab" data-module="optics" aria-selected="false">十 光学</button>
+            <button type="button" role="tab" data-module="thermal" aria-selected="false">十一 热学与气体</button>
+            <button type="button" role="tab" data-module="modern-physics" aria-selected="false">十二 原子物理与近代物理</button>
+          </div>
+
+          <p id="volumeEmpty" class="volume-empty" hidden>本模块暂未开放实验。</p>
 
           <div class="experiment-grid">
-            <article class="experiment-card" data-lesson-card="motion-graphs.html" data-volumes="required-1">
-              <div class="card-topline"><span class="chapter-tag">第一章 运动的描述</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="motion-graphs.html" data-modules="kinematics">
+              <div class="card-topline"><span class="chapter-tag">模型一 · 运动描述</span><span class="subject-tag mechanics">力学</span></div>
               <h3>运动图像</h3>
               <p class="card-focus">斜率对应速度，面积对应位移。</p>
               <a class="card-link" href="./motion-graphs.html" data-lesson-link="motion-graphs.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="friction.html" data-volumes="required-1">
-              <div class="card-topline"><span class="chapter-tag">第三章 相互作用</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="friction.html" data-modules="forces">
+              <div class="card-topline"><span class="chapter-tag">模型二 · 相互作用</span><span class="subject-tag mechanics">力学</span></div>
               <h3>静摩擦力与滑动摩擦力</h3>
               <p class="card-focus">f静 ≤ μsN；f滑 = μkN。</p>
               <a class="card-link" href="./friction.html" data-lesson-link="friction.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="newton-laws.html" data-volumes="required-1">
-              <div class="card-topline"><span class="chapter-tag">第四章 运动和力的关系</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="newton-laws.html" data-modules="forces">
+              <div class="card-topline"><span class="chapter-tag">模型二 · 牛顿运动定律</span><span class="subject-tag mechanics">力学</span></div>
               <h3>牛顿第二定律</h3>
               <p class="card-focus">F合 = ma。</p>
               <a class="card-link" href="./newton-laws.html" data-lesson-link="newton-laws.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="projectile.html" data-volumes="required-2">
-              <div class="card-topline"><span class="chapter-tag">第五章 抛体运动</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="projectile.html" data-modules="curved-motion">
+              <div class="card-topline"><span class="chapter-tag">模型三 · 抛体运动</span><span class="subject-tag mechanics">力学</span></div>
               <h3>抛体运动分解</h3>
               <p class="card-focus">vx = v0 cosθ；最高点 vy = 0。</p>
               <a class="card-link" href="./projectile.html" data-lesson-link="projectile.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="circular.html" data-volumes="required-2">
-              <div class="card-topline"><span class="chapter-tag">第六章 圆周运动</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="circular.html" data-modules="curved-motion">
+              <div class="card-topline"><span class="chapter-tag">模型三 · 圆周运动</span><span class="subject-tag mechanics">力学</span></div>
               <h3>圆周运动与向心力</h3>
               <p class="card-focus">ac = v²/r；Fc = mv²/r。</p>
               <a class="card-link" href="./circular.html" data-lesson-link="circular.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="ohm-law.html" data-volumes="required-3">
-              <div class="card-topline"><span class="chapter-tag">第十一章 电路及其应用</span><span class="subject-tag electromagnetism">电学</span></div>
+            <article class="experiment-card" data-lesson-card="ohm-law.html" data-modules="current">
+              <div class="card-topline"><span class="chapter-tag">模型六 · 电路与测量</span><span class="subject-tag electromagnetism">电学</span></div>
               <h3>欧姆定律</h3>
               <p class="card-focus">同一组 U、R 同步生成读数与 I-U 图像。</p>
               <a class="card-link" href="./ohm-law.html" data-lesson-link="ohm-law.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="oscillation.html" data-volumes="selective-1">
-              <div class="card-topline"><span class="chapter-tag">第二章 机械振动</span><span class="subject-tag mechanics">力学</span></div>
+            <article class="experiment-card" data-lesson-card="oscillation.html" data-modules="waves">
+              <div class="card-topline"><span class="chapter-tag">模型九 · 机械振动</span><span class="subject-tag mechanics">力学</span></div>
               <h3>简谐振动</h3>
               <p class="card-focus">观察 x、v、a 的相位关系。</p>
               <a class="card-link" href="./oscillation.html" data-lesson-link="oscillation.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card" data-lesson-card="waves.html" data-volumes="selective-1">
-              <div class="card-topline"><span class="chapter-tag">第三章 机械波</span><span class="subject-tag waves">波动</span></div>
+            <article class="experiment-card" data-lesson-card="waves.html" data-modules="waves">
+              <div class="card-topline"><span class="chapter-tag">模型九 · 机械波</span><span class="subject-tag waves">波动</span></div>
               <h3>波的叠加与驻波</h3>
               <p class="card-focus">y = y1 + y2；定位节点和腹部。</p>
               <a class="card-link" href="./waves.html" data-lesson-link="waves.html">打开实验<span aria-hidden="true">→</span></a>
             </article>
 
-            <article class="experiment-card featured" data-lesson-card="charged-particle.html" data-volumes="selective-2">
-              <div class="card-topline"><span class="chapter-tag">第一章 安培力与洛伦兹力</span><span class="subject-tag electromagnetism">电磁学</span></div>
+            <article class="experiment-card featured" data-lesson-card="charged-particle.html" data-modules="magnetic-field">
+              <div class="card-topline"><span class="chapter-tag">模型七 · 磁场与复合场</span><span class="subject-tag electromagnetism">电磁学</span></div>
               <h3>带电粒子在复合场中的运动</h3>
               <p class="card-focus">比较电场力、磁场力与恒力。</p>
               <a class="card-link" href="./charged-particle.html" data-lesson-link="charged-particle.html">打开实验<span aria-hidden="true">→</span></a>
@@ -108,6 +142,6 @@
     <script src="./platform-protocol.js?v=protocol-v1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=direct-labs-1"></script>
+    <script src="./platform.js?v=workspace-2"></script>
   </body>
 </html>

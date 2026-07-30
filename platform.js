@@ -5,6 +5,7 @@
     "newton-laws.html",
     "projectile.html",
     "circular.html",
+    "ohm-law.html",
     "oscillation.html",
     "waves.html",
     "charged-particle.html"
@@ -140,9 +141,23 @@
   const courseBooks = curriculum.books;
   const storageKey = "physics-visual-lab-progress-v1";
   const audienceStorageKey = "physics-visual-lab-audience-v1";
-  const volumeStorageKey = "physics-visual-lab-volume-v1";
+  const moduleStorageKey = "physics-visual-lab-module-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
+  const courseModules = [
+    { id: "kinematics", title: "运动学与力学基础", description: "用坐标、时间、图像和误差理解运动描述。" },
+    { id: "forces", title: "相互作用与牛顿运动定律", description: "从受力分析进入力、质量和加速度的动态关系。" },
+    { id: "curved-motion", title: "曲线运动与万有引力", description: "把二维运动拆成分运动，并扩展到圆周和轨道。" },
+    { id: "energy", title: "功和机械能", description: "用功、动能和势能追踪能量转化。" },
+    { id: "electric-field", title: "电场与电荷", description: "聚焦电荷相互作用、电场、电势和静电器件。" },
+    { id: "current", title: "恒定电流与电路", description: "联动电路图、器材、电表和数据图像。" },
+    { id: "magnetic-field", title: "磁场与电磁感应", description: "观察磁场、磁力、粒子轨迹和感应电流。" },
+    { id: "momentum", title: "动量与碰撞", description: "用守恒量理解短时间相互作用和碰撞。" },
+    { id: "waves", title: "机械振动与机械波", description: "用相位、波形和传播过程统一振动与波。" },
+    { id: "optics", title: "光学", description: "用可拖拽光路理解成像、干涉和衍射。" },
+    { id: "thermal", title: "热学与气体", description: "连接宏观状态量、微观粒子运动和热力学过程。" },
+    { id: "modern-physics", title: "原子物理与近代物理", description: "用统计和能级图像理解微观实验现象。" }
+  ];
   let katexPromise = null;
   let mathTypesetRequest = 0;
   let controlValueObserver = null;
@@ -263,18 +278,18 @@
     }
   }
 
-  function readVolume() {
+  function readModule() {
     try {
-      const stored = window.localStorage.getItem(volumeStorageKey);
-      return courseBooks.some((book) => book.id === stored) ? stored : courseBooks[0].id;
+      const stored = window.localStorage.getItem(moduleStorageKey);
+      return courseModules.some((module) => module.id === stored) ? stored : courseModules[0].id;
     } catch {
-      return courseBooks[0].id;
+      return courseModules[0].id;
     }
   }
 
-  function saveVolume(volume) {
+  function saveModule(moduleId) {
     try {
-      window.localStorage.setItem(volumeStorageKey, volume);
+      window.localStorage.setItem(moduleStorageKey, moduleId);
     } catch {
       // The course navigator remains usable when storage is unavailable.
     }
@@ -312,31 +327,44 @@
 
   function renderCourseNavigation() {
     if (!isHome) return;
-    const tabs = Array.from(document.querySelectorAll("[data-volume]"));
+    const tabs = Array.from(document.querySelectorAll("[data-module]"));
     const title = document.getElementById("courseTitle");
+    const description = document.getElementById("moduleDescription");
     const empty = document.getElementById("volumeEmpty");
     const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
     if (!tabs.length) return;
 
-    const selectVolume = (volumeId) => {
-      const book = courseBooks.find((item) => item.id === volumeId) || courseBooks[0];
-      const matchedCards = cards.filter((card) => (card.dataset.volumes || "").split(/\s+/).includes(book.id));
+    tabs.forEach((tab) => {
+      const module = courseModules.find((item) => item.id === tab.dataset.module);
+      if (!module || tab.querySelector(".module-count")) return;
+      const count = cards.filter((card) => (card.dataset.modules || "").split(/\s+/).includes(module.id)).length;
+      const countLabel = document.createElement("span");
+      countLabel.className = "module-count";
+      countLabel.textContent = `${count}`;
+      countLabel.setAttribute("aria-label", `${count} 个已开放实验`);
+      tab.append(countLabel);
+    });
+
+    const selectModule = (moduleId) => {
+      const module = courseModules.find((item) => item.id === moduleId) || courseModules[0];
+      const matchedCards = cards.filter((card) => (card.dataset.modules || "").split(/\s+/).includes(module.id));
 
       tabs.forEach((tab) => {
-        const active = tab.dataset.volume === book.id;
+        const active = tab.dataset.module === module.id;
         tab.classList.toggle("active", active);
         tab.setAttribute("aria-selected", active ? "true" : "false");
       });
       cards.forEach((card) => {
-        card.hidden = !(card.dataset.volumes || "").split(/\s+/).includes(book.id);
+        card.hidden = !(card.dataset.modules || "").split(/\s+/).includes(module.id);
       });
-      if (title) title.textContent = book.title;
+      if (title) title.textContent = module.title;
+      if (description) description.textContent = module.description;
       if (empty) empty.hidden = matchedCards.length > 0;
-      saveVolume(book.id);
+      saveModule(module.id);
     };
 
-    tabs.forEach((tab) => tab.addEventListener("click", () => selectVolume(tab.dataset.volume)));
-    selectVolume(readVolume());
+    tabs.forEach((tab) => tab.addEventListener("click", () => selectModule(tab.dataset.module)));
+    selectModule(readModule());
   }
 
   const audience = readAudience();
@@ -353,7 +381,7 @@
   function readProgress() {
     try {
       const parsed = JSON.parse(window.localStorage.getItem(storageKey) || "{}");
-      if (!parsed || typeof parsed !== "object") return { visited: {}, completed: {}, tasks: {} };
+      if (!parsed || typeof parsed !== "object") return { visited: {}, completed: {}, tasks: {}, lastVisited: "" };
       const visited = parsed.visited && typeof parsed.visited === "object" ? parsed.visited : {};
       lessons.forEach((lesson) => {
         if (parsed[lesson]) visited[lesson] = true;
@@ -361,10 +389,11 @@
       return {
         visited,
         completed: parsed.completed && typeof parsed.completed === "object" ? parsed.completed : {},
-        tasks: parsed.tasks && typeof parsed.tasks === "object" ? parsed.tasks : {}
+        tasks: parsed.tasks && typeof parsed.tasks === "object" ? parsed.tasks : {},
+        lastVisited: lessons.includes(parsed.lastVisited) ? parsed.lastVisited : ""
       };
     } catch {
-      return { visited: {}, completed: {}, tasks: {} };
+      return { visited: {}, completed: {}, tasks: {}, lastVisited: "" };
     }
   }
 
@@ -379,6 +408,7 @@
   const progress = readProgress();
   if (!isHome && lessons.includes(currentPage)) {
     progress.visited[currentPage] = true;
+    progress.lastVisited = currentPage;
     saveProgress(progress);
   }
 
@@ -388,6 +418,7 @@
       if (!lesson || !lessons.includes(lesson)) return;
       const nextProgress = readProgress();
       nextProgress.visited[lesson] = true;
+      nextProgress.lastVisited = lesson;
       saveProgress(nextProgress);
     });
   });
@@ -399,7 +430,19 @@
     if (count) count.textContent = `${completed} / ${lessons.length}`;
     if (fill) fill.style.width = `${(completed / lessons.length) * 100}%`;
 
-    document.querySelectorAll("[data-lesson-card]").forEach((card) => {
+    const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
+    const recentLink = document.getElementById("recentLessonLink");
+    const recentNote = document.getElementById("recentLessonNote");
+    const recentCard = cards.find((card) => card.dataset.lessonCard === progress.lastVisited);
+    if (recentLink && recentNote && recentCard) {
+      const title = recentCard.querySelector("h3")?.textContent?.trim() || progress.lastVisited;
+      recentLink.href = `./${progress.lastVisited}`;
+      recentLink.textContent = `继续：${title}`;
+      recentLink.hidden = false;
+      recentNote.textContent = "从上次离开的实验继续观察。";
+    }
+
+    cards.forEach((card) => {
       const lesson = card.dataset.lessonCard;
       const link = card.querySelector(".card-link");
       if (progress.visited[lesson]) {
@@ -409,6 +452,53 @@
       if (progress.completed[lesson]) card.classList.add("completed");
     });
     renderCourseNavigation();
+    const searchInput = document.getElementById("experimentSearch");
+    const subjectFilter = document.getElementById("subjectFilter");
+    const resultCount = document.getElementById("experimentResultCount");
+    const catalogTitle = document.getElementById("courseTitle");
+    const catalogDescription = document.getElementById("moduleDescription");
+    const applyCatalogFilters = () => {
+      const query = (searchInput?.value || "").trim().toLocaleLowerCase();
+      const subject = subjectFilter?.value || "all";
+      const activeModule = document.querySelector("[data-module].active")?.dataset.module || readModule();
+      const isSearching = query.length > 0;
+      let visibleCount = 0;
+      cards.forEach((card) => {
+        const matchesQuery = !query || card.textContent.toLocaleLowerCase().includes(query);
+        const matchesSubject = subject === "all" || Boolean(card.querySelector(`.subject-tag.${subject}`));
+        const matchesModule = isSearching || (card.dataset.modules || "").split(/\s+/).includes(activeModule);
+        const visible = matchesQuery && matchesSubject && matchesModule;
+        card.hidden = !visible;
+        card.classList.toggle("search-match", isSearching && visible);
+        if (visible) visibleCount += 1;
+      });
+      document.querySelectorAll("[data-module]").forEach((tab) => {
+        const moduleId = tab.dataset.module;
+        const hasMatch = isSearching && cards.some((card) => {
+          const belongs = (card.dataset.modules || "").split(/\s+/).includes(moduleId);
+          const matchesText = card.textContent.toLocaleLowerCase().includes(query);
+          const matchesSubject = subject === "all" || Boolean(card.querySelector(`.subject-tag.${subject}`));
+          return belongs && matchesText && matchesSubject;
+        });
+        tab.classList.toggle("module-match", hasMatch);
+      });
+      if (catalogTitle && isSearching) catalogTitle.textContent = "搜索结果";
+      if (catalogDescription && isSearching) catalogDescription.textContent = `跨 ${courseModules.length} 个模型模块查找实验。`;
+      if (catalogTitle && !isSearching) {
+        const active = courseModules.find((module) => module.id === activeModule) || courseModules[0];
+        catalogTitle.textContent = active.title;
+        if (catalogDescription) catalogDescription.textContent = active.description;
+      }
+      if (resultCount) resultCount.textContent = `${visibleCount} 个实验`;
+      const empty = document.getElementById("volumeEmpty");
+      if (empty) {
+        empty.hidden = visibleCount > 0;
+        empty.textContent = isSearching || subject !== "all" ? "没有符合条件的实验。" : "本模块暂未开放实验。";
+      }
+    };
+    [searchInput, subjectFilter].filter(Boolean).forEach((control) => control.addEventListener("input", applyCatalogFilters));
+    document.querySelectorAll("[data-module]").forEach((tab) => tab.addEventListener("click", () => window.requestAnimationFrame(applyCatalogFilters)));
+    applyCatalogFilters();
     typesetMath();
     return;
   }
@@ -516,6 +606,34 @@
     link.textContent = "实验目录";
     actions.prepend(link);
  }
+
+  function renderExperimentNavigation() {
+    if (isHome || !actions) return;
+    const currentIndex = lessons.indexOf(currentPage);
+    if (currentIndex < 0) return;
+    [
+      { index: currentIndex - 1, label: "上一个实验" },
+      { index: currentIndex + 1, label: "下一个实验" }
+    ].forEach(({ index, label }) => {
+      const lesson = lessons[index];
+      if (!lesson || actions.querySelector(`[data-lab-nav="${lesson}"]`)) return;
+      const link = document.createElement("a");
+      link.className = "lab-nav-link";
+      link.dataset.labNav = lesson;
+      link.href = `./${lesson}`;
+      link.textContent = label;
+      actions.append(link);
+    });
+    const heading = document.querySelector(".stage-head h1");
+    if (heading && !heading.querySelector(".lab-context")) {
+      const context = document.createElement("span");
+      context.className = "lab-context";
+      context.textContent = `实验 ${currentIndex + 1} / ${lessons.length}`;
+      heading.insertAdjacentElement("beforebegin", context);
+    }
+  }
+
+  renderExperimentNavigation();
  moveActionsToCanvas();
   observeControlValues();
   typesetMath();
