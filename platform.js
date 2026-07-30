@@ -9,7 +9,8 @@
     "oscillation.html",
     "waves.html",
     "charged-particle.html",
-    "refraction.html"
+    "refraction.html",
+    "double-slit.html"
   ];
   const lessonTasks = {
     "motion-graphs.html": [
@@ -56,6 +57,11 @@
       "先确认入射角和折射角都是从法线量起，再比较两者大小。",
       "固定两种介质，改变入射角，观察折射角是否按斯涅尔定律变化。",
       "让光从高折射率介质射向低折射率介质，找到临界角并观察全反射。"
+    ],
+    "double-slit.html": [
+      "先定位中央亮纹，再寻找两侧相邻亮纹，比较它们的间距。",
+      "每次只改变一个参数，观察波长、双缝间距和屏距对条纹的影响。",
+      "在屏上选择亮纹和暗纹位置，用路程差解释相长与相消干涉。"
     ]
   };
   const lessonPlans = {
@@ -148,6 +154,16 @@
         "切换到高折射率介质射向低折射率介质，寻找临界角和全反射。"
       ],
       takeaway: "折射满足 \\(n_1\\sin\\theta_1=n_2\\sin\\theta_2\\)；只有从高折射率介质射向低折射率介质时才可能发生全反射。"
+    },
+    "double-slit.html": {
+      goal: "建立波长、双缝间距、屏距与条纹间距之间的定量关系。",
+      prerequisite: "知道波可以叠加，光程差会造成相位差；亮纹和暗纹怎样由路程差决定，会通过屏上强度分布直接观察。",
+      prompts: [
+        "先找到中央亮纹，观察两侧亮纹是否近似对称。",
+        "改变波长或屏距，比较相邻亮纹的距离。",
+        "切换路程差观察，判断相长和相消干涉的条件。"
+      ],
+      takeaway: "双缝干涉条纹间距近似满足 \\(\\beta=\\lambda L/d\\)；暗纹处仍有光，只是两列光相消。"
     }
   };
   const curriculumSource = window.physicsCurriculum || { books: [], models: [], categories: ["全部"], statusLabels: {} };

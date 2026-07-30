@@ -1,0 +1,6 @@
+.double-slit-lab #doubleSlitCanvas { display:block; width:100%; height:auto; aspect-ratio:980 / 560; }
+.double-slit-lab .stage-readout strong { font-variant-numeric:tabular-nums; }
+.double-slit-lab .critical-strip { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.double-slit-lab .critical-card.active { border-color:rgba(13,113,104,.42); box-shadow:inset 3px 0 0 var(--accent); }
+@media (max-width:980px) { .double-slit-lab .critical-strip { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:760px) { .double-slit-lab .critical-strip { grid-template-columns:1fr; } }
