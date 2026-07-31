@@ -73,6 +73,20 @@
       ]
     },
     {
+      "id": "conveyor",
+      "html": "conveyor.html",
+      "script": "conveyor.js",
+      "model": "conveyor-model.js",
+      "api": "conveyorLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "horizontal start u=4m/s,v0=0,muK=0.3 -> sync at 1.36054s and heat=16J",
+        "reverse start u=4m/s,v0=-2m/s -> sync at 2.04082s and heat=36J",
+        "object faster u=3m/s,v0=8m/s -> friction reverses and sync at 1.70068s",
+        "incline sync requires static friction demand not exceeding muS*N"
+      ]
+    },
+    {
       "id": "vertical-motion",
       "html": "vertical-motion.html",
       "script": "vertical-motion.js",
@@ -83,6 +97,19 @@
         "drop from 20m at g=9.8m/s2 -> impact at 2.0203s",
         "throw upward at 20m/s -> apex at 2.0408s with a=-g",
         "uniform frame changes velocity but not acceleration"
+      ]
+    },
+    {
+      "id": "free-fall-measurement",
+      "html": "free-fall-measurement.html",
+      "script": "free-fall-measurement.js",
+      "model": "free-fall-measurement-model.js",
+      "api": "freeFallMeasurementLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "h=2.4m and g=9.8m/s2 gives impact time 0.699854212s",
+        "equal-time strobe at T=0.08s gives ideal second difference 0.06272m and recovers g=9.8m/s2",
+        "s versus t squared fit has slope g/2 while repeated estimates separate standard deviation from standard error"
       ]
     },
     {
@@ -120,6 +147,58 @@
         "orthogonal forces 6N and 8N -> resultant 10N",
         "k=40N/m and x=0.15m -> spring force -6N and energy 0.45J",
         "connected bodies residuals are zero"
+      ]
+    },
+    {
+      "id": "hooke-measurement",
+      "html": "hooke-measurement.html",
+      "script": "hooke-measurement.js",
+      "model": "hooke-measurement-model.js",
+      "api": "hookeMeasurementLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "a 50g mass at g=9.8m/s2 adds 0.49N and stretches a 40N/m spring by 12.25mm",
+        "elastic-only F-x fit recovers k while including post-limit points biases the slope downward",
+        "overloading beyond 3.2N produces a continuous nonlinear branch and nonzero permanent set on unloading"
+      ]
+    },
+    {
+      "id": "force-composition",
+      "html": "force-composition.html",
+      "script": "force-composition.js",
+      "model": "force-composition-model.js",
+      "api": "forceCompositionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "orthogonal forces 6N and 8N compose to 10N and decompose back to 6N and 8N",
+        "finite scale and protractor resolution produce a deterministic nonzero closure residual",
+        "one-degree direction separation has condition number above 100 and strongly amplifies angle uncertainty"
+      ]
+    },
+    {
+      "id": "motion-composition",
+      "html": "motion-composition.html",
+      "script": "motion-composition.js",
+      "model": "motion-composition-model.js",
+      "api": "motionCompositionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "wax rises 1.2m at 0.8m/s while the tube moves at 1.2m/s: top event occurs at 1.5s and 1.8m",
+        "a 3m/s boat crossing a 120m river with 2m/s current takes 40s and drifts 80m when aimed straight across",
+        "zero drift requires 41.8103deg upstream when boat speed exceeds current; stronger current makes zero drift impossible"
+      ]
+    },
+    {
+      "id": "projectile-drop-comparison",
+      "html": "projectile-drop-comparison.html",
+      "script": "projectile-drop-comparison.js",
+      "model": "projectile-drop-comparison-model.js",
+      "api": "projectileDropComparisonLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "from 20m at g=9.8m/s2 both ideal balls land after 2.020305s regardless of horizontal speed",
+        "an 80ms release delay produces an 80ms impact-time difference",
+        "quadratic drag beta=0.03/m makes the 12m/s projectile land about 84.97ms after the dropped ball"
       ]
     },
     {
@@ -170,6 +249,19 @@
         "400km circular orbit -> speed about 7.673km/s and period about 92.41min",
         "geosynchronous radius is about 42164km",
         "escape threshold is sqrt(2) times circular speed"
+      ]
+    },
+    {
+      "id": "work-energy-process",
+      "html": "work-energy-process.html",
+      "script": "work-energy-process.js",
+      "model": "work-energy-process-model.js",
+      "api": "workEnergyProcessLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "2kg at 3m/s under 10N drive and 3N friction for 6m gains 42J and reaches 7.14143m/s",
+        "linear force F=4+1.5s N against 3N friction does 33J net work over 6m",
+        "a 2kg body at 8m/s stopped by 5N braking force stops after 12.8m without negative kinetic energy"
       ]
     },
     {
@@ -338,6 +430,58 @@
       ]
     },
     {
+      "id": "rail-rod",
+      "html": "rail-rod.html",
+      "script": "rail-rod.js",
+      "model": "rail-rod-model.js",
+      "api": "railRodLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "resistive rail has tau=mR/(B squared L squared) and force-start terminal speed FR/(B squared L squared)",
+        "after force removal velocity current and magnetic braking decay with the same time constant",
+        "source back emf limits speed while capacitor load adds CB squared L squared electromagnetic inertia"
+      ]
+    },
+    {
+      "id": "double-rail",
+      "html": "double-rail.html",
+      "script": "double-rail.js",
+      "model": "double-rail-model.js",
+      "api": "doubleRailLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "free rods couple through relative velocity and preserve total momentum under internal magnetic forces",
+        "equal masses at 4m/s and 0m/s approach a common 2m/s velocity",
+        "fixing one rod introduces an external constraint impulse while energy still closes"
+      ]
+    },
+    {
+      "id": "cyclotron",
+      "html": "cyclotron.html",
+      "script": "cyclotron.js",
+      "model": "cyclotron-model.js",
+      "api": "cyclotronLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "nonrelativistic cyclotron frequency is qB over 2 pi m and independent of radius",
+        "each ideal gap crossing adds qU while edge energy is q squared B squared R squared over 2m",
+        "relativistic gamma lowers orbital frequency and accumulates RF phase error"
+      ]
+    },
+    {
+      "id": "three-field",
+      "html": "three-field.html",
+      "script": "three-field.js",
+      "model": "three-field-model.js",
+      "api": "threeFieldLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "three-force straight motion satisfies qE minus mg minus qvB equals zero",
+        "with B zero the motion reduces to a constant-acceleration projectile",
+        "magnetic force changes direction but has zero instantaneous power and energy work"
+      ]
+    },
+    {
       "id": "alternating-current",
       "html": "alternating-current.html",
       "script": "alternating-current.js",
@@ -376,6 +520,19 @@
       ]
     },
     {
+      "id": "collision-2d",
+      "html": "collision-2d.html",
+      "script": "collision-2d.js",
+      "model": "collision-2d-model.js",
+      "api": "collision2dLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "smooth-disk impulse acts only along the contact normal and leaves tangential velocity unchanged",
+        "x and y momentum components are both conserved without external impulse",
+        "kinetic energy loss equals one half reduced mass times one minus e squared times normal approach speed squared"
+      ]
+    },
+    {
       "id": "oscillation",
       "html": "oscillation.html",
       "script": "oscillation.js",
@@ -385,6 +542,19 @@
         "m=1kg and k=4N/m -> omega=2rad/s and period=pi seconds",
         "at an endpoint velocity is zero while acceleration and restoring force are maximal",
         "kinetic plus elastic potential energy remains one half k A squared"
+      ]
+    },
+    {
+      "id": "pendulum",
+      "html": "pendulum.html",
+      "script": "pendulum.js",
+      "model": "pendulum-model.js",
+      "api": "pendulumLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "L=1m and g=9.8m/s2 gives a small-angle period near 2.00709s",
+        "at 60 degrees the exact nonlinear period is about 7.318 percent longer than the small-angle result",
+        "without damping mechanical energy is conserved; with damping mechanical plus dissipated energy remains constant"
       ]
     },
     {
@@ -410,6 +580,19 @@
         "wave speed equals wavelength times frequency while particles remain at fixed horizontal positions",
         "superposition equals y1 plus y2 at every position and time",
         "standing-wave node spacing is lambda over two"
+      ]
+    },
+    {
+      "id": "wave-interference",
+      "html": "wave-interference.html",
+      "script": "wave-interference.js",
+      "model": "wave-interference-model.js",
+      "api": "waveInterferenceLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "equal-frequency in-phase sources give four times one-source intensity on the perpendicular bisector",
+        "a pi source-phase offset changes the same bisector from constructive to destructive",
+        "frequency mismatch makes the finite-time coherence factor tend to zero and removes the stable cross term"
       ]
     },
     {
@@ -468,6 +651,10 @@
       "referencePoints": ["400nm photon on sodium gives about 0.82eV maximum kinetic energy", "650nm light does not eject electrons from sodium regardless of intensity", "stopping voltage in volts equals maximum kinetic energy in electronvolts"]
     },
     {
+      "id": "rutherford", "html": "rutherford.html", "script": "rutherford.js", "model": "rutherford-model.js", "api": "rutherfordLab", "minimumCanvasCount": 3,
+      "referencePoints": ["5MeV alpha on gold at b=50fm scatters by 48.9338 degrees", "b=0 head-on closest approach is 45.5029fm and b90 is 22.7514fm", "impact parameters sampled uniformly by incident area reproduce rare large-angle events while a Thomson sphere cannot"]
+    },
+    {
       "id": "bohr", "html": "bohr.html", "script": "bohr.js", "model": "bohr-model.js", "api": "bohrLab", "minimumCanvasCount": 3,
       "referencePoints": ["hydrogen n=3 to n=2 emits the 656nm H-alpha line", "Bohr level energy follows -13.6/n squared", "absorption occurs only when photon energy matches an allowed level difference"]
     },
@@ -488,6 +675,97 @@
       "referencePoints": ["effective multiplication k equals neutron yield times productive probability", "critical control absorption makes k equal one", "default D-T reference has opportunity index one while classical closest approach exceeds nuclear contact scale"]
     },
     {
+      "id": "ampere-force",
+      "html": "ampere-force.html",
+      "script": "ampere-force.js",
+      "model": "ampere-force-model.js",
+      "api": "ampereForceLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "B=.5T,I=5A,L=.4m,theta=90deg gives a 1N force",
+        "parallel wire has zero force and reversing I or B reverses force direction",
+        "20g conductor balances at I=.98A for B=.5T,L=.4m with closed vector residual"
+      ]
+    },
+    {
+      "id": "rc-circuit",
+      "html": "rc-circuit.html",
+      "script": "rc-circuit.js",
+      "model": "rc-circuit-model.js",
+      "api": "rcCircuitLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "R=10kohm,C=100uF gives tau=1s and charge voltage 0.6321205588E at tau",
+        "discharge voltage is 0.3678794412U0 at tau with reversed current",
+        "current-time area equals charge change and source-capacitor-heat energy ledger closes"
+      ]
+    },
+    {
+      "id": "resistivity",
+      "html": "resistivity.html",
+      "script": "resistivity.js",
+      "model": "resistivity-model.js",
+      "api": "resistivityLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "rho=1.72e-8,L=.8m,d=.4mm gives R=.1094986008ohm",
+        "external connection measures Rx parallel Rv while internal measures Rx plus Ra",
+        "five-point U-I slope and geometry invert resistivity with a closed residual ledger"
+      ]
+    },
+    {
+      "id": "measurement-tools",
+      "html": "measurement-tools.html",
+      "script": "measurement-tools.js",
+      "model": "measurement-tools-model.js",
+      "api": "measurementToolsLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "12.36mm reads 12.4,12.35,12.36mm on 10,20,50-division verniers",
+        "5.678mm reads 5.68mm as 5.5mm sleeve plus division 18 on a micrometer",
+        "corrected reading equals indicated reading minus positive or negative zero error"
+      ]
+    },
+    {
+      "id": "electric-gravity",
+      "html": "electric-gravity.html",
+      "script": "electric-gravity.js",
+      "model": "electric-gravity-model.js",
+      "api": "electricGravityLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "1ng,0.5fC,19.6kV/m gives exact suspension with qE=mg",
+        "field-off motion from y0=2m,vx=3m/s gives x=1.5m,y=0.775m at t=0.5s",
+        "suspension inverse measurement returns q=mg/E and force-energy residuals remain zero"
+      ]
+    },
+    {
+      "id": "oscilloscope",
+      "html": "oscilloscope.html",
+      "script": "oscilloscope.js",
+      "model": "oscilloscope-model.js",
+      "api": "oscilloscopeLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "electron kinetic energy in eV equals accelerating voltage Ua",
+        "40V vertical deflection maps to 0.80cm screen coordinate in the teaching scale",
+        "XY phase difference changes the parametric screen trace while voltage residual remains zero"
+      ]
+    },
+    {
+      "id": "locomotive",
+      "html": "locomotive.html",
+      "script": "locomotive.js",
+      "model": "locomotive-model.js",
+      "api": "locomotiveLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "m=1000kg,f=2000N,Fmax=6000N -> constant-force acceleration=4m/s2",
+        "P=120kW,Fmax=6000N -> power transition at v=20m/s and t=5s",
+        "power terminal speed P/f=60m/s and energy residual remains zero"
+      ]
+    },
+    {
       "id": "double-slit",
       "html": "double-slit.html",
       "script": "double-slit.js",
@@ -497,6 +775,32 @@
         "lambda=600nm, L=1.2m, d=0.30mm -> beta=2.40mm",
         "first dark fringe is at y=beta/2=1.20mm",
         "which-path measurement removes the interference modulation"
+      ]
+    },
+    {
+      "id": "single-slit",
+      "html": "single-slit.html",
+      "script": "single-slit.js",
+      "model": "single-slit-model.js",
+      "api": "singleSlitLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "lambda=600nm, a=0.06mm and L=1.2m gives the first minimum at 12.0006mm",
+        "the central maximum lies between the two first minima and is 24.0012mm wide",
+        "at a minimum the aperture-edge path difference is an integer wavelength and the continuous phasor sum closes"
+      ]
+    },
+    {
+      "id": "thin-film",
+      "html": "thin-film.html",
+      "script": "thin-film.js",
+      "model": "thin-film-model.js",
+      "api": "thinFilmLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "an air-water-air quarter-wave film at 600nm has one reflection phase flip and enhanced reflection",
+        "an ideal n=sqrt(1.5) quarter-wave coating has nearly zero reflectance at 550nm",
+        "a glass-air-glass wedge has a dark contact fringe and spacing lambda over two n slope"
       ]
     }
   ]

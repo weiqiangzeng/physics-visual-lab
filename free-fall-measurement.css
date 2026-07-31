@@ -1,0 +1,96 @@
+.free-fall-measurement-lab {
+  --fall-cyan: #64c7d9;
+  --fall-amber: #f0b951;
+  --fall-violet: #b58ce5;
+}
+
+.free-fall-measurement-lab .stage {
+  grid-template-rows: auto minmax(280px, 1fr) minmax(180px, .54fr) auto;
+}
+
+.free-fall-measurement-lab .instrument-stage {
+  grid-template-columns: minmax(0, 1fr) 220px;
+  background: #070b0c;
+}
+
+.free-fall-measurement-lab canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #070b0c;
+}
+
+.free-fall-measurement-lab #fallCanvas {
+  min-height: 280px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.free-fall-measurement-lab .state-badge {
+  color: var(--fall-cyan);
+  border-color: rgba(100, 199, 217, .45);
+  background: rgba(100, 199, 217, .07);
+}
+
+.free-fall-measurement-lab .rail-equation strong,
+.free-fall-measurement-lab .formula-state strong {
+  color: var(--fall-amber);
+}
+
+.free-fall-measurement-lab .live-readouts dd {
+  font-size: 14px;
+}
+
+.free-fall-measurement-lab .mobile-scene-tabs {
+  display: none;
+}
+
+@media (max-width: 1120px) {
+  .free-fall-measurement-lab .mobile-scene-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: -10px -10px 10px;
+    border-bottom: 1px solid var(--lab-line);
+    background: #121513;
+  }
+
+  .free-fall-measurement-lab .mobile-scene-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 46px;
+    padding: 7px 3px;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .free-fall-measurement-lab .mobile-scene-tab.is-active {
+    border-bottom-color: var(--fall-amber);
+  }
+
+  .free-fall-measurement-lab .mobile-scene-tab > span {
+    grid-row: auto;
+    padding: 0;
+  }
+
+  .free-fall-measurement-lab .mobile-scene-tab strong {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .free-fall-measurement-lab .instrument-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .free-fall-measurement-lab #fallCanvas {
+    min-height: 330px;
+    aspect-ratio: 1.15;
+  }
+
+  .free-fall-measurement-lab .analysis-grid {
+    min-height: 350px;
+  }
+}

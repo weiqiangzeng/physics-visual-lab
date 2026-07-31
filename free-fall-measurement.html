@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101412" />
+    <title>自由落体测重力实验室</title>
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-3" />
+    <link rel="stylesheet" href="./free-fall-measurement.css?v=flagship-1" />
+  </head>
+  <body class="flagship-lab free-fall-measurement-lab">
+    <header class="lab-topbar">
+      <a class="lab-brand" href="./index.html" aria-label="返回实验目录"><span class="brand-mark">g</span><span><strong>PHYSICS VISUAL LAB</strong><small>高中物理可视化实验室</small></span></a>
+      <div class="topbar-title"><span>运动学 · 测量实验 01</span><strong>自由落体测重力</strong></div>
+      <div class="connection-state"><i></i><span>测量与误差模型已连接</span></div>
+      <div class="actions topbar-actions"><a href="./index.html">实验目录</a><button id="guideButton" class="toolbar-button">实验指南</button><button id="stepButton" class="toolbar-button">分步演示</button><button id="focusButton" class="toolbar-button" aria-pressed="false">专注模式</button><button id="fullscreenButton" class="toolbar-button icon-command" aria-label="全屏">⛶</button></div>
+    </header>
+    <main class="lab-shell">
+      <nav class="lesson-rail" aria-label="实验学习路径">
+        <div class="rail-heading"><span class="eyebrow">KINEMATICS / 04</span><h1>自由落体<br />测重力</h1><p>从计时与位移原始数据出发，经逐差和拟合得到重力加速度。</p></div>
+        <section class="rail-section"><span class="rail-label">实验场景</span>
+          <button class="scene-tab is-active" data-mode="gates"><span>01</span><strong>光电门采集</strong><i>记录 s 与 t</i></button>
+          <button class="scene-tab" data-mode="strobe"><span>02</span><strong>频闪逐差</strong><i>Δ²s=gT²</i></button>
+          <button class="scene-tab" data-mode="fit"><span>03</span><strong>s–t² 拟合</strong><i>斜率等于 g/2</i></button>
+          <button class="scene-tab" data-mode="uncertainty"><span>04</span><strong>重复与不确定度</strong><i>均值、标准差、标准误</i></button>
+        </section>
+        <section class="rail-section experiment-route"><span class="rail-label">探究路径</span>
+          <button class="route-step is-active"><b>1</b><span>先检查原始量<small>单位、零点与分辨率</small></span></button>
+          <button class="route-step"><b>2</b><span>再选择处理法<small>逐差或线性拟合</small></span></button>
+          <button class="route-step"><b>3</b><span>最后报告结果<small>估计值与不确定度</small></span></button>
+        </section>
+        <div class="rail-equation"><span>从位移到重力</span><strong>s=½gt²</strong><strong>g=Δ²s/T²=2k</strong><small>释放初速度近似为零、竖直向下为正；噪声模型只包含计时量化和位置读数随机误差，忽略空气阻力、释放延迟和系统偏差。</small></div>
+      </nav>
+      <aside class="controls" aria-label="实验控制">
+        <div class="controls-header"><div><span class="eyebrow">CONTROL</span><h2>装置与测量精度</h2></div><button id="resetButton" class="reset-button">重置</button></div>
+        <section class="control-section">
+          <div class="control-label"><span>释放高度 <i>h</i></span><strong id="heightValue">2.40 m</strong></div><input id="heightInput" class="range-input" type="range" min="0.8" max="5" step="0.05" value="2.4" aria-label="释放高度" />
+          <div class="control-label"><span>当地重力 <i>g</i></span><strong id="gravityValue">9.80 m/s²</strong></div><input id="gravityInput" class="range-input" type="range" min="1.6" max="12" step="0.05" value="9.8" aria-label="当地重力加速度" />
+          <div class="control-label"><span>采样点数 <i>N</i></span><strong id="samplesValue">7</strong></div><input id="samplesInput" class="range-input" type="range" min="5" max="10" step="1" value="7" aria-label="采样点数" />
+        </section>
+        <section class="control-section">
+          <div class="control-label"><span>频闪间隔 <i>T</i></span><strong id="intervalValue">0.080 s</strong></div><input id="intervalInput" class="range-input" type="range" min="0.03" max="0.18" step="0.005" value="0.08" aria-label="频闪时间间隔" />
+          <div class="control-label"><span>计时分辨率</span><strong id="resolutionValue">0.100 ms</strong></div><input id="resolutionInput" class="range-input" type="range" min="0.01" max="5" step="0.01" value="0.1" aria-label="计时分辨率" />
+          <div class="control-label"><span>位置随机误差 <i>σs</i></span><strong id="noiseValue">0.50 mm</strong></div><input id="noiseInput" class="range-input" type="range" min="0" max="5" step="0.05" value="0.5" aria-label="位置随机误差标准差" />
+        </section>
+        <section class="control-section">
+          <div class="control-label"><span>重复次数</span><strong id="repeatsValue">30</strong></div><input id="repeatsInput" class="range-input" type="range" min="5" max="100" step="5" value="30" aria-label="重复测量次数" />
+          <div class="control-label"><span>实验编号</span><strong id="seedValue">23</strong></div><input id="seedInput" class="range-input" type="range" min="1" max="100" step="1" value="23" aria-label="随机实验编号" />
+          <div class="playback-row"><button id="newRunButton" class="primary-command">重新采集</button><button id="idealButton" class="secondary-command">理想装置</button></div>
+        </section>
+        <section class="control-section overlay-controls"><span class="section-kicker">分析叠加层</span><div class="toggle-grid">
+          <label><input id="showIdealToggle" type="checkbox" checked /><span>理想运动</span></label>
+          <label><input id="showFitToggle" type="checkbox" checked /><span>拟合直线</span></label>
+          <label><input id="showResidualsToggle" type="checkbox" checked /><span>残差</span></label>
+          <label><input id="showUncertaintyToggle" type="checkbox" checked /><span>不确定度带</span></label>
+        </div></section>
+      </aside>
+      <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" data-mode="gates"><span>01</span><strong>采集</strong></button><button class="scene-tab mobile-scene-tab" data-mode="strobe"><span>02</span><strong>逐差</strong></button><button class="scene-tab mobile-scene-tab" data-mode="fit"><span>03</span><strong>拟合</strong></button><button class="scene-tab mobile-scene-tab" data-mode="uncertainty"><span>04</span><strong>重复</strong></button></nav>
+        <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">运动学 / <b id="modeTitle">光电门采集</b></span><h2 id="modeGoal">读取每个门的位移和累计时间，先判断原始数据是否可信</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">g测=9.800 m/s²</span><span class="drag-hint">上下拖动释放器改变高度</span></div></header>
+        <section class="instrument-stage"><canvas id="fallCanvas" width="900" height="470" aria-label="可拖动释放高度的自由落体测量装置"></canvas><aside class="live-readouts"><div class="readout-head"><span>MEASUREMENT RESULT</span><i></i></div><dl>
+          <div><dt>测量结果</dt><dd id="estimateMetric">9.800 m/s²</dd></div><div><dt>设定真值</dt><dd id="truthMetric">9.800 m/s²</dd></div><div><dt>绝对误差</dt><dd id="errorMetric">+0.000 m/s²</dd></div><div><dt>相对误差</dt><dd id="relativeMetric">+0.000%</dd></div><div><dt>落地时间</dt><dd id="impactMetric">0.700 s</dd></div><div><dt id="qualityLabel">拟合优度 R²</dt><dd id="qualityMetric">1.000000</dd></div>
+        </dl><div class="law-check"><span>当前判断</span><strong id="natureText">随机误差处于可分辨范围</strong><small id="explanationText">拟合斜率与逐差结果应在不确定度内相容</small></div></aside></section>
+        <section class="analysis-grid"><article class="chart-panel"><header><div><span id="dataKicker">RAW DATA / FIT</span><h3 id="dataTitle">位移—时间平方</h3></div><strong id="dataStatus">k=4.900 m/s²</strong></header><canvas id="dataChart" width="620" height="230" aria-label="位移时间平方拟合或重复测量分布"></canvas></article><article class="chart-panel"><header><div><span id="evidenceKicker">RESIDUALS</span><h3 id="evidenceTitle">拟合残差</h3></div><strong id="evidenceStatus">RMS 0.50 mm</strong></header><canvas id="evidenceChart" width="620" height="230" aria-label="拟合残差逐差结果或收敛图"></canvas></article></section>
+        <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先检查原始量</strong><p id="stepPrompt">位移从哪里起算，计时器记录的是累计时间还是相邻时间？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">s=½gt²</strong></div></footer>
+      </section>
+    </main>
+    <dialog id="guideDialog" class="guide-dialog"><form method="dialog"><header><div><span class="eyebrow">EXPERIMENT GUIDE</span><h2>自由落体测重力指南</h2></div><button aria-label="关闭指南">×</button></header><ol>
+      <li><b>原始数据</b><span>释放点取位移零点，光电门记录物体到达各位置的累计时间；不要把累计时间误当相邻门时间。</span></li>
+      <li><b>逐差法</b><span>等时间间隔频闪满足相邻位移的二阶差 Δ²s=gT²，多组二阶差可平均以利用全部数据。</span></li>
+      <li><b>图像法</b><span>以 t² 为横轴、s 为纵轴做线性拟合，斜率 k=g/2；截距偏离零可暴露零点或释放延迟问题。</span></li>
+      <li><b>不确定度</b><span>重复测量的标准差描述单次结果离散，标准误 σ/√N 描述均值的不确定度，两者不能混用。</span></li>
+      <li><b>模型边界</b><span>当前随机模型只含计时量化和位置读数噪声；真实实验还需检查空气阻力、释放初速度、装置竖直度和系统延迟。</span></li>
+    </ol><button class="primary-command" value="close">开始实验</button></form></dialog>
+    <script src="./free-fall-measurement-model.js?v=flagship-1"></script><script src="./free-fall-measurement.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-67"></script>
+  </body>
+</html>

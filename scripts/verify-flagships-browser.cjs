@@ -21,16 +21,30 @@ const labs = [
   { id: "motion-graphs", path: "motion-graphs.html", perturb: ["#initialSpeedInput", "3.4"] },
   { id: "pursuit", path: "pursuit.html", perturb: ["#gapInput", "55"] },
   { id: "elevator", path: "elevator.html", perturb: ["#massInput", "72"] },
+  { id: "conveyor", path: "conveyor.html", perturb: ["#beltSpeedInput", "5"] },
   { id: "vertical-motion", path: "vertical-motion.html", perturb: ["#heightInput", "36"] },
+  { id: "free-fall-measurement", path: "free-fall-measurement.html", perturb: ["#heightInput", "3.2"] },
   { id: "friction", path: "friction.html", perturb: ["#massInput", "3.2"] },
   { id: "newton-laws", path: "newton-laws.html", perturb: ["#massInput", "3.2"] },
   { id: "interaction", path: "interaction.html", perturb: ["#force1Input", "9.5"] },
+  { id: "hooke-measurement", path: "hooke-measurement.html", perturb: ["#springInput", "55"] },
+  { id: "force-composition", path: "force-composition.html", perturb: ["#force1Input", "9"] },
+  { id: "motion-composition", path: "motion-composition.html", perturb: ["#currentInput", "2.5"] },
+  { id: "projectile-drop-comparison", path: "projectile-drop-comparison.html", perturb: ["#speedInput", "18"] },
   { id: "projectile", path: "projectile.html", perturb: ["#speedInput", "24"] },
   { id: "circular", path: "circular.html", perturb: ["#radiusInput", "1.8"] },
   { id: "circular-critical", path: "circular-critical.html", perturb: ["#radiusInput", "55"] },
   { id: "orbital", path: "orbital.html", perturb: ["#altitudeInput", "1200"] },
+  { id: "work-energy-process", path: "work-energy-process.html", perturb: ["#forceInput", "16"] },
   { id: "work-propulsion", path: "work-propulsion.html", perturb: ["#forceInput", "30"] },
   { id: "mechanical-energy", path: "mechanical-energy.html", perturb: ["#massInput", "3.2"] },
+  { id: "locomotive", path: "locomotive.html", perturb: ["#powerInput", "150000"] },
+  { id: "oscilloscope", path: "oscilloscope.html", perturb: ["#verticalInput", "65"] },
+  { id: "electric-gravity", path: "electric-gravity.html", perturb: ["#fieldInput", "24"] },
+  { id: "measurement-tools", path: "measurement-tools.html", perturb: ["#lengthInput", "17.42"] },
+  { id: "resistivity", path: "resistivity.html", perturb: ["#diameterInput", "0.55"] },
+  { id: "rc-circuit", path: "rc-circuit.html", perturb: ["#capacitanceInput", "150"] },
+  { id: "ampere-force", path: "ampere-force.html", perturb: ["#angleInput", "60"] },
   { id: "refraction", path: "refraction.html", perturb: ["#angleInput", "42"] },
   { id: "electric-field", path: "electric-field.html", perturb: ["#testChargeInput", "-2"] },
   { id: "electrostatic-conductor", path: "electrostatic-conductor.html", perturb: ["#fieldInput", "1800"] },
@@ -41,24 +55,34 @@ const labs = [
   { id: "magnetic-field", path: "magnetic-field.html", perturb: ["#currentInput", "12"] },
   { id: "charged-particle", path: "charged-particle.html", perturb: ["#massInput", "3.2"] },
   { id: "mass-spectrometer", path: "mass-spectrometer.html", perturb: ["#electricInput", "140"] },
+  { id: "cyclotron", path: "cyclotron.html", perturb: ["#voltageInput", "60"] },
+  { id: "three-field", path: "three-field.html", perturb: ["#electricInput", "24"] },
   { id: "electromagnetic-induction", path: "electromagnetic-induction.html", perturb: ["#turnsInput", "160"] },
+  { id: "rail-rod", path: "rail-rod.html", perturb: ["#fieldInput", "1.1"] },
+  { id: "double-rail", path: "double-rail.html", perturb: ["#mass2Input", "1.2"] },
   { id: "alternating-current", path: "alternating-current.html", perturb: ["#generatorTurnsInput", "360"] },
   { id: "electromagnetic-oscillation", path: "electromagnetic-oscillation.html", perturb: ["#inductanceInput", "35"] },
   { id: "collision", path: "collision.html", perturb: ["#mass1Input", "3.2"] },
+  { id: "collision-2d", path: "collision-2d.html", perturb: ["#normalInput", "30"] },
   { id: "oscillation", path: "oscillation.html", perturb: ["#springInput", "25"] },
+  { id: "pendulum", path: "pendulum.html", perturb: ["#amplitudeInput", "35"] },
   { id: "resonance", path: "resonance.html", perturb: ["#dampingInput", "0.2"] },
   { id: "waves", path: "waves.html", perturb: ["#wavelengthInput", "3"] },
+  { id: "wave-interference", path: "wave-interference.html", perturb: ["#phaseInput", "90"] },
   { id: "lens", path: "lens.html", perturb: ["#focalInput", "12"] },
   { id: "ideal-gas", path: "ideal-gas.html", perturb: ["#amountInput", "0.16"] },
   { id: "matter-phase", path: "matter-phase.html", perturb: ["#radiusInput", "1.2"] },
   { id: "thermodynamics", path: "thermodynamics.html", perturb: ["#temperatureInput", "450"] },
   { id: "photoelectric", path: "photoelectric.html", perturb: ["#wavelengthInput", "450"] },
+  { id: "rutherford", path: "rutherford.html", perturb: ["#energyInput", "6"] },
   { id: "bohr", path: "bohr.html", perturb: ["#initialSelect", "4"] },
   { id: "matter-wave", path: "matter-wave.html", perturb: ["#speedInput", "6.8"] },
   { id: "radioactive-decay", path: "radioactive-decay.html", perturb: ["#halfLifeInput", "8"] },
   { id: "binding-energy", path: "binding-energy.html", perturb: ["#assemblyInput", "0.6"] },
   { id: "nuclear-reaction", path: "nuclear-reaction.html", perturb: ["#progressInput", "0.4"] },
-  { id: "double-slit", path: "double-slit.html", perturb: ["#wavelengthInput", "650"] }
+  { id: "double-slit", path: "double-slit.html", perturb: ["#wavelengthInput", "650"] },
+  { id: "single-slit", path: "single-slit.html", perturb: ["#widthInput", "0.08"] },
+  { id: "thin-film", path: "thin-film.html", perturb: ["#thicknessInput", "240"] }
 ];
 const runLabs = process.env.LAB ? labs.filter((lab) => lab.id === process.env.LAB) : labs;
 const viewports = [
@@ -198,6 +222,28 @@ async function verifyLab(browser, lab, viewport) {
       assert((await page.evaluate(() => window.elevatorLab.getState().time)) > 4, `${lab.id}/${viewport.name}: direct time drag did not update state`);
     }
 
+    if (lab.id === "conveyor") {
+      const reference = await page.evaluate(() => ({
+        start: window.conveyorLab.solve(4 / 2.94, { mass: 2, muS: .5, muK: .3, angleDeg: 0, beltSpeed: 4, objectSpeed: 0 }),
+        reverse: window.conveyorLab.solve(6 / 2.94, { mass: 2, muS: .5, muK: .3, angleDeg: 0, beltSpeed: 4, objectSpeed: -2 }),
+        fastBefore: window.conveyorLab.solve(1, { mass: 2, muS: .5, muK: .3, angleDeg: 0, beltSpeed: 3, objectSpeed: 8 }),
+        fast: window.conveyorLab.solve(5 / 2.94, { mass: 2, muS: .5, muK: .3, angleDeg: 0, beltSpeed: 3, objectSpeed: 8 }),
+        steep: window.conveyorLab.solve(3, { mass: 2, muS: .2, muK: .15, angleDeg: 30, beltSpeed: 3, objectSpeed: 3 })
+      }));
+      assert(closeTo(reference.start.syncTime, 4 / 2.94, 1e-9) && closeTo(reference.start.heat, 16, 1e-9) && closeTo(reference.start.energyResidual, 0, 1e-12), `${lab.id}/${viewport.name}: horizontal-start reference mismatch`);
+      assert(closeTo(reference.reverse.syncTime, 6 / 2.94, 1e-9) && closeTo(reference.reverse.heat, 36, 1e-9), `${lab.id}/${viewport.name}: reverse-start reference mismatch`);
+      assert(reference.fastBefore.friction < 0 && reference.fastBefore.relativeVelocity > 0 && closeTo(reference.fast.syncTime, 5 / 2.94, 1e-9) && closeTo(reference.fast.heat, 25, 1e-9), `${lab.id}/${viewport.name}: faster-object reference mismatch`);
+      assert(!reference.steep.canStick && reference.steep.regime === "sliding", `${lab.id}/${viewport.name}: incline static-limit boundary mismatch`);
+      const canvas = page.locator("#conveyorCanvas");
+      await page.evaluate(() => document.querySelector("#conveyorCanvas").scrollIntoView({ block: "center", inline: "center" }));
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .18, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .74, box.y + box.height * .5);
+      await page.mouse.up();
+      assert((await page.evaluate(() => window.conveyorLab.getState().time)) > 4, `${lab.id}/${viewport.name}: direct time drag did not update state`);
+    }
+
     if (lab.id === "vertical-motion") {
       const reference = await page.evaluate(() => ({
         dropTime: window.VerticalMotionModel.landingTime({ initialHeightM: 20, initialVelocityMs: 0, gravityMs2: 9.8 }),
@@ -205,6 +251,29 @@ async function verifyLab(browser, lab, viewport) {
       }));
       assert(closeTo(reference.dropTime, 2.020305, 1e-5), `${lab.id}/${viewport.name}: drop-time reference mismatch`);
       assert(closeTo(reference.apex.velocityMs, 0, 1e-9) && closeTo(reference.apex.accelerationMs2, -9.8, 1e-9), `${lab.id}/${viewport.name}: apex reference mismatch`);
+    }
+
+    if (lab.id === "free-fall-measurement") {
+      const reference = await page.evaluate(() => {
+        const ideal = { gravityMs2: 9.8, heightM: 2.4, sampleCount: 7, strobeIntervalS: .08, timeResolutionMs: .001, positionNoiseMm: 0, repeats: 30, seed: 23 };
+        const gate = window.freeFallMeasurementLab.gateMeasurement(ideal);
+        const strobe = window.freeFallMeasurementLab.strobeMeasurement(ideal);
+        const uncertainty = window.freeFallMeasurementLab.uncertaintySummary({ ...ideal, timeResolutionMs: .1, positionNoiseMm: .5 });
+        return { gate, strobe, uncertainty };
+      });
+      assert(closeTo(reference.gate.impactTimeS, .6998542122237651, 1e-12) && Math.abs(reference.gate.estimatedGravityMs2 - 9.8) < 1e-4, `${lab.id}/${viewport.name}: gate timing or fit reference mismatch`);
+      assert(closeTo(reference.strobe.estimatedGravityMs2, 9.8, 1e-10) && closeTo(reference.strobe.idealSecondDifferenceM, .06272, 1e-12), `${lab.id}/${viewport.name}: equal-time second-difference mismatch`);
+      assert(reference.uncertainty.standardDeviation > 0 && closeTo(reference.uncertainty.standardError, reference.uncertainty.standardDeviation / Math.sqrt(30), 1e-12) && Math.abs(reference.uncertainty.mean - 9.8) < .01, `${lab.id}/${viewport.name}: repeated-measurement uncertainty mismatch`);
+      const canvas = page.locator("#fallCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.freeFallMeasurementLab.getState().heightM);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .15);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .95);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.freeFallMeasurementLab.getState().heightM);
+      assert(Math.abs(after - before) > 1.5, `${lab.id}/${viewport.name}: direct release-height drag did not update state`);
     }
 
     if (lab.id === "friction") {
@@ -248,6 +317,113 @@ async function verifyLab(browser, lab, viewport) {
       assert(Math.abs(afterDrag - beforeDrag) > 0.2, `${lab.id}/${viewport.name}: direct vector drag did not update state`);
     }
 
+    if (lab.id === "hooke-measurement") {
+      const reference = await page.evaluate(() => {
+        const ideal = { springConstantNm: 40, naturalLengthCm: 12, massStepG: 50, gravityMs2: 9.8, pointCount: 8, loadIndex: 6, elasticLimitN: 3.2, postYieldRatio: .3, rulerResolutionMm: .1, readingNoiseMm: 0, zeroErrorMm: .6, seed: 31 };
+        return { experiment: window.hookeMeasurementLab.experiment(ideal), hysteresis: window.hookeMeasurementLab.hysteresis(ideal) };
+      });
+      assert(closeTo(reference.experiment.data[1].forceN, .49, 1e-12) && closeTo(reference.experiment.data[1].trueExtensionM, .01225, 1e-12), `${lab.id}/${viewport.name}: one-weight Hooke reference mismatch`);
+      assert(Math.abs(reference.experiment.estimatedSpringConstantNm - 40) < .001 && reference.experiment.allFit.slope < reference.experiment.estimatedSpringConstantNm, `${lab.id}/${viewport.name}: elastic-only fit or overloaded-fit bias mismatch`);
+      assert(closeTo(reference.experiment.maximum.maximumExtensionM, .09916666666666667, 1e-12) && closeTo(reference.experiment.maximum.permanentSetM, .01341666666666666, 1e-12), `${lab.id}/${viewport.name}: overload or permanent-set reference mismatch`);
+      assert(reference.hysteresis.loopAreaJ > 0 && closeTo(reference.experiment.zeroErrorCancellationResidualMm, 0, 1e-12), `${lab.id}/${viewport.name}: hysteresis or common zero-error cancellation mismatch`);
+      const canvas = page.locator("#springCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.hookeMeasurementLab.getState().loadIndex);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .08);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.hookeMeasurementLab.getState().loadIndex);
+      assert(Math.abs(after - before) >= 4, `${lab.id}/${viewport.name}: direct weight-stack drag did not update load`);
+    }
+
+    if (lab.id === "force-composition") {
+      const reference = await page.evaluate(() => {
+        const base = { force1N: 6, force2N: 8, direction1Deg: 0, direction2Deg: 90, targetForceN: 10, targetDirectionDeg: Math.atan2(8, 6) / window.ForceCompositionModel.DEG, forceResolutionN: .1, angleResolutionDeg: .5, readingNoise: .25, seed: 41 };
+        return {
+          compose: window.forceCompositionLab.compose(base),
+          decompose: window.forceCompositionLab.decompose(base),
+          apparatus: window.forceCompositionLab.apparatus(base),
+          near: window.forceCompositionLab.sensitivity({ ...base, direction1Deg: 30, direction2Deg: 31, targetDirectionDeg: 30.5 }),
+          invalid: window.forceCompositionLab.decompose({ ...base, direction1Deg: 0, direction2Deg: 60, targetDirectionDeg: 90 }),
+          work: window.forceCompositionLab.workEquivalence(base),
+        };
+      });
+      assert(closeTo(reference.compose.resultantN, 10, 1e-12) && closeTo(reference.compose.resultantDirectionDeg, 53.13010235415598, 1e-12), `${lab.id}/${viewport.name}: forward composition mismatch`);
+      assert(closeTo(reference.decompose.force1N, 6, 1e-12) && closeTo(reference.decompose.force2N, 8, 1e-12) && closeTo(reference.decompose.closureResidualN, 0, 1e-12), `${lab.id}/${viewport.name}: inverse decomposition mismatch`);
+      assert(closeTo(reference.apparatus.closureResidualN, .02270713956778767, 1e-12), `${lab.id}/${viewport.name}: apparatus closure mismatch`);
+      assert(reference.near.center.conditionNumber > 100 && closeTo(reference.near.spreadN, 10, 1e-9), `${lab.id}/${viewport.name}: near-collinear sensitivity mismatch`);
+      assert(!reference.invalid.validTensions && reference.invalid.force1N < 0 && closeTo(reference.work.residualJ, 0, 1e-12), `${lab.id}/${viewport.name}: tension boundary or work equivalence mismatch`);
+      const canvas = page.locator("#forceCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.forceCompositionLab.getState());
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .75, box.y + box.height * .25);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.forceCompositionLab.getState());
+      assert(Math.abs(after.force2N - before.force2N) > 1 || Math.abs(after.direction2Deg - before.direction2Deg) > 10, `${lab.id}/${viewport.name}: direct vector drag did not update state`);
+    }
+
+    if (lab.id === "motion-composition") {
+      const reference = await page.evaluate(() => {
+        const wax = window.motionCompositionLab.wax({ carrierSpeedMs: 1.2, relativeSpeedMs: .8, tubeHeightM: 1.2 }, 1);
+        const base = { riverCurrentMs: 2, boatSpeedMs: 3, headingDeg: 0, riverWidthM: 120 };
+        return {
+          wax,
+          river: window.motionCompositionLab.river(base, 1),
+          strategy: window.motionCompositionLab.strategies(base),
+          strong: window.motionCompositionLab.strategies({ ...base, riverCurrentMs: 4 }),
+          frame: window.motionCompositionLab.frameComparison(base, 20),
+        };
+      });
+      assert(closeTo(reference.wax.topTimeS, 1.5, 1e-12) && closeTo(reference.wax.horizontalAtTopM, 1.8, 1e-12) && closeTo(reference.wax.frameResidualM, 0, 1e-12), `${lab.id}/${viewport.name}: wax frame composition mismatch`);
+      assert(closeTo(reference.river.crossingTimeS, 40, 1e-12) && closeTo(reference.river.driftM, 80, 1e-12) && closeTo(reference.river.pathLengthM, 144.22205101855957, 1e-12), `${lab.id}/${viewport.name}: straight-across river reference mismatch`);
+      assert(reference.strategy.canCancelDrift && closeTo(reference.strategy.shortestHeadingDeg, 41.810314895778596, 1e-12) && closeTo(reference.strategy.shortest.driftM, 0, 1e-10) && closeTo(reference.strategy.shortest.pathLengthM, 120, 1e-10), `${lab.id}/${viewport.name}: zero-drift strategy mismatch`);
+      assert(!reference.strong.canCancelDrift && closeTo(reference.strong.shortest.driftM, 105.83005244258362, 1e-10), `${lab.id}/${viewport.name}: strong-current boundary mismatch`);
+      assert(closeTo(reference.frame.positionResidualM, 0, 1e-12) && closeTo(reference.frame.crossingEventTimeGroundS, reference.frame.crossingEventTimeWaterS, 1e-12), `${lab.id}/${viewport.name}: Galilean frame event mismatch`);
+      await page.evaluate(() => window.motionCompositionLab.setMode("river"));
+      const canvas = page.locator("#motionCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.motionCompositionLab.getState().headingDeg);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .78);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .25, box.y + box.height * .25);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.motionCompositionLab.getState().headingDeg);
+      assert(Math.abs(after - before) > 15, `${lab.id}/${viewport.name}: direct boat-heading drag did not update state`);
+    }
+
+    if (lab.id === "projectile-drop-comparison") {
+      const reference = await page.evaluate(() => {
+        const base = { heightM: 20, launchSpeedMs: 12, gravityMs2: 9.8, releaseDelayMs: 0, dragPerM: .03, strobeIntervalS: .2, timerResolutionMs: 1 };
+        return {
+          ideal: window.projectileDropComparisonLab.idealComparison(base),
+          strobe: window.projectileDropComparisonLab.strobe(base),
+          delay: window.projectileDropComparisonLab.idealComparison({ ...base, releaseDelayMs: 80 }),
+          drag: window.projectileDropComparisonLab.dragComparison(base),
+          sweep: window.projectileDropComparisonLab.speedSweep(base),
+        };
+      });
+      assert(closeTo(reference.ideal.landingTimeS, 2.0203050891044216, 1e-12) && closeTo(reference.ideal.horizontalRangeM, 24.243661069253058, 1e-12), `${lab.id}/${viewport.name}: ideal landing or range mismatch`);
+      assert(closeTo(reference.strobe.maximumVerticalResidualM, 0, 1e-12) && closeTo(reference.sweep.timeVariationS, 0, 1e-12), `${lab.id}/${viewport.name}: vertical strobe or speed independence mismatch`);
+      assert(closeTo(reference.delay.impactTimeDifferenceS, .08, 1e-12), `${lab.id}/${viewport.name}: release-delay timing mismatch`);
+      assert(closeTo(reference.drag.projectile.landingTimeS, 2.312047531048469, 1e-9) && closeTo(reference.drag.dropped.landingTimeS, 2.227075806264813, 1e-9) && closeTo(reference.drag.impactTimeDifferenceS, .08497172478365611, 1e-9), `${lab.id}/${viewport.name}: quadratic-drag boundary mismatch`);
+      const canvas = page.locator("#comparisonCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.projectileDropComparisonLab.getState().progress);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .45, box.y + box.height * .75);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .45, box.y + box.height * .15);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.projectileDropComparisonLab.getState().progress);
+      assert(Math.abs(after - before) > .3, `${lab.id}/${viewport.name}: direct experiment-progress drag did not update state`);
+    }
+
     if (lab.id === "projectile") {
       const reference = await page.evaluate(() => window.projectileLab.calculate({ speed: 20, angle: 45, gravity: 10 }));
       assert(closeTo(reference.range, 40, 1e-9), `${lab.id}/${viewport.name}: projectile-range reference mismatch`);
@@ -286,6 +462,29 @@ async function verifyLab(browser, lab, viewport) {
       await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5);
       await page.mouse.up();
       assert((await page.evaluate(() => window.orbitalLab.getState().progress)) > 0.7, `${lab.id}/${viewport.name}: direct orbit drag did not update state`);
+    }
+
+    if (lab.id === "work-energy-process") {
+      const reference = await page.evaluate(() => ({
+        constant: window.workEnergyProcessLab.constantProcess({ massKg: 2, initialSpeedMs: 3, distanceM: 6, appliedForceN: 10, forceAngleDeg: 0, frictionForceN: 3 }),
+        variable: window.workEnergyProcessLab.variableProcess({ massKg: 2, initialSpeedMs: 3, distanceM: 6, variableStartN: 4, variableSlopeNpm: 1.5, frictionForceN: 3 }),
+        incline: window.workEnergyProcessLab.inclineProcess({ massKg: 2, initialSpeedMs: 3, distanceM: 4, appliedForceN: 20, inclineAngleDeg: 30, frictionCoefficient: .2, gravityMs2: 9.8 }),
+        braking: window.workEnergyProcessLab.brakingProcess({ massKg: 2, initialSpeedMs: 8, distanceM: 20, brakeForceN: 5 }),
+      }));
+      assert(closeTo(reference.constant.netWorkJ, 42, 1e-12) && closeTo(reference.constant.finalKineticJ, 51, 1e-12) && closeTo(reference.constant.finalSpeedMs, 7.14142842854285, 1e-12), `${lab.id}/${viewport.name}: constant-force work-energy mismatch`);
+      assert(closeTo(reference.variable.netWorkJ, 33, 1e-12) && closeTo(reference.variable.finalKineticJ, 42, 1e-12) && closeTo(reference.variable.integrationResidualJ, 0, 1e-10), `${lab.id}/${viewport.name}: variable-force area mismatch`);
+      assert(closeTo(reference.incline.netWorkJ, 27.220721668660005, 1e-12) && closeTo(reference.incline.theoremResidualJ, 0, 1e-12), `${lab.id}/${viewport.name}: incline work ledger mismatch`);
+      assert(!reference.braking.reachedTarget && closeTo(reference.braking.stopDistanceM, 12.8, 1e-12) && closeTo(reference.braking.finalKineticJ, 0, 1e-12), `${lab.id}/${viewport.name}: braking stop boundary mismatch`);
+      const canvas = page.locator("#workCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.workEnergyProcessLab.getState().progress);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .25, box.y + box.height * .6);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .94, box.y + box.height * .6);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.workEnergyProcessLab.getState().progress);
+      assert(Math.abs(after - before) > .25, `${lab.id}/${viewport.name}: direct displacement drag did not update state`);
     }
 
     if (lab.id === "work-propulsion") {
@@ -468,6 +667,18 @@ async function verifyLab(browser, lab, viewport) {
       assert((await page.evaluate(() => window.massSpectrometerLab.getState().speed1e5)) > 3.5, `${lab.id}/${viewport.name}: direct speed drag did not update state`);
     }
 
+    if (lab.id === "cyclotron") {
+      const reference = await page.evaluate(() => ({
+        proton: window.cyclotronLab.solve({ fieldT: 1.2, gapVoltageKv: 30, deeRadiusM: .5, massU: 1.007276, chargeE: 1, initialEnergyKev: 1, crossing: 100 }),
+        highVoltage: window.cyclotronLab.solve({ fieldT: 1.2, gapVoltageKv: 60, deeRadiusM: .5, massU: 1.007276, chargeE: 1, initialEnergyKev: 1, crossing: 0 }),
+        slip: window.cyclotronLab.sequence({ fieldT: 2.5, gapVoltageKv: 100, deeRadiusM: 1, massU: 1.007276, chargeE: 1, initialEnergyKev: 1, rfRatio: 1 }, 100).at(-1)
+      }));
+      assert(closeTo(reference.proton.cyclotronFrequencyHz, 18294232.22464719, 1e-6) && closeTo(reference.proton.maxEnergyMev, 17.24190766800518, 1e-9), `${lab.id}/${viewport.name}: proton frequency or edge energy mismatch`);
+      assert(reference.proton.crossingsToEdge === 575 && reference.highVoltage.crossingsToEdge === 288, `${lab.id}/${viewport.name}: crossing count should scale inversely with gap voltage`);
+      assert(closeTo(reference.proton.radiusResidualM, 0, 1e-15) && reference.slip.phaseErrorRad > 1.4 && reference.slip.gainFactor < .1, `${lab.id}/${viewport.name}: radius ledger or relativistic phase-slip boundary mismatch`);
+      const canvas = page.locator("#cyclotronCanvas"); await canvas.scrollIntoViewIfNeeded(); const before = await page.evaluate(() => window.cyclotronLab.getState().crossing); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .2, box.y + box.height * .2); await page.mouse.down(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .2); await page.mouse.up(); const after = await page.evaluate(() => window.cyclotronLab.getState().crossing); assert(after > before + 100, `${lab.id}/${viewport.name}: direct crossing drag did not update state`);
+    }
+
     if (lab.id === "electromagnetic-induction") {
       const reference = await page.evaluate(() => ({
         closed: window.inductionLab.sampleAt(1, { mode: "rate", field: .08, motion: 1, turns: 100, area: 100, resistance: 10, circuit: "closed" }),
@@ -475,6 +686,54 @@ async function verifyLab(browser, lab, viewport) {
       }));
       assert(closeTo(reference.closed.emf, -.08, 1e-12) && closeTo(reference.closed.current, -.008, 1e-12), `${lab.id}/${viewport.name}: Faraday reference mismatch`);
       assert(closeTo(reference.open.emf, -.08, 1e-12) && closeTo(reference.open.current, 0, 1e-15), `${lab.id}/${viewport.name}: open-circuit boundary mismatch`);
+    }
+
+    if (lab.id === "rail-rod") {
+      const reference = await page.evaluate(() => ({
+        force: window.railRodLab.solve({ mode: "force", massKg: .5, lengthM: .5, fieldT: .8, resistanceOhm: .8, forceN: 1.2, timeS: 2.5 }),
+        coast: window.railRodLab.solve({ mode: "coast", massKg: .5, lengthM: .5, fieldT: .8, resistanceOhm: .8, initialSpeedMs: 6, timeS: 2.5 }),
+        capacitor: window.railRodLab.solve({ mode: "circuit", circuitKind: "capacitor", massKg: .5, lengthM: .5, fieldT: .8, forceN: 1.2, capacitanceF: 2, timeS: 2.5 }),
+        source: window.railRodLab.solve({ mode: "circuit", circuitKind: "source", massKg: .5, lengthM: .5, fieldT: .8, resistanceOhm: .8, sourceVoltageV: 3, timeS: 2.5 })
+      }));
+      assert(closeTo(reference.force.tauS, 2.5, 1e-12) && closeTo(reference.force.terminalSpeedMs, 6, 1e-12), `${lab.id}/${viewport.name}: force-start response mismatch`);
+      assert(closeTo(reference.coast.speedMs, 6 / Math.E, 1e-12) && closeTo(reference.capacitor.electromagneticMassKg, .32, 1e-12), `${lab.id}/${viewport.name}: coast or capacitor reference mismatch`);
+      assert(closeTo(reference.source.terminalSpeedMs, 7.5, 1e-12), `${lab.id}/${viewport.name}: source back-emf terminal speed mismatch`);
+      for (const value of Object.values(reference)) assert(closeTo(value.energyResidualJ, 0, 1e-12) && closeTo(value.forceResidualN, 0, 1e-12), `${lab.id}/${viewport.name}: rail force or energy ledger mismatch`);
+      const canvas = page.locator("#railCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.railRodLab.getState().timeS);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .2, box.y + box.height * .25); await page.mouse.down(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .25); await page.mouse.up();
+      const after = await page.evaluate(() => window.railRodLab.getState().timeS);
+      assert(after > before + 4, `${lab.id}/${viewport.name}: direct time drag did not update state`);
+    }
+
+    if (lab.id === "double-rail") {
+      const reference = await page.evaluate(() => ({
+        equal: window.doubleRailLab.solve({ mode: "equal", mass1Kg: .5, mass2Kg: .5, lengthM: .5, fieldT: .8, resistanceOhm: .8, initialV1Ms: 4, initialV2Ms: 0, initialGapM: 8, timeS: 1.25 }),
+        unequal: window.doubleRailLab.solve({ mode: "unequal", mass1Kg: .5, mass2Kg: 1.5, lengthM: .5, fieldT: .8, resistanceOhm: .8, initialV1Ms: 4, initialV2Ms: 0, initialGapM: 8, timeS: 3.75 }),
+        fixed: window.doubleRailLab.solve({ mode: "fixed", mass1Kg: .5, mass2Kg: .5, lengthM: .5, fieldT: .8, resistanceOhm: .8, initialV1Ms: 4, initialV2Ms: 0, initialGapM: 8, timeS: 2.5 })
+      }));
+      assert(closeTo(reference.equal.tauS, 1.25, 1e-12) && closeTo(reference.equal.commonVelocityMs, 2, 1e-12), `${lab.id}/${viewport.name}: equal-mass coupling mismatch`);
+      assert(closeTo(reference.equal.velocity1Ms, 2 + 2 / Math.E, 1e-12) && closeTo(reference.equal.velocity2Ms, 2 - 2 / Math.E, 1e-12), `${lab.id}/${viewport.name}: equal-mass velocity response mismatch`);
+      assert(closeTo(reference.unequal.commonVelocityMs, 1, 1e-12) && closeTo(reference.fixed.tauS, 2.5, 1e-12), `${lab.id}/${viewport.name}: unequal or fixed boundary mismatch`);
+      for (const value of Object.values(reference)) assert(closeTo(value.energyResidualJ, 0, 1e-12) && closeTo(value.momentumResidualKgmS, 0, 1e-12), `${lab.id}/${viewport.name}: double-rail ledger mismatch`);
+      const canvas = page.locator("#doubleRailCanvas"); await canvas.scrollIntoViewIfNeeded(); const before = await page.evaluate(() => window.doubleRailLab.getState().timeS); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .2, box.y + box.height * .25); await page.mouse.down(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .25); await page.mouse.up(); const after = await page.evaluate(() => window.doubleRailLab.getState().timeS); assert(after > before + 3, `${lab.id}/${viewport.name}: direct time drag did not update state`);
+    }
+
+    if (lab.id === "three-field") {
+      const reference = await page.evaluate(() => ({
+        straight: window.threeFieldLab.stateAt(5, { massPg: 1, chargeFc: 1, electricVm: 19.6, magneticT: 1, initialVxMs: 9.8, initialVyMs: 0 }),
+        circle: window.threeFieldLab.stateAt(Math.PI / 2, { massPg: 1, chargeFc: 1, electricVm: 9.8, magneticT: 1, initialVxMs: 2, initialVyMs: 0 }),
+        projectile: window.threeFieldLab.stateAt(.5, { massPg: 1, chargeFc: 1, electricVm: 0, magneticT: 0, initialVxMs: 3, initialVyMs: 0, initialYM: 2 }),
+        cycloid: window.threeFieldLab.stateAt(Math.PI, { massPg: 1, chargeFc: 1, electricVm: 19.6, magneticT: 1, initialVxMs: 0, initialVyMs: 0 })
+      }));
+      assert(closeTo(reference.straight.xM, 49, 1e-12) && closeTo(reference.straight.yM, 0, 1e-12) && closeTo(reference.straight.netForceYN, 0, 1e-27), `${lab.id}/${viewport.name}: straight three-force balance mismatch`);
+      assert(closeTo(reference.circle.xM, 2, 1e-12) && closeTo(reference.circle.yM, -2, 1e-12) && closeTo(reference.circle.speedMs, 2, 1e-12), `${lab.id}/${viewport.name}: gravity-electric balanced circle mismatch`);
+      assert(closeTo(reference.projectile.xM, 1.5, 1e-12) && closeTo(reference.projectile.yM, .775, 1e-12) && closeTo(reference.projectile.vyMs, -4.9, 1e-12), `${lab.id}/${viewport.name}: B=0 projectile boundary mismatch`);
+      assert(closeTo(reference.cycloid.xM, 9.8 * Math.PI, 1e-12) && closeTo(reference.cycloid.yM, 19.6, 1e-12), `${lab.id}/${viewport.name}: cycloid drift mismatch`);
+      for (const value of Object.values(reference)) assert(closeTo(value.energyResidualJ, 0, 1e-26) && closeTo(value.magneticPowerW, 0, 1e-26), `${lab.id}/${viewport.name}: three-field work-energy ledger mismatch`);
+      const canvas = page.locator("#trajectoryCanvas"); await canvas.scrollIntoViewIfNeeded(); const before = await page.evaluate(() => window.threeFieldLab.getState().timeS); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .2, box.y + box.height * .2); await page.mouse.down(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .2); await page.mouse.up(); const after = await page.evaluate(() => window.threeFieldLab.getState().timeS); assert(after > before + 4, `${lab.id}/${viewport.name}: direct time drag did not update state`);
     }
 
     if (lab.id === "alternating-current") {
@@ -519,6 +778,174 @@ async function verifyLab(browser, lab, viewport) {
       assert(Math.abs(afterDrag - beforeDrag) > .5, `${lab.id}/${viewport.name}: direct cart-velocity drag did not update state`);
     }
 
+    if (lab.id === "locomotive") {
+      const reference = await page.evaluate(() => ({
+        force: window.locomotiveLab.solveForce(5, { mass: 1000, resistance: 2000, maxTraction: 6000, power: 120000, initialSpeed: 0 }),
+        switchPoint: window.locomotiveLab.solvePower(5, { mass: 1000, resistance: 2000, maxTraction: 6000, power: 120000, initialSpeed: 0 }),
+        power: window.locomotiveLab.solvePower(10, { mass: 1000, resistance: 2000, maxTraction: 6000, power: 120000, initialSpeed: 0 })
+      }));
+      assert(closeTo(reference.force.acceleration, 4, 1e-12) && closeTo(reference.force.velocity, 20, 1e-12), `${lab.id}/${viewport.name}: constant-force reference mismatch`);
+      assert(closeTo(reference.switchPoint.switchSpeed, 20, 1e-12) && closeTo(reference.switchPoint.switchTime, 5, 1e-12) && closeTo(reference.switchPoint.position, 50, 1e-12), `${lab.id}/${viewport.name}: power transition mismatch`);
+      assert(closeTo(reference.power.velocity, 32.515555, 1e-5) && closeTo(reference.power.terminalSpeed, 60, 1e-12) && closeTo(reference.power.energyResidual, 0, 1e-8), `${lab.id}/${viewport.name}: constant-power reference mismatch`);
+      const canvas = page.locator("#locomotiveCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.locomotiveLab.getState().time);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .18, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .74, box.y + box.height * .5);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.locomotiveLab.getState().time);
+      assert(afterDrag > beforeDrag + 10, `${lab.id}/${viewport.name}: direct timeline drag did not update state`);
+    }
+
+    if (lab.id === "oscilloscope") {
+      const reference = await page.evaluate(() => ({
+        beam: window.oscilloscopeLab.solve(0, { acceleratingVoltage: 500, verticalVoltage: 40 }),
+        trace: window.oscilloscopeLab.solve(.125, { mode: "xy", horizontalVoltage: 60, verticalVoltage: 60, frequency: 2, phaseDeg: 90 })
+      }));
+      assert(closeTo(reference.beam.kineticEnergyEv, 500, 1e-12) && closeTo(reference.beam.screenY, .008, 1e-12), `${lab.id}/${viewport.name}: electron-beam reference mismatch`);
+      assert(closeTo(reference.trace.signalX, 60, 1e-9) && closeTo(reference.trace.signalY, 0, 1e-8) && closeTo(reference.trace.voltageResidual, 0, 1e-12), `${lab.id}/${viewport.name}: XY signal reference mismatch`);
+      const canvas = page.locator("#oscilloscopeCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.oscilloscopeLab.getState().time);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .15, box.y + box.height * .2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .72, box.y + box.height * .2);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.oscilloscopeLab.getState().time);
+      assert(afterDrag > beforeDrag + .5, `${lab.id}/${viewport.name}: direct timeline drag did not update state`);
+    }
+
+    if (lab.id === "electric-gravity") {
+      const reference = await page.evaluate(() => ({
+        balance: window.electricGravityLab.solve(2, { massNg: 1, chargeFc: .5, fieldKvM: 19.6, startHeight: 1.5, initialVx: 0, initialVy: 0 }),
+        fall: window.electricGravityLab.solve(.5, { massNg: 1, chargeFc: 0, fieldKvM: 0, startHeight: 2, initialVx: 3, initialVy: 0 }),
+        negative: window.electricGravityLab.solve(1, { massNg: 1, chargeFc: -.5, fieldKvM: -19.6, startHeight: 1.5, initialVx: 0, initialVy: 0 }),
+        inferred: window.electricGravityLab.infer({ massNg: 1, fieldKvM: 19.6 })
+      }));
+      assert(closeTo(reference.balance.accelerationY, 0, 1e-12) && closeTo(reference.balance.y, 1.5, 1e-12), `${lab.id}/${viewport.name}: suspension reference mismatch`);
+      assert(closeTo(reference.fall.x, 1.5, 1e-12) && closeTo(reference.fall.y, .775, 1e-12) && closeTo(reference.fall.velocityY, -4.9, 1e-12), `${lab.id}/${viewport.name}: field-off trajectory mismatch`);
+      assert(closeTo(reference.negative.accelerationY, 0, 1e-12) && closeTo(reference.inferred.chargeFc, .5, 1e-12), `${lab.id}/${viewport.name}: sign or inverse-charge reference mismatch`);
+      assert(closeTo(reference.balance.forceResidualN, 0, 1e-24) && closeTo(reference.fall.energyResidualJ, 0, 1e-24) && closeTo(reference.inferred.residualN, 0, 1e-24), `${lab.id}/${viewport.name}: force or energy ledger mismatch`);
+      const canvas = page.locator("#motionCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.electricGravityLab.getState().time);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .18, box.y + box.height * .2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .72, box.y + box.height * .2);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.electricGravityLab.getState().time);
+      assert(afterDrag > beforeDrag + 1, `${lab.id}/${viewport.name}: direct timeline drag did not update state`);
+    }
+
+    if (lab.id === "measurement-tools") {
+      const reference = await page.evaluate(() => ({
+        v10: window.measurementToolsLab.solveVernier({ jawMm: 12.36, divisions: 10 }),
+        v20: window.measurementToolsLab.solveVernier({ jawMm: 12.36, divisions: 20 }),
+        v50: window.measurementToolsLab.solveVernier({ jawMm: 12.36, divisions: 50 }),
+        micro: window.measurementToolsLab.solveMicrometer({ openingMm: 5.678 }),
+        zero: window.measurementToolsLab.solveVernier({ jawMm: 12.3, divisions: 10, zeroErrorMm: .2 })
+      }));
+      assert(closeTo(reference.v10.indicatedMm, 12.4, 1e-12) && reference.v10.coincidence === 4, `${lab.id}/${viewport.name}: 10-division vernier mismatch`);
+      assert(closeTo(reference.v20.indicatedMm, 12.35, 1e-12) && reference.v20.coincidence === 7, `${lab.id}/${viewport.name}: 20-division vernier mismatch`);
+      assert(closeTo(reference.v50.indicatedMm, 12.36, 1e-12) && reference.v50.coincidence === 18, `${lab.id}/${viewport.name}: 50-division vernier mismatch`);
+      assert(closeTo(reference.micro.indicatedMm, 5.68, 1e-12) && closeTo(reference.micro.sleeveMm, 5.5, 1e-12) && reference.micro.thimbleDivision === 18, `${lab.id}/${viewport.name}: micrometer reference mismatch`);
+      assert(closeTo(reference.zero.correctedMm, 12.3, 1e-12) && closeTo(reference.zero.reconstructionResidualMm, 0, 1e-12), `${lab.id}/${viewport.name}: zero-error correction mismatch`);
+      const canvas = page.locator("#toolCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.measurementToolsLab.getState().lengthMm);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .2, box.y + box.height * .2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .95, box.y + box.height * .2);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.measurementToolsLab.getState().lengthMm);
+      assert(Math.abs(afterDrag - beforeDrag) > 5, `${lab.id}/${viewport.name}: direct measuring-jaw drag did not update state`);
+    }
+
+    if (lab.id === "resistivity") {
+      const reference = await page.evaluate(() => ({
+        wire: window.resistivityLab.wire({ resistivity: 1.72e-8, lengthM: .8, diameterMm: .4 }),
+        external: window.resistivityLab.experiment({ resistivity: 1.72e-8, lengthM: .8, diameterMm: .4, connection: "external", voltmeterResistance: 1000 }),
+        internal: window.resistivityLab.measure({ resistivity: 1.72e-8, lengthM: .8, diameterMm: .4, connection: "internal", ammeterResistance: .2 })
+      }));
+      assert(closeTo(reference.wire.resistanceOhm, .109498600847224, 1e-12), `${lab.id}/${viewport.name}: wire resistance reference mismatch`);
+      assert(closeTo(reference.external.measuredOhm, .109486612216375, 1e-12) && closeTo(reference.external.rSquared, 1, 1e-12), `${lab.id}/${viewport.name}: external-connection or fit mismatch`);
+      assert(closeTo(reference.external.estimatedResistivity, 1.7198116830269884e-8, 1e-20), `${lab.id}/${viewport.name}: resistivity inverse mismatch`);
+      assert(closeTo(reference.internal.measuredOhm, .309498600847224, 1e-12) && reference.internal.relativeConnectionError > 1.8, `${lab.id}/${viewport.name}: internal-connection error mismatch`);
+      const canvas = page.locator("#apparatusCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.resistivityLab.getState().currentA);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .15, box.y + box.height * .2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .85, box.y + box.height * .2);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.resistivityLab.getState().currentA);
+      assert(Math.abs(afterDrag - beforeDrag) > .25, `${lab.id}/${viewport.name}: direct current drag did not update state`);
+    }
+
+    if (lab.id === "rc-circuit") {
+      const reference = await page.evaluate(() => ({
+        charge: window.rcCircuitLab.atTau({ mode: "charge", resistanceKOhm: 10, capacitanceUf: 100, emfV: 12, initialVoltageV: 0 }),
+        discharge: window.rcCircuitLab.atTau({ mode: "discharge", resistanceKOhm: 10, capacitanceUf: 100, initialVoltageV: 12 })
+      }));
+      assert(closeTo(reference.charge.tau, 1, 1e-12) && closeTo(reference.charge.voltageV, 7.585446705942694, 1e-12), `${lab.id}/${viewport.name}: charge-at-tau reference mismatch`);
+      assert(closeTo(reference.discharge.voltageV, 4.414553294057306, 1e-12) && closeTo(reference.discharge.currentMa, -.4414553294057306, 1e-12), `${lab.id}/${viewport.name}: discharge-at-tau reference mismatch`);
+      assert(closeTo(reference.charge.energyResidualJ, 0, 1e-15) && closeTo(reference.discharge.energyResidualJ, 0, 1e-15), `${lab.id}/${viewport.name}: RC energy ledger mismatch`);
+      assert(closeTo(reference.charge.areaChargeResidualC, 0, 1e-15) && closeTo(reference.discharge.areaChargeResidualC, 0, 1e-15), `${lab.id}/${viewport.name}: current-area charge ledger mismatch`);
+      const canvas = page.locator("#circuitCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.rcCircuitLab.getState().timeS);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .15, box.y + box.height * .2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .82, box.y + box.height * .2);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.rcCircuitLab.getState().timeS);
+      assert(afterDrag > beforeDrag + 2, `${lab.id}/${viewport.name}: direct transient-time drag did not update state`);
+    }
+
+    if (lab.id === "ampere-force") {
+      const reference = await page.evaluate(() => ({
+        maximum: window.ampereForceLab.solve({ currentA: 5, lengthM: .4, fieldT: .5, angleDeg: 90, massG: 20 }),
+        parallel: window.ampereForceLab.solve({ currentA: 5, lengthM: .4, fieldT: .5, angleDeg: 0 }),
+        reverse: window.ampereForceLab.solve({ currentA: 5, lengthM: .4, fieldT: .5, angleDeg: 90, currentSign: -1 }),
+        balance: window.ampereForceLab.solve({ currentA: .98, lengthM: .4, fieldT: .5, angleDeg: 90, massG: 20, currentSign: -1 })
+      }));
+      assert(closeTo(reference.maximum.forceN, 1, 1e-12) && closeTo(reference.maximum.signedForceN, -1, 1e-12), `${lab.id}/${viewport.name}: perpendicular-force reference mismatch`);
+      assert(closeTo(reference.parallel.forceN, 0, 1e-15) && !Number.isFinite(reference.parallel.balanceCurrentA), `${lab.id}/${viewport.name}: parallel zero-force boundary mismatch`);
+      assert(closeTo(reference.reverse.signedForceN, 1, 1e-12) && closeTo(reference.balance.netVerticalN, 0, 1e-12), `${lab.id}/${viewport.name}: reversal or balance reference mismatch`);
+      assert(closeTo(reference.maximum.crossResidualN, 0, 1e-15) && closeTo(reference.balance.balanceCurrentA, .98, 1e-12), `${lab.id}/${viewport.name}: Ampere vector ledger mismatch`);
+      const canvas = page.locator("#forceCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeDrag = await page.evaluate(() => window.ampereForceLab.getState().angleDeg);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .2, box.y + box.height * .2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .8, box.y + box.height * .2);
+      await page.mouse.up();
+      const afterDrag = await page.evaluate(() => window.ampereForceLab.getState().angleDeg);
+      assert(Math.abs(afterDrag - beforeDrag) > 40, `${lab.id}/${viewport.name}: direct angle drag did not update state`);
+    }
+
+    if (lab.id === "collision-2d") {
+      const reference = await page.evaluate(() => ({
+        head: window.collision2dLab.solve({ mass1Kg: 1, mass2Kg: 1, speed1Ms: 4, angle1Deg: 0, speed2Ms: 0, normalDeg: 0, restitution: 1 }),
+        oblique: window.collision2dLab.solve({ mass1Kg: 1, mass2Kg: 1, speed1Ms: 4, angle1Deg: 0, speed2Ms: 0, normalDeg: 45, restitution: 1 }),
+        inelastic: window.collision2dLab.solve({ mass1Kg: 2, mass2Kg: 3, speed1Ms: 5, angle1Deg: 20, speed2Ms: 2, angle2Deg: -30, normalDeg: 35, restitution: .4 }),
+        away: window.collision2dLab.solve({ mass1Kg: 1, mass2Kg: 1, speed1Ms: 1, angle1Deg: 180, speed2Ms: 0, normalDeg: 0, restitution: 1 })
+      }));
+      assert(closeTo(reference.head.v1.x, 0, 1e-12) && closeTo(reference.head.v2.x, 4, 1e-12), `${lab.id}/${viewport.name}: equal-mass head-on velocity exchange mismatch`);
+      assert(closeTo(reference.oblique.v1.x, 2, 1e-12) && closeTo(reference.oblique.v1.y, -2, 1e-12) && closeTo(reference.oblique.v2.x, 2, 1e-12) && closeTo(reference.oblique.v2.y, 2, 1e-12), `${lab.id}/${viewport.name}: elastic oblique collision mismatch`);
+      assert(!reference.away.collided && closeTo(reference.away.impulseNs, 0, 1e-15), `${lab.id}/${viewport.name}: separating boundary should have no impulse`);
+      for (const value of Object.values(reference)) assert(closeTo(value.momentumResidual.x, 0, 1e-12) && closeTo(value.momentumResidual.y, 0, 1e-12) && closeTo(value.energyLossResidualJ, 0, 1e-12) && closeTo(value.restitutionResidual, 0, 1e-12), `${lab.id}/${viewport.name}: 2D collision ledger mismatch`);
+      const canvas = page.locator("#collision2dCanvas"); await canvas.scrollIntoViewIfNeeded(); const before = await page.evaluate(() => window.collision2dLab.getState().normalDeg); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .25, box.y + box.height * .25); await page.mouse.down(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .8); await page.mouse.up(); const after = await page.evaluate(() => window.collision2dLab.getState().normalDeg); assert(Math.abs(after - before) > 15, `${lab.id}/${viewport.name}: direct contact-normal drag did not update state`);
+    }
+
     if (lab.id === "oscillation") {
       const reference = await page.evaluate(() => ({
         endpoint: window.oscillationLab.calculate({ mass: 1, spring: 4, amplitude: 2, phase: 0, time: 0 }),
@@ -537,6 +964,31 @@ async function verifyLab(browser, lab, viewport) {
       await page.mouse.up();
       const afterDrag = await page.evaluate(() => window.oscillationLab.getState().time);
       assert(Math.abs(afterDrag - beforeDrag) > .02, `${lab.id}/${viewport.name}: direct phase drag did not update state`);
+    }
+
+    if (lab.id === "pendulum") {
+      const reference = await page.evaluate(() => {
+        const base = { lengthM: 1, gravity: 9.8, massKg: 1, dampingS: 0 };
+        const small = window.pendulumLab.periods({ ...base, amplitudeDeg: 5 });
+        const large = window.pendulumLab.periods({ ...base, amplitudeDeg: 60 });
+        const quarter = window.pendulumLab.stateAt(small.exactPeriodS / 4, { ...base, amplitudeDeg: 5 });
+        const damped = window.pendulumLab.stateAt(8, { ...base, amplitudeDeg: 30, dampingS: .12 });
+        return { small, large, quarter, damped };
+      });
+      assert(closeTo(reference.small.smallAnglePeriodS, 2.007089923154493, 1e-12) && closeTo(reference.small.exactPeriodS, 2.008045644, 1e-9), `${lab.id}/${viewport.name}: small-angle period reference mismatch`);
+      assert(closeTo(reference.large.exactPeriodS, 2.1539727922602023, 1e-12) && closeTo(reference.large.periodErrorPercent, 7.3182, 1e-4), `${lab.id}/${viewport.name}: large-angle correction mismatch`);
+      assert(Math.abs(reference.quarter.thetaRad) < 2e-6 && Math.abs(reference.quarter.energyResidualJ) < 1e-10, `${lab.id}/${viewport.name}: undamped quarter-period or energy mismatch`);
+      assert(reference.damped.dissipatedJ > 0 && Math.abs(reference.damped.energyResidualJ) < 2e-8, `${lab.id}/${viewport.name}: damped energy ledger mismatch`);
+      const canvas = page.locator("#pendulumCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.pendulumLab.getState().amplitudeDeg);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .45);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .65, box.y + box.height * .1);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.pendulumLab.getState().amplitudeDeg);
+      assert(Math.abs(after - before) > 20, `${lab.id}/${viewport.name}: direct bob drag did not update amplitude`);
     }
 
     if (lab.id === "resonance") {
@@ -578,6 +1030,26 @@ async function verifyLab(browser, lab, viewport) {
       await page.mouse.up();
       const afterDrag = await page.evaluate(() => window.wavesLab.getState().probe);
       assert(Math.abs(afterDrag - beforeDrag) > 2, `${lab.id}/${viewport.name}: direct probe drag did not update state`);
+    }
+
+    if (lab.id === "wave-interference") {
+      const reference = await page.evaluate(() => {
+        const base = { amplitude: 1, wavelengthM: 2, frequency1Hz: 1, frequency2Hz: 1, separationM: 4, sourcePhaseDeg: 0, probeXM: 0, probeYM: 4, timeS: .37, averagingTimeS: 1, attenuation: false };
+        return { inphase: window.waveInterferenceLab.probe(base), antiphase: window.waveInterferenceLab.probe({ ...base, sourcePhaseDeg: 180 }), incoherent: window.waveInterferenceLab.probe({ ...base, frequency2Hz: 2, averagingTimeS: 1 }) };
+      });
+      assert(closeTo(reference.inphase.pathDifferenceM, 0, 1e-12) && closeTo(reference.inphase.coherentIntensity, 4, 1e-12), `${lab.id}/${viewport.name}: in-phase bisector reference mismatch`);
+      assert(closeTo(reference.antiphase.coherentIntensity, 0, 1e-12) && Math.abs(reference.antiphase.displacement) < 1e-12, `${lab.id}/${viewport.name}: anti-phase cancellation mismatch`);
+      assert(Math.abs(reference.incoherent.coherence) < 1e-12 && closeTo(reference.incoherent.averagedIntensity, 2, 1e-12), `${lab.id}/${viewport.name}: finite-time coherence mismatch`);
+      const canvas = page.locator("#waveFieldCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.waveInterferenceLab.getState());
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .75, box.y + box.height * .1);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.waveInterferenceLab.getState());
+      assert(Math.abs(after.probeXM - before.probeXM) > 2 && Math.abs(after.probeYM - before.probeYM) > 2, `${lab.id}/${viewport.name}: direct 2D probe drag did not update coordinates`);
     }
 
     if (lab.id === "lens") {
@@ -676,6 +1148,40 @@ async function verifyLab(browser, lab, viewport) {
       const canvas = page.locator("#photoCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .5); await page.mouse.down(); await page.mouse.up(); assert((await page.evaluate(() => window.photoelectricLab.getState().wavelengthNm)) > 600, `${lab.id}/${viewport.name}: wavelength drag did not update state`);
     }
 
+    if (lab.id === "rutherford") {
+      const reference = await page.evaluate(() => {
+        const input = { projectileCharge: 2, targetZ: 79, energyMeV: 5, impactFm: 50, maxImpactFm: 200, atomRadiusFm: 50000, seed: 17 };
+        const scattering = window.rutherfordLab.scatter(input);
+        const cross90 = window.rutherfordLab.differentialCrossSection(90, input);
+        const thomson = window.rutherfordLab.thomsonAngle(input);
+        const expected = window.rutherfordLab.expectedFractionAbove(90, input);
+        const events = window.rutherfordLab.eventAngles(input, 20000);
+        const measured = events.filter((event) => event.angleDeg > 90).length / events.length;
+        const trajectory = window.rutherfordLab.trajectory(input);
+        const closest = trajectory.reduce((best, point) => point.radiusFm < best.radiusFm ? point : best);
+        const last = trajectory.at(-1);
+        const previous = trajectory.at(-2);
+        const outgoingDeg = Math.abs(Math.atan2(last.yFm - previous.yFm, last.xFm - previous.xFm)) * 180 / Math.PI;
+        return { scattering, cross90, thomson, expected, measured, closest, outgoingDeg };
+      });
+      assert(closeTo(reference.scattering.angleDeg, 48.93380207382619, 1e-10), `${lab.id}/${viewport.name}: Coulomb scattering angle mismatch`);
+      assert(closeTo(reference.scattering.closestFm, 77.68437941839622, 1e-10) && closeTo(reference.scattering.headOnClosestFm, 45.502877568, 1e-10) && closeTo(reference.scattering.b90Fm, 22.751438784, 1e-10), `${lab.id}/${viewport.name}: closest-approach reference mismatch`);
+      assert(closeTo(reference.cross90.fm2PerSr, 517.6279667420997, 1e-9), `${lab.id}/${viewport.name}: Rutherford cross-section mismatch`);
+      assert(closeTo(reference.expected, .012940699168552491, 1e-12) && Math.abs(reference.measured - reference.expected) < .002, `${lab.id}/${viewport.name}: angular statistics mismatch`);
+      assert(reference.thomson.angleDeg < .001, `${lab.id}/${viewport.name}: Thomson comparison should not produce large-angle scattering`);
+      assert(Math.abs(reference.closest.radiusFm - reference.scattering.closestFm) < .001 && Math.abs(reference.outgoingDeg - reference.scattering.angleDeg) < .1, `${lab.id}/${viewport.name}: analytic hyperbola trajectory mismatch`);
+      const canvas = page.locator("#scatterCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.rutherfordLab.getState().impactFm);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .1);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.rutherfordLab.getState().impactFm);
+      assert(Math.abs(after - before) > 100, `${lab.id}/${viewport.name}: direct impact-parameter drag did not update state`);
+    }
+
     if (lab.id === "bohr") {
       const reference = await page.evaluate(() => ({ halpha: window.bohrLab.solve({ mode: "emission", initial: 3, final: 2 }), absorption: window.bohrLab.solve({ mode: "absorption", initial: 2, probeNm: 656.112 }) }));
       assert(closeTo(reference.halpha.wavelengthNm, 656.1, .5) && reference.halpha.type === "emission" && closeTo(reference.halpha.energyResidualEv, 0, 1e-12), `${lab.id}/${viewport.name}: H-alpha reference mismatch`);
@@ -718,6 +1224,55 @@ async function verifyLab(browser, lab, viewport) {
         wavelength: 600, slit: 0.3, slitWidth: 0.06, screen: 1.2, cursorRatio: 0
       }));
       assert(closeTo(reference.betaMm, 2.4, 0.001), `${lab.id}/${viewport.name}: fringe spacing reference mismatch`);
+    }
+
+    if (lab.id === "single-slit") {
+      const reference = await page.evaluate(() => {
+        const input = { wavelengthNm: 600, slitWidthMm: .06, screenDistanceM: 1.2, probeMm: 0 };
+        const base = window.singleSlitLab.derived(input);
+        const first = window.singleSlitLab.intensityAt(base.firstMinimumMm, input);
+        const narrow = window.singleSlitLab.derived({ ...input, slitWidthMm: .03 });
+        const phasor = window.singleSlitLab.phasors({ ...input, probeMm: base.firstMinimumMm });
+        return { base, first, narrow, phasor };
+      });
+      assert(closeTo(reference.base.firstMinimumMm, 12.00060004500375, 1e-10) && closeTo(reference.base.centralWidthMm, 24.0012000900075, 1e-10), `${lab.id}/${viewport.name}: central-width reference mismatch`);
+      assert(Math.abs(reference.first.intensity) < 1e-28 && closeTo(reference.first.pathEdgeWaves, 1, 1e-12), `${lab.id}/${viewport.name}: first-minimum condition mismatch`);
+      assert(closeTo(reference.narrow.approximateCentralWidthMm, 2 * reference.base.approximateCentralWidthMm, 1e-12), `${lab.id}/${viewport.name}: aperture-width inverse relation mismatch`);
+      assert(reference.phasor.resultant.magnitude < 1e-12, `${lab.id}/${viewport.name}: Huygens phasor closure mismatch`);
+      const canvas = page.locator("#singleSlitCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.singleSlitLab.getState().probeMm);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .55, box.y + box.height * .5);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .55, box.y + box.height * .25);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.singleSlitLab.getState().probeMm);
+      assert(Math.abs(after - before) > 5, `${lab.id}/${viewport.name}: direct screen-probe drag did not update position`);
+    }
+
+    if (lab.id === "thin-film") {
+      const reference = await page.evaluate(() => {
+        const soap = { wavelengthNm: 600, thicknessNm: 600 / (4 * 1.33), incidentIndex: 1, filmIndex: 1.33, substrateIndex: 1, incidenceDeg: 0 };
+        const q = window.thinFilmLab.idealQuarterWave(550, 1.5);
+        const coating = { wavelengthNm: 550, thicknessNm: q.thicknessNm, incidentIndex: 1, filmIndex: q.filmIndex, substrateIndex: 1.5, incidenceDeg: 0 };
+        const wedge = { wavelengthNm: 550, thicknessNm: 0, incidentIndex: 1.5, filmIndex: 1, substrateIndex: 1.5, incidenceDeg: 0, wedgeSlopeUrad: 100, positionMm: 0 };
+        return { soap: window.thinFilmLab.derived(soap), zero: window.thinFilmLab.derived({ ...soap, thicknessNm: 0 }), coating: window.thinFilmLab.derived(coating), q, wedge: window.thinFilmLab.derived(wedge) };
+      });
+      assert(closeTo(reference.soap.reflectance, .07711257030552099, 1e-14) && reference.soap.topPhaseFlip && !reference.soap.bottomPhaseFlip, `${lab.id}/${viewport.name}: soap-film quarter-wave reference mismatch`);
+      assert(reference.zero.reflectance < 1e-28, `${lab.id}/${viewport.name}: zero-thickness equivalent-interface mismatch`);
+      assert(closeTo(reference.q.filmIndex, Math.sqrt(1.5), 1e-14) && closeTo(reference.q.thicknessNm, 112.26827987756234, 1e-12) && reference.coating.reflectance < 1e-28, `${lab.id}/${viewport.name}: anti-reflection coating mismatch`);
+      assert(reference.wedge.localReflectance < 1e-28 && closeTo(reference.wedge.wedgeSpacingMm, 2.75, 1e-12) && !reference.wedge.topPhaseFlip && reference.wedge.bottomPhaseFlip, `${lab.id}/${viewport.name}: air-wedge contact or spacing mismatch`);
+      const canvas = page.locator("#filmCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const before = await page.evaluate(() => window.thinFilmLab.getState().thicknessNm);
+      const box = await canvas.boundingBox();
+      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .25);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .75);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.thinFilmLab.getState().thicknessNm);
+      assert(Math.abs(after - before) > 300, `${lab.id}/${viewport.name}: direct film-thickness drag did not update state`);
     }
 
     const savedValue = await page.locator(lab.perturb[0]).evaluate((element) => element.value);

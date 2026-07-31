@@ -1,0 +1,120 @@
+.hooke-measurement-lab {
+  --hooke-cyan: #64c7d9;
+  --hooke-amber: #f0b951;
+  --hooke-violet: #b58ce5;
+}
+
+.hooke-measurement-lab .stage {
+  grid-template-rows: auto minmax(280px, 1fr) minmax(180px, .54fr) auto;
+}
+
+.hooke-measurement-lab .instrument-stage {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  background: #070b0c;
+}
+
+.hooke-measurement-lab canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #070b0c;
+}
+
+.hooke-measurement-lab #springCanvas {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: calc(100% - 220px);
+  height: 100%;
+  min-height: 0;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.hooke-measurement-lab .live-readouts {
+  position: relative;
+  grid-column: 2;
+}
+
+.hooke-measurement-lab .state-badge {
+  color: var(--hooke-cyan);
+  border-color: rgba(100, 199, 217, .45);
+  background: rgba(100, 199, 217, .07);
+}
+
+.hooke-measurement-lab .state-badge.is-over {
+  color: #ff786e;
+  border-color: rgba(255, 120, 110, .5);
+  background: rgba(255, 120, 110, .08);
+}
+
+.hooke-measurement-lab .rail-equation strong,
+.hooke-measurement-lab .formula-state strong {
+  color: var(--hooke-amber);
+}
+
+.hooke-measurement-lab .live-readouts dd {
+  font-size: 14px;
+}
+
+.hooke-measurement-lab .mobile-scene-tabs {
+  display: none;
+}
+
+@media (max-width: 1120px) {
+  .hooke-measurement-lab .mobile-scene-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: -10px -10px 10px;
+    border-bottom: 1px solid var(--lab-line);
+    background: #121513;
+  }
+
+  .hooke-measurement-lab .mobile-scene-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 46px;
+    padding: 7px 3px;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .hooke-measurement-lab .mobile-scene-tab.is-active {
+    border-bottom-color: var(--hooke-amber);
+  }
+
+  .hooke-measurement-lab .mobile-scene-tab > span {
+    grid-row: auto;
+    padding: 0;
+  }
+
+  .hooke-measurement-lab .mobile-scene-tab strong {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .hooke-measurement-lab .instrument-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .hooke-measurement-lab #springCanvas {
+    position: static;
+    inset: auto;
+    width: 100%;
+    height: 340px;
+    min-height: 340px;
+    aspect-ratio: 1.12;
+  }
+
+  .hooke-measurement-lab .live-readouts {
+    grid-column: auto;
+  }
+
+  .hooke-measurement-lab .analysis-grid {
+    min-height: 350px;
+  }
+}

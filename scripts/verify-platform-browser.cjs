@@ -135,7 +135,7 @@ async function verifyPage(page, lesson, viewport) {
 }
 
 (async () => {
-  assert(lessons.length === 41, `expected 41 lessons, found ${lessons.length}`);
+  assert(lessons.length === 65, `expected 65 lessons, found ${lessons.length}`);
   const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   let failed = false;
   const adaptedLessons = new Set();

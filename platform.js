@@ -2,40 +2,64 @@
   const lessons = [
     "motion-graphs.html",
     "pursuit.html",
-    "elevator.html",
     "vertical-motion.html",
+    "free-fall-measurement.html",
     "friction.html",
     "newton-laws.html",
     "interaction.html",
+    "hooke-measurement.html",
+    "force-composition.html",
+    "elevator.html",
+    "conveyor.html",
+    "motion-composition.html",
+    "projectile-drop-comparison.html",
     "projectile.html",
     "circular.html",
     "circular-critical.html",
     "orbital.html",
+    "work-energy-process.html",
     "work-propulsion.html",
     "mechanical-energy.html",
+    "locomotive.html",
     "electric-field.html",
     "electrostatic-conductor.html",
     "capacitor.html",
+    "oscilloscope.html",
+    "electric-gravity.html",
+    "measurement-tools.html",
+    "resistivity.html",
     "ohm-law.html",
     "circuit-applications.html",
     "power-source.html",
+    "rc-circuit.html",
     "magnetic-field.html",
+    "ampere-force.html",
     "charged-particle.html",
-    "mass-spectrometer.html",
     "electromagnetic-induction.html",
+    "rail-rod.html",
+    "double-rail.html",
     "alternating-current.html",
+    "mass-spectrometer.html",
+    "cyclotron.html",
+    "three-field.html",
     "electromagnetic-oscillation.html",
     "collision.html",
+    "collision-2d.html",
     "oscillation.html",
+    "pendulum.html",
     "resonance.html",
     "waves.html",
+    "wave-interference.html",
     "refraction.html",
     "lens.html",
     "double-slit.html",
+    "single-slit.html",
+    "thin-film.html",
     "ideal-gas.html",
     "matter-phase.html",
     "thermodynamics.html",
     "photoelectric.html",
+    "rutherford.html",
     "bohr.html",
     "matter-wave.html",
     "radioactive-decay.html",
@@ -46,39 +70,63 @@
     "motion-graphs.html": "运动图像",
     "pursuit.html": "追及与相遇",
     "elevator.html": "电梯与视重",
+    "conveyor.html": "传送带模型",
+    "motion-composition.html": "运动的合成与分解",
+    "projectile-drop-comparison.html": "平抛与自由落体对照实验",
     "vertical-motion.html": "自由落体与竖直上抛",
+    "free-fall-measurement.html": "自由落体测重力",
     "friction.html": "摩擦力",
     "newton-laws.html": "牛顿运动定律",
     "interaction.html": "力与相互作用",
+    "hooke-measurement.html": "胡克定律测量弹簧劲度系数",
+    "force-composition.html": "力的合成与分解实验",
     "projectile.html": "抛体运动",
     "circular.html": "匀速圆周运动",
     "circular-critical.html": "圆周运动临界",
     "orbital.html": "卫星轨道与宇宙航行",
+    "work-energy-process.html": "动能定理与位移过程",
     "work-propulsion.html": "功率与推进",
     "mechanical-energy.html": "机械能守恒",
+    "locomotive.html": "机车启动",
     "electric-field.html": "电场强度与电势",
     "electrostatic-conductor.html": "静电平衡与感应",
     "capacitor.html": "电容器与电场能量",
+    "oscilloscope.html": "示波管原理",
+    "electric-gravity.html": "重力—电场复合运动",
+    "measurement-tools.html": "长度测量与量具读数",
+    "resistivity.html": "金属丝电阻率测量",
     "ohm-law.html": "欧姆定律",
     "circuit-applications.html": "电路应用与传感器",
     "power-source.html": "闭合电路与电源内阻",
+    "rc-circuit.html": "RC 电容器充放电",
+    "ampere-force.html": "安培力方向与大小",
     "magnetic-field.html": "电流的磁场",
     "charged-particle.html": "带电粒子与电磁场",
     "mass-spectrometer.html": "速度选择器与质谱仪",
     "electromagnetic-induction.html": "电磁感应与楞次定律",
+    "rail-rod.html": "单杆导轨模型",
+    "double-rail.html": "双杆导轨模型",
+    "cyclotron.html": "回旋加速器",
+    "three-field.html": "重力—电场—磁场复合运动",
+    "collision-2d.html": "二维碰撞与法向冲量",
     "alternating-current.html": "交变电流、变压与输电",
     "electromagnetic-oscillation.html": "LC 振荡与电磁波",
     "collision.html": "一维碰撞",
     "oscillation.html": "简谐运动",
+    "pendulum.html": "单摆周期与大角修正",
     "resonance.html": "受迫振动与共振",
     "waves.html": "机械波与驻波",
+    "wave-interference.html": "二维波干涉",
     "refraction.html": "折射与全反射",
     "lens.html": "透镜成像",
     "double-slit.html": "双缝干涉",
+    "single-slit.html": "单缝衍射",
+    "thin-film.html": "薄膜干涉",
     "ideal-gas.html": "理想气体",
     "matter-phase.html": "物态与热运动",
     "thermodynamics.html": "热力学与热机",
     "photoelectric.html": "光电效应",
+    "rutherford.html": "卢瑟福散射与原子核式结构",
     "bohr.html": "玻尔模型与原子能级",
     "matter-wave.html": "物质波与波粒二象性",
     "radioactive-decay.html": "放射性衰变与半衰期",
@@ -86,18 +134,18 @@
     "nuclear-reaction.html": "核裂变与核聚变",
   };
   const moduleLessonFiles = {
-    "kinematics": ["motion-graphs.html", "pursuit.html", "elevator.html", "vertical-motion.html"],
-    "forces": ["friction.html", "newton-laws.html", "interaction.html"],
-    "curved-motion": ["projectile.html", "circular.html", "circular-critical.html", "orbital.html"],
-    "energy": ["work-propulsion.html", "mechanical-energy.html"],
-    "electric-field": ["electric-field.html", "electrostatic-conductor.html", "capacitor.html"],
-    "current": ["ohm-law.html", "circuit-applications.html", "power-source.html"],
-    "magnetic-field": ["magnetic-field.html", "charged-particle.html", "mass-spectrometer.html", "electromagnetic-induction.html", "alternating-current.html", "electromagnetic-oscillation.html"],
-    "momentum": ["collision.html"],
-    "waves": ["oscillation.html", "resonance.html", "waves.html"],
-    "optics": ["refraction.html", "lens.html", "double-slit.html"],
+    "kinematics": ["motion-graphs.html", "pursuit.html", "vertical-motion.html", "free-fall-measurement.html"],
+    "forces": ["friction.html", "newton-laws.html", "interaction.html", "hooke-measurement.html", "force-composition.html", "elevator.html", "conveyor.html"],
+    "curved-motion": ["motion-composition.html", "projectile-drop-comparison.html", "projectile.html", "circular.html", "circular-critical.html", "orbital.html"],
+    "energy": ["work-energy-process.html", "work-propulsion.html", "mechanical-energy.html", "locomotive.html"],
+    "electric-field": ["electric-field.html", "electrostatic-conductor.html", "capacitor.html", "oscilloscope.html", "electric-gravity.html"],
+    "current": ["measurement-tools.html", "resistivity.html", "ohm-law.html", "circuit-applications.html", "power-source.html", "rc-circuit.html"],
+    "magnetic-field": ["magnetic-field.html", "ampere-force.html", "charged-particle.html", "electromagnetic-induction.html", "rail-rod.html", "double-rail.html", "alternating-current.html", "mass-spectrometer.html", "cyclotron.html", "three-field.html", "electromagnetic-oscillation.html"],
+    "momentum": ["collision.html", "collision-2d.html"],
+    "waves": ["oscillation.html", "pendulum.html", "resonance.html", "waves.html", "wave-interference.html"],
+    "optics": ["refraction.html", "lens.html", "double-slit.html", "single-slit.html", "thin-film.html"],
     "thermal": ["ideal-gas.html", "matter-phase.html", "thermodynamics.html"],
-    "modern-physics": ["photoelectric.html", "bohr.html", "matter-wave.html", "radioactive-decay.html", "binding-energy.html", "nuclear-reaction.html"],
+    "modern-physics": ["photoelectric.html", "rutherford.html", "bohr.html", "matter-wave.html", "radioactive-decay.html", "binding-energy.html", "nuclear-reaction.html"],
   };
   const lessonTasks = {
     "motion-graphs.html": [
@@ -115,10 +163,20 @@
       "把向下加速度调到 −g，观察支持力何时降为零并解释失重边界。",
       "在加速参考系中显示伪力，核对完整受力账本与牛顿第二定律。",
     ],
+    "conveyor.html": [
+      "比较物块与传送带的速度，用相对速度符号判断滑动摩擦方向。",
+      "分别运行从静止、反向和物块更快场景，定位共速时刻与摩擦换向。",
+      "进入倾斜传送带，核对静摩擦接管条件和相对滑移产生的热量。",
+    ],
     "vertical-motion.html": [
       "改变两个物体质量并同时释放，核对真空中高度、速度与落地时刻是否一致。",
       "暂停在最高点和返回原高度时刻，比较速度、加速度及同高度速率的对称关系。",
       "切换匀速参考系和空气阻力，区分坐标读数变化与真空模型适用边界。",
+    ],
+    "free-fall-measurement.html": [
+      "读取光电门的位移和累计时间，检查单位、零点与计时分辨率。",
+      "用等时间隔频闪数据计算多组二阶差，并与 s–t² 拟合结果交叉核对。",
+      "改变位置噪声和重复次数，区分标准差、标准误与仍未纳入模型的系统误差。",
     ],
     "friction.html": [
       "逐渐增大外力，记录物体仍然静止时 \\(f_{\\text{静}}\\) 的变化。",
@@ -134,6 +192,26 @@
       "改变两力夹角，用分量和余弦定理核对合力大小与方向。",
       "拖动弹簧跨过弹性限度，区分胡克定律的计算结果与模型适用性。",
       "分别比较第三定律力对和连接体整体/隔离受力图，说明研究对象为何决定力的账本。",
+    ],
+    "hooke-measurement.html": [
+      "先读取无砝码原长，再逐个加码并用总长之差得到每组伸长。",
+      "只选择弹性限度内数据拟合 F–x 直线，用斜率估计劲度系数。",
+      "加入超限点并完成卸载，比较有效拟合、全点盲拟合和永久伸长。",
+    ],
+    "force-composition.html": [
+      "拖动第二个力的端点，用平行四边形和分量账本交叉核对合力。",
+      "给定目标合力与两条方向，反求两个分力并检查绳张力是否可实现。",
+      "减小两方向夹角，比较条件数、测角误差范围与分力波动。",
+    ],
+    "motion-composition.html": [
+      "在红蜡块实验中分别读取管内速度、管速与地面系合速度。",
+      "改变船头逆流偏角，比较最快过河、零漂移和最短航迹的条件。",
+      "让水流速度超过船速，解释为什么正对岸到达不再有有限解。",
+    ],
+    "projectile-drop-comparison.html": [
+      "同步释放平抛球与自由落体球，用等时频闪核对每一帧的竖直坐标。",
+      "扫描水平初速度，比较射程曲线与保持不变的落地时间。",
+      "分别加入释放延迟和二次空气阻力，判断同时落地结论的实验边界。",
     ],
     "projectile.html": [
       "定位最高点，确认 \\(v_y = 0\\) 但速度并不为 0。",
@@ -155,10 +233,20 @@
       "进入同步轨道场景，说明周期等于恒星日为什么还不足以保证卫星相对地面静止。",
       "完成 400 km 到同步轨道的霍曼转移，再改变切向速度跨过撞地、椭圆与逃逸边界。",
     ],
+    "work-energy-process.html": [
+      "拖动物体改变过程末点，逐项核对外力功、摩擦功与动能变化。",
+      "在线性变力场景用 F–s 有向面积与解析积分交叉计算总功。",
+      "增大制动研究距离，定位动能降到零的停止点并拒绝负动能外推。",
+    ],
     "mechanical-energy.html": [
       "在自由下落场景定位能量平分时刻，核对动能与重力势能。",
       "进入粗糙斜面，比较机械能减少量和内能增加量。",
       "切换三种系统边界，分别写出物体、物体加地球、完整系统的能量方程。",
+    ],
+    "locomotive.html": [
+      "在相同质量和阻力下并排运行恒牵引力与恒功率方案，比较速度和位置。",
+      "定位 Fmax=P/v 的切换时刻，说明恒功率阶段牵引力为何随速度下降。",
+      "增大时间观察终端速度，并核对牵引功、阻力功和动能变化的账本。",
     ],
     "work-propulsion.html": [
       "把力与位移夹角依次调到 0°、90° 和大于 90°，核对功的正负与动能变化。",
@@ -179,6 +267,36 @@
       "保持接通电源并把板距加倍，核对 C、Q、E 和储能的变化比例。",
       "断开电源后重复板距变化，说明为什么 Q 和 E 不变而 U 与储能加倍。",
       "插入介质并检查电池功、外力功和电容器能量变化，最后定位空气击穿边界。",
+    ],
+    "oscilloscope.html": [
+      "先调加速电压，比较电子束的速度与屏上光点为何不直接由速度决定。",
+      "切换扫描与 XY 模式，观察偏转板输入如何成为时间波形或参数轨迹。",
+      "改变相位差，结合两张图说明荧光屏轨迹为什么能够反映两路信号关系。",
+    ],
+    "electric-gravity.html": [
+      "先改变电荷正负与电场方向，判断电场力方向并核对 qE−mg。",
+      "设置水平初速度，比较有场与关场轨迹的竖直加速度和落地时刻。",
+      "进入反演场景，只用质量与悬浮电场求未知电荷并检查残差。",
+    ],
+    "measurement-tools.html": [
+      "拖动游标卡尺，分别用 10、20、50 分度读取同一长度并比较最小分度。",
+      "切换螺旋测微器，按套筒整/半毫米与微分筒刻线分解读数。",
+      "加入正负零误差并完成随机题，核对修正结果与有效位数。",
+    ],
+    "resistivity.html": [
+      "在多个位置读取金属丝直径，比较直径误差为何以两倍比例进入截面积。",
+      "对同一小电阻切换电流表外接和内接，比较 Rv、Ra 造成的系统误差。",
+      "记录多组 U-I 数据，用拟合斜率求 R，再由 ρ=Rπd²/(4L) 反演材料电阻率。",
+    ],
+    "rc-circuit.html": [
+      "切换充电与放电，比较约定电流、电子运动和电容两极板电荷变化方向。",
+      "分别改变 R 与 C，定位 t=τ 时充电 63.2% 和放电剩余 36.8% 的状态。",
+      "用 i-t 面积核对电荷变化，并闭合电源功、电容能量变化与电阻热账本。",
+    ],
+    "ampere-force.html": [
+      "分别反转电流和磁场，验证只反转一个量时安培力反向、同时反转时方向不变。",
+      "拖动 θ 从 0° 到 180°，定位平行零力与垂直最大力并核对正弦曲线。",
+      "让安培力竖直向上，用 BIL=mg 反演平衡电流并闭合受力账本。",
     ],
     "ohm-law.html": [
       "保持电阻不变，改变电压，核对电流表读数与 \\(I=U/R\\)。",
@@ -205,6 +323,11 @@
       "在时间图像和相位圆中追踪 \\(x\\)、\\(v\\)、\\(a\\) 的相位关系。",
       "改变质量或劲度系数，观察周期如何变化。",
     ],
+    "pendulum.html": [
+      "从同一端点、同一速度方向出发，测量单摆完成一个完整周期所需的时间。",
+      "扫描初始振幅，对比精确周期与小角公式，寻找近似开始明显偏离的区域。",
+      "开启阻尼并追踪相图和能量账本，核对机械能如何转化为耗散能。",
+    ],
     "resonance.html": [
       "从低频扫到高频，比较位移峰值频率与平均输入功率峰值频率。",
       "在 f=f₀ 处核对位移滞后驱动力 90°，并解释驱动力为何与速度近同相。",
@@ -214,6 +337,11 @@
       "分别观察入射波、反射波和合成波的传播方向。",
       "定位节点和腹部，比较它们的位移与振幅。",
       "改变波长，验证节点间距与波长的关系。",
+    ],
+    "wave-interference.html": [
+      "在二维波场中拖动探针，用路径差和源相位共同判断加强或减弱。",
+      "对照探针处两列分波与合位移，核对叠加发生在同一时刻、同一位置。",
+      "逐渐拉开两源频率并延长观察时间，观察拍频和稳定条纹洗出。",
     ],
     "charged-particle.html": [
       "比较仅电场和仅磁场，观察电场力与磁场力对运动的不同作用。",
@@ -225,10 +353,30 @@
       "精确配平 qE 与 qvB 后进入分析场，用半圆半径反演粒子质量。",
       "比较两种同位素和不同电荷态，核对检测位置比、质量比与质荷比。",
     ],
+    "cyclotron.html": [
+      "拖动穿越次数，区分盒内磁偏转与缝隙电场做功。",
+      "改变 B、U、R、m、q，比较回旋频率、单次增能和达到边缘所需次数。",
+      "进入相对论边界，观察频率下降、相位误差积累和增能效率反转。",
+    ],
+    "three-field.html": [
+      "分别标出重力、电场力与磁场力，用竖直合力寻找匀速直线条件。",
+      "切换旋轮线和圆周场景，把轨迹拆成导引中心漂移与相对回旋。",
+      "关闭磁场观察类抛体边界，并用功—能账本验证磁场力不做功。",
+    ],
     "electromagnetic-induction.html": [
       "让 N 极分别靠近和远离线圈，比较磁通变化率、感应电动势和电流方向。",
       "保持磁通变化量不变，改变变化时间，验证感应电动势由变化率决定。",
       "保持磁铁运动不变，切换开路与闭路，区分感应电动势、感应电流和能量转化。",
+    ],
+    "rail-rod.html": [
+      "恒力启动后拖动时间，比较速度、感应电流和磁阻力的同步变化。",
+      "切换撤力与斜面场景，核对指数衰减、启动边界和终端速度。",
+      "在电路负载中切换电源与电容，用能量账本解释反电动势限速和电磁等效惯性。",
+    ],
+    "double-rail.html": [
+      "比较两杆速度和相对速度，确认只有相对运动产生感应电流。",
+      "改变两杆质量与外力，把质心运动和相对运动分开观察。",
+      "切换固定单杆，比较自由系统与受约束系统的动量、能量账本。",
     ],
     "alternating-current.html": [
       "拖动发电机线圈相位，定位磁通量极值与电动势峰值，解释两者相差四分之一周期。",
@@ -245,6 +393,11 @@
       "改变两车质量和初速度，预测碰后速度方向，再用读数核对。",
       "连续改变恢复系数 \\(e\\)，观察动能保留率如何变化。",
     ],
+    "collision-2d.html": [
+      "拖动接触法线，预测两圆盘碰后速度方向。",
+      "分解法向与切向速度，核对光滑接触只改变法向分量。",
+      "改变恢复系数，分别检查 x/y 动量守恒和动能损失。",
+    ],
     "refraction.html": [
       "先确认入射角和折射角都是从法线量起，再比较两者大小。",
       "固定两种介质，改变入射角，观察折射角是否按斯涅尔定律变化。",
@@ -259,6 +412,16 @@
       "先定位中央亮纹，再寻找两侧相邻亮纹，比较它们的间距。",
       "每次只改变一个参数，观察波长、双缝间距和屏距对条纹的影响。",
       "在屏上选择亮纹和暗纹位置，用路程差解释相长与相消干涉。",
+    ],
+    "single-slit.html": [
+      "拖动屏上探针找到一级暗纹，核对缝边程差是否等于一个波长。",
+      "查看缝内子波振幅矢量，解释一级暗纹处为何首尾闭合。",
+      "减小缝宽或增大波长，测量中央亮纹宽度并判断小角近似误差。",
+    ],
+    "thin-film.html": [
+      "分别判断两个界面的反射相位突变，再与膜内往返传播相位合并。",
+      "设置四分之一波厚度和折射率匹配，核对设计波长反射率是否趋近于零。",
+      "沿空气劈尖拖动探针，测量接触暗纹和相邻等厚条纹间距。",
     ],
     "ideal-gas.html": [
       "拖动活塞改变体积，比较分子碰撞频率和宏观压强读数。",
@@ -279,6 +442,11 @@
       "逐步增大波长跨过截止条件，观察光电子是否仍能逸出。",
       "保持频率不变只改变光强，比较最大初动能与饱和光电流。",
       "施加反向电压找到电流归零点，用遏止电压反推最大初动能。",
+    ],
+    "rutherford.html": [
+      "上下拖动入射束改变碰撞参数，比较散射角和最近距离。",
+      "积累随机束流事件，核对多数小角偏转与少数大角反弹能否同时出现。",
+      "切换模型对照，说明均匀正电球为什么无法解释大角散射。",
     ],
     "bohr.html": [
       "比较 n=1、n=2 与 n=3 的能量和玻尔半径，核对 Eₙ∝−1/n²、rₙ∝n²。",
@@ -343,6 +511,18 @@
       takeaway:
         "惯性系中 \\(N-mg=ma\\)，所以 \\(N=m(g+a)\\)；向上加速超重、向下加速失重，\\(a=-g\\) 时支持力为零；加速系需加入伪力。",
     },
+    "conveyor.html": {
+      goal: "用接触状态机统一相对速度、摩擦方向、共速事件和摩擦生热。",
+      prerequisite:
+        "知道滑动摩擦阻碍接触面的相对运动，静摩擦力不一定达到上限；传送带方向规定为正方向。",
+      prompts: [
+        "先比较物块与传送带速度，要求只根据 v−u 的符号判断摩擦方向。",
+        "暂停在共速瞬间，检查静摩擦所需值是否小于最大静摩擦力。",
+        "在倾斜场景比较动能变化、重力功、摩擦功与接触生热，区分不同能量对象。",
+      ],
+      takeaway:
+        "滑动时摩擦方向由相对速度决定；共速后只有 \\(|f_{需}|\\le\\mu_sN\\) 才能保持相对静止，滑动摩擦生热满足 \\(Q=f_k\\Delta s_{相对}\\)。",
+    },
     "vertical-motion.html": {
       goal: "用同一竖直坐标统一自由落体、竖直上抛、参考系变换和空气阻力边界。",
       prerequisite:
@@ -354,6 +534,18 @@
       ],
       takeaway:
         "忽略空气阻力时竖直运动满足 \\(y=y_0+v_0t-\\tfrac12gt^2\\)、\\(v=v_0-gt\\)；最高点 \\(v=0\\) 但 \\(a=-g\\)，质量无关结论只属于真空近似。",
+    },
+    "free-fall-measurement.html": {
+      goal: "从位移和时间原始数据出发，用逐差、线性拟合和重复测量得到有不确定度的重力加速度。",
+      prerequisite:
+        "知道自由落体从静止释放时满足 s=gt²/2，并能区分累计时间、相邻时间与等时间隔频闪。",
+      prompts: [
+        "先逐行检查光电门的位移和累计时间，要求学生说明位移零点与计时起点。",
+        "用同一组条件分别做逐差和 s–t² 拟合，比较两个 g 估计是否相容。",
+        "增大位置误差并增加重复次数，追问标准差和标准误为何产生不同变化。",
+      ],
+      takeaway:
+        "等时间隔频闪满足 \\(\\Delta^2s=gT^2\\)，而 \\(s-t^2\\) 图斜率满足 \\(k=g/2\\)；完整结果还应报告随机离散和均值标准误，并单独检查系统误差。",
     },
     "friction.html": {
       goal: "区分静摩擦力的自适应性、最大静摩擦力和滑动摩擦力。",
@@ -391,6 +583,48 @@
       ],
       takeaway:
         "力按分量作矢量相加；胡克定律只在弹性限度内有效；第三定律力对作用在不同物体上；连接体整体方程消去内力，隔离方程用于求内力。",
+    },
+    "hooke-measurement.html": {
+      goal: "从逐个加码和标尺读数得到 F–x 数据，筛选弹性区并拟合弹簧劲度系数。",
+      prerequisite:
+        "知道静止砝码对弹簧的载荷等于 mg，形变量是加载总长与无载原长之差。",
+      prompts: [
+        "先读无载原长，再检查共同标尺零误差为什么在长度相减中抵消。",
+        "逐个增加砝码，要求学生先判断哪些点仍处于弹性限度内。",
+        "把超限点混入拟合后比较斜率，再沿卸载线寻找永久伸长。",
+      ],
+      takeaway:
+        "弹性限度内 \\(F=kx\\)，所以 \\(F-x\\) 图斜率为 k；超限点会破坏线性并可能产生永久形变，不能继续并入同一模型拟合。",
+    },
+    "force-composition.html": {
+      goal: "把几何作图、分量方程、实验闭合与误差放大统一到同一个共点力模型中。",
+      prerequisite: "知道力有大小和方向，会把矢量投影到相互垂直的两个坐标轴。",
+      prompts: [
+        "先拖动 F₂ 端点，要求学生分别用平行四边形和分量相加预测合力。",
+        "固定合力与两条方向，检查逆向分解何时出现负拉力。",
+        "让两方向接近共线，比较条件数与有限测角误差造成的分力跨度。",
+      ],
+      takeaway: "合力按分量相加；逆向分解只有在方向约束下才唯一，且绳只能提供非负张力；近共线方向会显著放大测量误差。",
+    },
+    "motion-composition.html": {
+      goal: "用红蜡块与渡河装置建立相对速度、介质速度和地面速度的矢量关系。",
+      prerequisite: "知道速度有大小和方向，会用位移除以时间描述匀速运动。",
+      prompts: [
+        "先分别指出蜡块相对管、管相对地面的运动，再预测地面系轨迹。",
+        "比较船头垂直河岸和向上游偏转时的过河时间与漂移。",
+        "切换到水面系，核对船与对岸相遇的时刻是否改变。",
+      ],
+      takeaway: "物体对地速度等于物体对介质速度与介质对地速度的矢量和；最快过河与最短航迹通常不同，且强流可能使零漂移不可实现。",
+    },
+    "projectile-drop-comparison.html": {
+      goal: "用同步释放和等时频闪证明平抛运动的竖直分运动是自由落体，并检查实验边界。",
+      prerequisite: "知道自由落体由高度和重力决定，平抛物体具有水平方向初速度。",
+      prompts: [
+        "先检查两球是否同高、同步且竖直初速度均为零，再观察撞地时刻。",
+        "改变水平初速度，要求学生分别预测射程和落地时间。",
+        "加入释放延迟和空气阻力，比较理想结论与真实装置可分辨的时差。",
+      ],
+      takeaway: "理想条件下水平初速度不进入竖直方程，两球始终同高并同时落地；释放不同步或与总速度相关的空气阻力会破坏该对照。",
     },
     "projectile.html": {
       goal: "建立速度分解和独立运动的观念。",
@@ -441,6 +675,16 @@
       takeaway:
         "圆轨道满足 \\(v_c=\\sqrt{\\mu/r}\\)、\\(T=2\\pi\\sqrt{r^3/\\mu}\\)、\\(\\varepsilon=-\\mu/(2r)\\)；切向变速同时改变能量和角动量，\\(v\\ge\\sqrt2v_c\\) 时二体总机械能不小于零。",
     },
+    "work-energy-process.html": {
+      goal: "沿位移累计恒力、变力、重力和摩擦力做功，用全过程证据建立动能定理。",
+      prerequisite: "知道动能与质量、速度有关，会判断力与位移的夹角。",
+      prompts: [
+        "先拖动末位置，要求学生逐项判断各力做正功、负功还是零功。",
+        "进入变力场景，把 F–s 面积、梯形求和和动能变化三者核对。",
+        "在制动场景把目标拖过停止点，追问负动能为什么说明过程早已终止。",
+      ],
+      takeaway: "合力沿实际位移所做总功等于动能变化；变力功是 F–s 有向面积，阻力负功耗尽初动能时物体停止，后续不能沿原运动继续外推。",
+    },
     "mechanical-energy.html": {
       goal: "区分机械能守恒与总能量守恒，并理解系统边界对能量方程的影响。",
       prerequisite:
@@ -452,6 +696,18 @@
       ],
       takeaway:
         "只有重力或弹力做功时机械能守恒；摩擦使机械能转化为内能，而包含所有相关物体的系统总能量仍守恒。",
+    },
+    "locomotive.html": {
+      goal: "在同一阻力模型中比较恒牵引力与恒功率启动的分段动力学和能量输入。",
+      prerequisite:
+        "会用 F=ma 和 P=Fv；知道阻力与运动方向相反，终端状态对应合力趋近零。",
+      prompts: [
+        "先观察切换前两车为何完全重合，再定位 P/Fmax 对应的速度。",
+        "进入恒功率阶段，要求学生同时预测牵引力、加速度和速度斜率的变化。",
+        "把时间推进到接近终端速度，核对 F≈f、a≈0 和能量账本。",
+      ],
+      takeaway:
+        "恒力阶段 \\(a=(F-f)/m\\)；恒功率阶段 \\(F=P/v\\)，加速度随速度下降，并渐近 \\(v_m=P/f\\)。",
     },
     "work-propulsion.html": {
       goal:
@@ -503,6 +759,66 @@
       ],
       takeaway:
         "平行板电容满足 C=ε₀κA/d；接电源时 U 固定，断开后 Q 固定。电容器能量变化等于电池功与外力功之和，击穿后理想绝缘模型失效。",
+    },
+    "oscilloscope.html": {
+      goal: "连接电子枪加速、偏转板电压、时间扫描和荧光屏轨迹，理解示波器怎样把电信号变成可见图形。",
+      prerequisite: "知道电场会对电子施力，电压可以改变带电粒子的能量；两路周期信号的相位关系会从实时轨迹建立。",
+      prompts: [
+        "先只调加速电压，区分电子速率与偏转板直接控制的屏上位置。",
+        "打开时间扫描，让学生从 U-t 图预测屏上波形的峰、谷和周期。",
+        "进入 XY 模式改变相位差，要求学生用参数方程解释直线、椭圆和圆。",
+      ],
+      takeaway: "加速电压满足 eUa=mv²/2；理想线性偏转中屏上坐标分别正比于两组偏转电压，时间扫描与 XY 模式决定信号如何映射到荧光屏。",
+    },
+    "electric-gravity.html": {
+      goal: "统一重力与电场力的方向、复合运动和悬浮反演，避免把电场类平抛当作仅替换重力加速度。",
+      prerequisite: "会画重力和电场力，知道匀变速分运动；电荷正负与电场方向的组合会在同一受力账本中核对。",
+      prompts: [
+        "先保持粒子静止，改变 q 或 E 的符号，让学生判断电场力是否还能向上。",
+        "给粒子水平初速度，同时显示有场与关场轨迹，比较两个竖直加速度。",
+        "隐藏电荷读数，只给质量和悬浮电场，让学生反演 q 并说明符号。",
+      ],
+      takeaway: "竖直向上为正时 qE−mg=maᵧ；水平方向无力则保持匀速；悬浮满足 qE=mg，可由 q=mg/E 反演电荷。",
+    },
+    "measurement-tools.html": {
+      goal: "把量具几何位置转化成可复核的读数步骤，并建立最小分度、零误差与有效位数意识。",
+      prerequisite: "会读取普通刻度尺，知道测量值需要单位；游标对齐和微分筒读法由可拖动量具逐步建立。",
+      prompts: [
+        "保持真实长度不变切换三种游标分度，比较读数位数与量化误差。",
+        "先遮住答案，让学生指出套筒最后露出的半毫米和微分筒对齐序号。",
+        "闭合量具观察零误差，再测同一物体并解释为何要减去 e₀。",
+      ],
+      takeaway: "游标读数为主尺值加对齐序号乘最小分度；螺旋测微器为套筒值加微分筒值；修正结果统一满足 L真=L示−e₀。",
+    },
+    "resistivity.html": {
+      goal: "把几何测量、电表接法、U-I 拟合和电阻率反演连接成一条可核对的实验链。",
+      prerequisite: "会读长度量具并使用欧姆定律；内外接法的等效电路和误差方向由实验比较建立。",
+      prompts: [
+        "让学生先预测直径相对误差为何会在截面积中近似加倍。",
+        "保持 Rx 不变切换内外接，要求从电表支路说明测量值偏大或偏小。",
+        "比较单点 U/I 与多点拟合斜率，最后追踪误差如何传入 ρ。",
+      ],
+      takeaway: "外接测得 Rx∥Rv，内接测得 Rx+Ra；多点 U-I 斜率给出测量电阻，电阻率满足 ρ=Rπd²/(4L)。",
+    },
+    "rc-circuit.html": {
+      goal: "统一 RC 电路的开关状态、指数暂态、电流面积和能量转移。",
+      prerequisite: "知道电容器能储存电荷、电阻会发热；指数变化和时间常数由曲线与关键状态建立。",
+      prompts: [
+        "先在 t=0 比较充电与放电的电流方向和大小，再预测后续变化。",
+        "分别把 R、C 加倍，观察 τ 和曲线横向尺度如何改变。",
+        "在 t=τ 和接近稳态时，核对电荷面积与能量账本。",
+      ],
+      takeaway: "τ=RC；充电满足 uC=E(1−e⁻ᵗ/τ)，放电满足 uC=U₀e⁻ᵗ/τ；i-t 有向面积等于电荷变化，电源功等于电容能量增量与焦耳热之和。",
+    },
+    "ampere-force.html": {
+      goal: "统一左手定则、叉乘方向、角度响应和平衡应用。",
+      prerequisite: "知道电流方向和磁场方向，理解力是矢量；叉乘方向和正弦因子由直接操控建立。",
+      prompts: [
+        "固定导线垂直磁场，逐次反转 I、B，记录力方向的变化规律。",
+        "扫过完整夹角范围，让学生先预测零点和峰值再观察 F-θ 图。",
+        "切换平衡场景，比较当前电流与 mg/(BL) 并解释符号方向。",
+      ],
+      takeaway: "安培力满足 F=I L×B、|F|=BILsinθ；平行时为零、垂直时最大，反转 I 或 B 会翻转方向。",
     },
     "ohm-law.html": {
       goal: "建立电压、电流和电阻的定量关系，并认识欧姆定律的适用条件。",
@@ -566,6 +882,18 @@
       takeaway:
         "简谐运动中端点速度为零、加速度最大，平衡位置速度最大、加速度为零。",
     },
+    "pendulum.html": {
+      goal: "区分单摆的小角周期公式与大角非线性运动，并用能量和相图解释阻尼衰减。",
+      prerequisite:
+        "知道周期和振幅的含义，会分解重力并使用机械能守恒；椭圆积分只作为精确周期模型读取，不要求推导。",
+      prompts: [
+        "先用小振幅测一个完整周期，再改变质量，判断周期是否变化。",
+        "把振幅逐步增大到 60° 以上，对照周期比曲线解释小角公式为何低估真实周期。",
+        "开启阻尼，观察相轨迹向内收缩，并核对机械能与累计耗散能的总账。",
+      ],
+      takeaway:
+        "小角单摆满足 T₀=2π√(L/g)，近似与质量、振幅无关；大角时非线性使周期变长，阻尼则让机械能转化为耗散能。",
+    },
     "resonance.html": {
       goal:
         "用稳态幅频、相频、平均功率和瞬态衰减统一解释受迫振动与共振。",
@@ -589,6 +917,18 @@
         "改变波长，观察节点间距是否随之改变。",
       ],
       takeaway: "驻波由相向传播的波叠加形成，节点不振动，腹部振幅最大。",
+    },
+    "wave-interference.html": {
+      goal: "把二维路径差、源初相、局部时间叠加和相干时间统一到同一波场。",
+      prerequisite:
+        "知道波的叠加和相位差，理解驻波节点；本实验把一维叠加推广到两个二维点波源。",
+      prompts: [
+        "先在同相双源的中垂线上移动探针，核对路径差为零和相长条件。",
+        "把源二初相改为 π，观察中垂线如何从加强线变为减弱线。",
+        "设置不同频率并延长观察时间，对照瞬时拍频与时间平均强度。",
+      ],
+      takeaway:
+        "稳定干涉图样要求频率相同且相位关系稳定；空间相位差由路径差和源初相共同决定，频率失配会使交叉项随观察时间衰减。",
     },
     "charged-particle.html": {
       goal: "比较电场力、磁场力和恒力，建立复合场中的受力分析。",
@@ -614,6 +954,26 @@
       takeaway:
         "正交场只让满足方向与 v=E/Bₛ 的粒子直线通过；进入纯磁分析场后 r=mv/(|q|Bₐ)。同速同电荷态下检测位置与质量成正比。",
     },
+    "cyclotron.html": {
+      goal: "把 D 形盒轨道、过缝增能、回旋频率与高能失谐连接成事件链。",
+      prerequisite: "知道磁场力不做功、圆周运动半径和电场力做功；会区分盒内与缝隙。",
+      prompts: [
+        "先暂停在盒内和缝隙，分别判断速率是否改变。",
+        "改变轨道半径，验证非相对论回旋周期是否保持不变。",
+        "提高末态能量，追踪相对论频率下降如何积累为相位误差。",
+      ],
+      takeaway: "理想回旋频率 f=qB/(2πm)，每次过缝增能 qU；高能时 γ 增大使实际频率下降，固定高频源最终失谐。",
+    },
+    "three-field.html": {
+      goal: "用统一动力学方程解释重力、电场和磁场共同作用下的四类轨迹。",
+      prerequisite: "知道重力、电场力和洛伦兹力的方向与做功特点，会分解二维速度。",
+      prompts: [
+        "先调水平速度，让三种力的竖直合力为零。",
+        "从旋轮线中识别匀速移动的导引中心和相对圆周分运动。",
+        "关闭磁场并令 qE=mg，分别观察类抛体和纯圆周两个边界。",
+      ],
+      takeaway: "三场运动满足 m dv/dt=mg+qE+qv×B；磁场力不做功，有磁场时可拆为漂移与回旋。",
+    },
     "electromagnetic-induction.html": {
       goal: "从磁通量变化率建立法拉第定律，并用楞次定律判断感应电流方向。",
       prerequisite:
@@ -625,6 +985,26 @@
       ],
       takeaway:
         "感应电动势满足 \\(\\varepsilon=-N\\,d\\Phi/dt\\)；楞次定律决定感应场阻碍磁通变化，闭路时才形成持续电流。",
+    },
+    "rail-rod.html": {
+      goal: "把运动、电磁感应、安培力与能量转化统一到单杆导轨模型。",
+      prerequisite: "知道动生电动势、闭合电路欧姆定律和安培力方向；终端速度将由动态反馈建立。",
+      prompts: [
+        "先从静止施加恒力，观察速度增大时为何加速度减小。",
+        "撤去外力，比较速度、电流和安培力是否具有相同时间常数。",
+        "切换接电源和接电容，分别核对反电动势与电场能账本。",
+      ],
+      takeaway: "闭合电阻回路中 ε=BLv 产生磁阻尼；接电源时 U−BLv=IR，接电容时外力同时增加机械动能和电场能。",
+    },
+    "double-rail.html": {
+      goal: "用相对速度、质心运动和守恒账本建立双杆电磁耦合模型。",
+      prerequisite: "理解动生电动势、安培力和系统动量；会区分内力与外力。",
+      prompts: [
+        "先让一杆运动一杆静止，观察电流与两杆速度如何同步变化。",
+        "改变质量，预测最终共同速度，再用总动量核对。",
+        "固定第二杆，指出维持固定的约束力为何使系统动量不再守恒。",
+      ],
+      takeaway: "自由双杆中 ε=BL(v₁−v₂)，内部磁力等大反向；相对动能转化为热，而质心运动只由外力决定。",
     },
     "alternating-current.html": {
       goal: "用波形、有效值和功率账本统一解释交流发电、理想变压和高压输电。",
@@ -662,6 +1042,16 @@
       takeaway:
         "外力冲量可忽略时系统总动量守恒；只有弹性碰撞还保持总动能，完全非弹性碰撞中两物体以共同速度运动。",
     },
+    "collision-2d.html": {
+      goal: "把接触法线、法切分解和二维动量守恒统一到斜碰模型。",
+      prerequisite: "理解一维动量守恒与恢复系数，会把矢量分解到两个互相垂直的方向。",
+      prompts: [
+        "先旋转接触法线，预测冲量方向而不计算。",
+        "比较碰前后切向速度，判断光滑假设意味着什么。",
+        "分别核对 px、py 和动能，区分动量守恒与动能守恒。",
+      ],
+      takeaway: "光滑圆盘冲量沿接触公法线；无外力冲量时二维总动量守恒，动能损失由 e 和法向接近速度决定。",
+    },
     "refraction.html": {
       goal: "建立入射角、折射角、折射率和临界角之间的联系。",
       prerequisite:
@@ -697,6 +1087,30 @@
       ],
       takeaway:
         "双缝干涉条纹间距近似满足 \\(\\beta=\\lambda L/d\\)；暗纹处仍有光，只是两列光相消。",
+    },
+    "single-slit.html": {
+      goal: "用连续子波叠加解释单缝暗纹、中央亮纹展宽和单光子统计。",
+      prerequisite:
+        "知道波的叠加和相位差，理解双缝亮暗条件；本实验把两个相干波源推广到缝内连续波源。",
+      prompts: [
+        "从中央向外拖动探针，先定位一级暗纹并读取缝边程差。",
+        "在一级暗纹处查看相量链，说明连续子波为何能够完全相消。",
+        "分别改变 a、λ 和 L，比较精确暗纹位置、中央宽度与小角近似。",
+      ],
+      takeaway:
+        "单缝远场光强满足 sinc² 分布，暗纹条件为 a sinθ=mλ；中央亮纹宽度约为 2λL/a，孔径越小衍射越显著。",
+    },
+    "thin-film.html": {
+      goal: "统一理解反射相位突变、膜内光程、多光束叠加、增透和等厚干涉。",
+      prerequisite:
+        "知道光程和相位差决定干涉明暗；需要进一步区分传播相位与界面反射造成的 π 相位突变。",
+      prompts: [
+        "先只判断两个界面的反射方向，记录各自是否发生 π 相位突变。",
+        "再改变膜厚，追踪传播相位、总反射振幅和反射率的周期变化。",
+        "切换增透膜和空气劈尖，分别检查设计波长最小反射与接触暗纹。",
+      ],
+      takeaway:
+        "薄膜反射必须叠加 Fresnel 振幅而不是直接相加光强；明暗由膜内往返相位和两个界面的反射符号共同决定。",
     },
     "ideal-gas.html": {
       goal: "从分子碰撞和速率统计建立气体压强、温度与状态方程的统一图景。",
@@ -746,6 +1160,18 @@
       ],
       takeaway:
         "单个光子能量满足 \\(E=h\\nu\\)，最大初动能满足 \\(E_{k\\max}=h\\nu-W_0=eU_c\\)；光强主要影响光电子数量。",
+    },
+    "rutherford.html": {
+      goal: "从单粒子库仑轨迹和束流角分布，推断原子正电荷与主要质量集中在极小区域。",
+      prerequisite:
+        "知道同号电荷相斥，并能区分一条给定初始条件的模型轨迹与大量随机事件的统计分布。",
+      prompts: [
+        "先拖动碰撞参数 b，观察散射角跨过 90° 时最近距离怎样变化。",
+        "固定金靶和能量积累束流事件，比较小角与大角事件的数量级。",
+        "保持同一 b 对比核式结构与均匀正电球，判断哪种模型能产生大角反弹。",
+      ],
+      takeaway:
+        "单次库仑散射满足 \\(\\theta=2\\arctan[k/(2Eb)]\\)；多数小角与少数大角事件共同说明原子大部分是空的，正电荷和主要质量集中在原子核。",
     },
     "bohr.html": {
       goal: "用氢原子离散能级统一解释定态、共振吸收、发射跃迁和线状光谱。",
@@ -917,9 +1343,17 @@
       api: "elevatorLab",
       fields: ["mode", "mass", "gravity", "acceleration", "frameAcceleration", "time", "guideStep", "showVectors", "showScale", "showFrame", "showTrail"],
     },
+    "conveyor.html": {
+      api: "conveyorLab",
+      fields: ["mode", "mass", "muS", "muK", "angleDeg", "beltSpeed", "objectSpeed", "time", "guideStep", "showForces", "showRelative", "showHeat", "showTrail"],
+    },
     "vertical-motion.html": {
       api: "verticalMotionLab",
       fields: ["mode", "heightM", "speedMs", "gravity", "massA", "massB", "frameVelocity", "dragMass", "areaCm2", "dragCoefficient", "progress", "guideStep", "showStrobe", "showVectors", "showGrid", "showForces"],
+    },
+    "free-fall-measurement.html": {
+      api: "freeFallMeasurementLab",
+      fields: ["mode", "gravityMs2", "heightM", "sampleCount", "strobeIntervalS", "timeResolutionMs", "positionNoiseMm", "repeats", "seed", "guideStep", "showIdeal", "showFit", "showResiduals", "showUncertainty"],
     },
     "friction.html": {
       api: "frictionLab",
@@ -932,6 +1366,22 @@
     "interaction.html": {
       api: "interactionLab",
       fields: ["mode", "force1", "force2", "angle", "mass1", "mass2", "deformation", "k", "guideStep", "showComponents", "showFreeBody", "showValues", "showResidual"],
+    },
+    "hooke-measurement.html": {
+      api: "hookeMeasurementLab",
+      fields: ["mode", "springConstantNm", "naturalLengthCm", "massStepG", "gravityMs2", "pointCount", "loadIndex", "elasticLimitN", "postYieldRatio", "rulerResolutionMm", "readingNoiseMm", "zeroErrorMm", "seed", "guideStep", "showIdeal", "showFit", "showInvalid", "showRuler"],
+    },
+    "force-composition.html": {
+      api: "forceCompositionLab",
+      fields: ["mode", "force1N", "force2N", "direction1Deg", "direction2Deg", "targetForceN", "targetDirectionDeg", "forceResolutionN", "angleResolutionDeg", "readingNoise", "seed", "guideStep", "showComponents", "showParallelogram", "showValues", "showUncertainty"],
+    },
+    "motion-composition.html": {
+      api: "motionCompositionLab",
+      fields: ["mode", "carrierSpeedMs", "relativeSpeedMs", "tubeHeightM", "riverCurrentMs", "boatSpeedMs", "headingDeg", "riverWidthM", "progress", "guideStep", "showVectors", "showTrails", "showFrames", "showCompare"],
+    },
+    "projectile-drop-comparison.html": {
+      api: "projectileDropComparisonLab",
+      fields: ["mode", "heightM", "launchSpeedMs", "gravityMs2", "releaseDelayMs", "dragPerM", "strobeIntervalS", "timerResolutionMs", "progress", "guideStep", "showVectors", "showStrobe", "showGuide", "showIdeal"],
     },
     "projectile.html": {
       api: "projectileLab",
@@ -949,9 +1399,17 @@
       api: "orbitalLab",
       fields: ["mode", "altitudeKm", "targetKm", "speedRatio", "progress", "rate", "guideStep", "showVelocity", "showGravity", "showEnergy", "showScale", "showTheory"],
     },
+    "work-energy-process.html": {
+      api: "workEnergyProcessLab",
+      fields: ["mode", "massKg", "initialSpeedMs", "distanceM", "appliedForceN", "forceAngleDeg", "frictionForceN", "variableStartN", "variableSlopeNpm", "inclineAngleDeg", "frictionCoefficient", "gravityMs2", "brakeForceN", "progress", "guideStep", "showForces", "showArea", "showLedger", "showStop"],
+    },
     "mechanical-energy.html": {
       api: "mechanicalEnergyLab",
       fields: ["m", "position", "v0", "mu", "k", "mode", "boundary", "rate", "guideStep", "showVelocity", "showForce", "showFlow", "showReference"],
+    },
+    "locomotive.html": {
+      api: "locomotiveLab",
+      fields: ["mode", "mass", "resistance", "maxTraction", "power", "initialSpeed", "time", "guideStep", "showForce", "showPower", "showSwitch", "showTrail"],
     },
     "work-propulsion.html": {
       api: "workPropulsionLab",
@@ -973,9 +1431,41 @@
       api: "capacitorLab",
       fields: ["mode", "areaCm2", "distanceMm", "voltage", "constraint", "kappa", "fraction", "guideStep", "showCharges", "showField", "showDipoles", "showEnergy"],
     },
+    "oscilloscope.html": {
+      api: "oscilloscopeLab",
+      fields: ["mode", "acceleratingVoltage", "horizontalVoltage", "verticalVoltage", "frequency", "phaseDeg", "time", "guideStep", "showBeam", "showPlates", "showGrid", "showTrace"],
+    },
+    "electric-gravity.html": {
+      api: "electricGravityLab",
+      fields: ["mode", "massNg", "chargeFc", "fieldKvM", "startHeight", "initialVx", "initialVy", "gravity", "time", "guideStep", "showForces", "showTrail", "showCompare", "showEnergy"],
+    },
+    "measurement-tools.html": {
+      api: "measurementToolsLab",
+      fields: ["mode", "lengthMm", "divisions", "zeroErrorMm", "seed", "guideStep", "showLabels", "showCoincidence", "showDecomposition", "showAnswer"],
+    },
+    "resistivity.html": {
+      api: "resistivityLab",
+      fields: ["mode", "rhoE8", "lengthM", "diameterMm", "currentA", "ammeterResistance", "voltmeterResistance", "guideStep", "showMeters", "showCurrent", "showFit", "showError"],
+    },
+    "rc-circuit.html": {
+      api: "rcCircuitLab",
+      fields: ["mode", "resistanceKOhm", "capacitanceUf", "emfV", "initialVoltageV", "timeS", "guideStep", "showElectrons", "showCurrent", "showTau", "showEnergy"],
+    },
+    "ampere-force.html": {
+      api: "ampereForceLab",
+      fields: ["mode", "currentA", "lengthM", "fieldT", "angleDeg", "massG", "currentSign", "fieldSign", "guideStep", "showVectors", "showRule", "showAngle", "showBalance"],
+    },
     "double-slit.html": {
       api: "doubleSlitLab",
       fields: ["wavelength", "slit", "slitWidth", "screen", "cursorRatio", "mode", "guideStep", "showRays", "showWaves", "showEnvelope", "showLabels", "whichPath", "photonRate"],
+    },
+    "single-slit.html": {
+      api: "singleSlitLab",
+      fields: ["mode", "wavelengthNm", "slitWidthMm", "screenDistanceM", "probeMm", "guideStep", "showWaves", "showMinima", "showPhasors", "showPhotons", "photonCount", "photonSeed"],
+    },
+    "thin-film.html": {
+      api: "thinFilmLab",
+      fields: ["mode", "wavelengthNm", "thicknessNm", "incidentIndex", "filmIndex", "substrateIndex", "incidenceDeg", "polarization", "wedgeSlopeUrad", "positionMm", "guideStep", "showRays", "showPhase", "showMultiple", "showSpectrum"],
     },
     "ohm-law.html": {
       api: "ohmLab",
@@ -1001,6 +1491,14 @@
       api: "inductionLab",
       fields: ["field", "motion", "turns", "area", "resistance", "pole", "direction", "circuit", "mode", "playbackRate", "guideStep", "showField", "showFlux", "showInduced", "showCarriers"],
     },
+    "rail-rod.html": {
+      api: "railRodLab",
+      fields: ["mode", "circuitKind", "massKg", "lengthM", "fieldT", "resistanceOhm", "forceN", "initialSpeedMs", "angleDeg", "friction", "capacitanceF", "sourceVoltageV", "timeS", "guideStep", "showVectors", "showCurrent", "showTrail", "showLedger"],
+    },
+    "double-rail.html": {
+      api: "doubleRailLab",
+      fields: ["mode", "mass1Kg", "mass2Kg", "lengthM", "fieldT", "resistanceOhm", "initialV1Ms", "initialV2Ms", "force1N", "force2N", "initialGapM", "timeS", "guideStep", "showVectors", "showCurrent", "showCom", "showLedger"],
+    },
     "alternating-current.html": {
       api: "alternatingCurrentLab",
       fields: ["mode", "field", "generatorTurns", "areaCm2", "frequency", "peakVoltage", "load", "primaryVoltage", "primaryTurns", "secondaryTurns", "transformerLoad", "sentPowerMW", "transmissionVoltageKV", "lineResistance", "phase", "guideStep", "showField", "showFlow", "showRms", "showLedger"],
@@ -1008,6 +1506,14 @@
     "mass-spectrometer.html": {
       api: "massSpectrometerLab",
       fields: ["mode", "charge", "electricKv", "selectorB", "speed1e5", "analyzerB", "lightMass", "heavyMass", "progress", "guideStep", "showForces", "showFields", "showRejected", "showDetector"],
+    },
+    "cyclotron.html": {
+      api: "cyclotronLab",
+      fields: ["mode", "fieldT", "gapVoltageKv", "deeRadiusM", "massU", "chargeE", "initialEnergyKev", "crossing", "rfRatio", "guideStep", "showOrbit", "showField", "showGap", "showBoundary"],
+    },
+    "three-field.html": {
+      api: "threeFieldLab",
+      fields: ["mode", "massPg", "chargeFc", "electricVm", "magneticT", "initialVxMs", "initialVyMs", "initialXM", "initialYM", "gravity", "timeS", "guideStep", "showForces", "showDrift", "showTrail", "showLedger"],
     },
     "electromagnetic-oscillation.html": {
       api: "electromagneticOscillationLab",
@@ -1017,9 +1523,17 @@
       api: "collisionLab",
       fields: ["m1", "m2", "u1", "u2", "e", "mode", "guideStep", "showVelocity", "showGhosts", "showCenter", "showMomentum"],
     },
+    "collision-2d.html": {
+      api: "collision2dLab",
+      fields: ["mode", "mass1Kg", "mass2Kg", "speed1Ms", "angle1Deg", "speed2Ms", "angle2Deg", "normalDeg", "restitution", "guideStep", "showBefore", "showAfter", "showBasis", "showLedger"],
+    },
     "oscillation.html": {
       api: "oscillationLab",
       fields: ["mass", "spring", "amplitude", "phase", "timeScale", "mode", "guideStep", "showVelocity", "showAcceleration", "showForce", "showProjection"],
+    },
+    "pendulum.html": {
+      api: "pendulumLab",
+      fields: ["mode", "lengthM", "gravity", "amplitudeDeg", "massKg", "dampingS", "timeS", "guideStep", "showForces", "showSmall", "showTrail", "showEnergy"],
     },
     "resonance.html": {
       api: "resonanceLab",
@@ -1028,6 +1542,10 @@
     "waves.html": {
       api: "wavesLab",
       fields: ["amplitude", "wavelength", "frequency", "phase", "probe", "mode", "guideStep", "showComponents", "showMarkers", "showParticles", "showEnvelope"],
+    },
+    "wave-interference.html": {
+      api: "waveInterferenceLab",
+      fields: ["mode", "amplitude", "wavelengthM", "frequency1Hz", "frequency2Hz", "separationM", "sourcePhaseDeg", "probeXM", "probeYM", "timeS", "averagingTimeS", "attenuation", "guideStep", "showIntensity", "showPaths", "showNodal"],
     },
     "lens.html": {
       api: "lensLab",
@@ -1048,6 +1566,10 @@
     "photoelectric.html": {
       api: "photoelectricLab",
       fields: ["mode", "wavelengthNm", "intensity", "voltage", "material", "playbackRate", "guideStep", "showPhotons", "showElectrons", "showEnergy", "showField", "showEvents"],
+    },
+    "rutherford.html": {
+      api: "rutherfordLab",
+      fields: ["mode", "projectileCharge", "targetZ", "energyMeV", "impactFm", "maxImpactFm", "atomRadiusFm", "seed", "eventCount", "guideStep", "showAsymptote", "showClosest", "showEvents", "showThomson"],
     },
     "bohr.html": {
       api: "bohrLab",
