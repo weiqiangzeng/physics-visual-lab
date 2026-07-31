@@ -696,6 +696,21 @@
     state.running = false;
   }
 
+  function setState(next = {}) {
+    if (!next || typeof next !== "object") return;
+    if (typeof next.mode === "string" && MODES[next.mode]) state.mode = next.mode;
+    if (typeof next.particle === "string" && model.PARTICLES[next.particle]) state.particle = next.particle;
+    const ranges = { speedExponent: [0, 8], voltage: [50, 6000], latticeSpacingNm: [.04, .5], screenDistanceM: [.06, .3], totalEvents: [100, 3000], progress: [0, 1] };
+    Object.entries(ranges).forEach(([key, [min, max]]) => { if (Number.isFinite(Number(next[key]))) state[key] = clamp(next[key], min, max); });
+    if (Number.isFinite(Number(next.seed))) state.seed = Math.round(Number(next.seed));
+    if ([.5, 1].includes(Number(next.playbackRate))) state.playbackRate = Number(next.playbackRate);
+    if (Number.isFinite(Number(next.guideStep))) state.guideStep = clamp(Math.round(Number(next.guideStep)), 0, GUIDE.length - 1);
+    ["showWave", "showParticle", "showCrystal", "showBragg", "showTheory"].forEach((key) => { if (typeof next[key] === "boolean") state[key] = next[key]; });
+    state.running = false; state.dragging = false; hitCache.key = "";
+    [[refs.showWaveToggle, "showWave"], [refs.showParticleToggle, "showParticle"], [refs.showCrystalToggle, "showCrystal"], [refs.showBraggToggle, "showBragg"], [refs.showTheoryToggle, "showTheory"]].forEach(([input, key]) => { input.checked = state[key]; });
+    render();
+  }
+
   refs.particleSelect.addEventListener("change", () => {
     state.particle = refs.particleSelect.value;
     state.speedExponent = Math.log10(model.particle(state.particle).defaultSpeed);
@@ -833,7 +848,7 @@
 
   window.matterWaveLab = {
     getState: () => ({ ...state }),
-    setState: (next = {}) => { Object.assign(state, next); hitCache.key = ""; render(); },
+    setState,
     solve: (next = {}) => {
       const merged = { ...state, ...next };
       if (merged.mode === "scale") return model.deBroglieState({ particle: merged.particle, speedMs: 10 ** merged.speedExponent });

@@ -576,6 +576,21 @@
     render();
   }
 
+  function setState(next = {}) {
+    if (!next || typeof next !== "object") return;
+    if (typeof next.mode === "string" && MODES[next.mode]) state.mode = next.mode;
+    if (typeof next.isotope === "string" && model.ISOTOPES[next.isotope]) state.isotope = next.isotope;
+    if (typeof next.compare === "string" && model.ISOTOPES[next.compare]) state.compare = next.compare;
+    if (typeof next.reaction === "string" && model.REACTIONS[next.reaction]) state.reaction = next.reaction;
+    if (Number.isFinite(Number(next.progress))) state.progress = clamp(next.progress, 0, 1);
+    if ([.5, 1].includes(Number(next.playbackRate))) state.playbackRate = Number(next.playbackRate);
+    if (Number.isFinite(Number(next.guideStep))) state.guideStep = clamp(Math.round(Number(next.guideStep)), 0, GUIDE.length - 1);
+    ["showNucleons", "showEnergy", "showLabels", "showTrend", "showLedger"].forEach((key) => { if (typeof next[key] === "boolean") state[key] = next[key]; });
+    state.running = false; state.dragging = false;
+    [[refs.showNucleonsToggle, "showNucleons"], [refs.showEnergyToggle, "showEnergy"], [refs.showLabelsToggle, "showLabels"], [refs.showTrendToggle, "showTrend"], [refs.showLedgerToggle, "showLedger"]].forEach(([input, key]) => { input.checked = state[key]; });
+    render();
+  }
+
   refs.isotopeSelect.addEventListener("change", () => { state.isotope = refs.isotopeSelect.value; state.running = false; render(); });
   refs.compareSelect.addEventListener("change", () => { state.compare = refs.compareSelect.value; render(); });
   refs.reactionSelect.addEventListener("change", () => { state.reaction = refs.reactionSelect.value; state.progress = 0; state.running = false; render(); });
@@ -666,7 +681,7 @@
     solveReaction: (key = state.reaction) => model.reactionState(key),
     getState: () => ({ ...state }),
     setMode,
-    setState: (next = {}) => { Object.assign(state, next); render(); },
+    setState,
     reset
   };
   render();

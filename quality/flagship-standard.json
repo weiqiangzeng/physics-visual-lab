@@ -1,0 +1,503 @@
+{
+  "version": 1,
+  "minimumDimensionScore": 2,
+  "minimumAverageScore": 2.5,
+  "dimensions": [
+    "physics",
+    "stateConsistency",
+    "directManipulation",
+    "linkedEvidence",
+    "modelBoundaries",
+    "learningLoop",
+    "productQuality"
+  ],
+  "requiredMarkup": [
+    "flagship-lab",
+    "lab-topbar",
+    "lesson-rail",
+    "controls",
+    "instrument-stage",
+    "live-readouts",
+    "analysis-grid",
+    "observation-bar",
+    "guideDialog",
+    "resetButton",
+    "guideButton",
+    "stepButton",
+    "focusButton",
+    "fullscreenButton"
+  ],
+  "requiredSharedScripts": [
+    "url-state.js",
+    "learning-records.js",
+    "platform.js"
+  ],
+  "labs": [
+    {
+      "id": "motion-graphs",
+      "html": "motion-graphs.html",
+      "script": "motion-graphs.js",
+      "api": "motionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "x0=-2m, v0=2m/s, a=0, t=3s -> x=4m",
+        "v0=4m/s, a=-1m/s2 -> reversal at t=4s",
+        "signed v-t area equals displacement"
+      ]
+    },
+    {
+      "id": "pursuit",
+      "html": "pursuit.html",
+      "script": "pursuit.js",
+      "model": "pursuit-model.js",
+      "api": "pursuitLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "chase gap=40m, vA=6m/s, vB=10m/s -> encounter at t=10s and x=100m",
+        "delayed B gap=20m, vA=4m/s, vB=12m/s, delay=2s -> encounter at t=5.5s",
+        "opposite gap=80m, vA=6m/s, vB=-10m/s -> encounter at t=5s"
+      ]
+    },
+    {
+      "id": "elevator",
+      "html": "elevator.html",
+      "script": "elevator.js",
+      "model": "elevator-model.js",
+      "api": "elevatorLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "m=60kg,g=9.8m/s2,a=0 -> N=588N",
+        "m=60kg,g=9.8m/s2,a=2m/s2 -> N=708N and N/mg=1.204",
+        "a=-g -> N=0, while gravity remains mg",
+        "elevator acceleration below -g -> contact is lost and person free-falls at -g"
+      ]
+    },
+    {
+      "id": "vertical-motion",
+      "html": "vertical-motion.html",
+      "script": "vertical-motion.js",
+      "model": "vertical-motion-model.js",
+      "api": "verticalMotionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "drop from 20m at g=9.8m/s2 -> impact at 2.0203s",
+        "throw upward at 20m/s -> apex at 2.0408s with a=-g",
+        "uniform frame changes velocity but not acceleration"
+      ]
+    },
+    {
+      "id": "friction",
+      "html": "friction.html",
+      "script": "friction.js",
+      "api": "frictionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "m=2kg, muS=0.5 -> maximum static friction=9.8N",
+        "applied force 5N -> static friction 5N and acceleration 0",
+        "applied force 12N, muK=0.3 -> kinetic friction 5.88N"
+      ]
+    },
+    {
+      "id": "newton-laws",
+      "html": "newton-laws.html",
+      "script": "newton-laws.js",
+      "api": "newtonLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "right force 6N, left force 2N, mass 2kg -> acceleration 2m/s2",
+        "zero net force with nonzero velocity -> uniform motion",
+        "force and mass parameter sweeps share the same F=ma state"
+      ]
+    },
+    {
+      "id": "interaction",
+      "html": "interaction.html",
+      "script": "interaction.js",
+      "model": "interaction-model.js",
+      "api": "interactionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "orthogonal forces 6N and 8N -> resultant 10N",
+        "k=40N/m and x=0.15m -> spring force -6N and energy 0.45J",
+        "connected bodies residuals are zero"
+      ]
+    },
+    {
+      "id": "projectile",
+      "html": "projectile.html",
+      "script": "projectile.js",
+      "api": "projectileLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "v0=20m/s, theta=45deg, g=10m/s2 -> range=40m",
+        "at apex vy=0 while vx remains nonzero",
+        "complementary launch angles have equal range at equal launch and landing heights"
+      ]
+    },
+    {
+      "id": "circular",
+      "html": "circular.html",
+      "script": "circular.js",
+      "api": "circularLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "m=2kg, r=2m, v=4m/s -> ac=8m/s2 and Fc=16N",
+        "velocity is tangent while centripetal acceleration is radial",
+        "releasing the constraint produces tangent uniform motion"
+      ]
+    },
+    {
+      "id": "circular-critical",
+      "html": "circular-critical.html",
+      "script": "circular-critical.js",
+      "model": "circular-critical-model.js",
+      "api": "circularCriticalLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "mu=0.5, r=40m -> flat-turn critical speed=14m/s",
+        "vertical loop minimum bottom speed=sqrt(5gr)",
+        "hill crest loses contact at v=sqrt(gr)"
+      ]
+    },
+    {
+      "id": "orbital",
+      "html": "orbital.html",
+      "script": "orbital.js",
+      "model": "orbital-model.js",
+      "api": "orbitalLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "400km circular orbit -> speed about 7.673km/s and period about 92.41min",
+        "geosynchronous radius is about 42164km",
+        "escape threshold is sqrt(2) times circular speed"
+      ]
+    },
+    {
+      "id": "work-propulsion",
+      "html": "work-propulsion.html",
+      "script": "work-propulsion.js",
+      "model": "work-propulsion-model.js",
+      "api": "workPropulsionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "F=20N, s=5m, theta=60deg -> work=50J",
+        "closed recoil system has zero momentum residual",
+        "ideal rocket delta-v equals exhaust speed times ln(m0/mf)"
+      ]
+    },
+    {
+      "id": "mechanical-energy",
+      "html": "mechanical-energy.html",
+      "script": "mechanical-energy.js",
+      "api": "mechanicalEnergyLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "m=2kg, h=4m, v0=0 -> initial mechanical energy=78.4J",
+        "rough-surface total energy residual remains zero when internal energy is included",
+        "spring kinetic plus elastic potential energy remains constant"
+      ]
+    },
+    {
+      "id": "refraction",
+      "html": "refraction.html",
+      "script": "refraction.js",
+      "api": "refractionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "n1=1, n2=1.5, theta1=30deg -> theta2=19.47deg",
+        "n1=1.5, n2=1 -> critical=41.81deg",
+        "n1=1.5, n2=1, theta1=50deg -> total internal reflection"
+      ]
+    },
+    {
+      "id": "electric-field",
+      "html": "electric-field.html",
+      "script": "electric-field.js",
+      "model": "electric-field-model.js",
+      "api": "electricFieldLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "Q=6nC, r=2m -> E=13.481N/C and V=26.962V",
+        "reversing test charge reverses F but leaves E and V unchanged",
+        "equal like charges at midpoint -> E=0 while V is nonzero"
+      ]
+    },
+    {
+      "id": "electrostatic-conductor",
+      "html": "electrostatic-conductor.html",
+      "script": "electrostatic-conductor.js",
+      "model": "electrostatic-conductor-model.js",
+      "api": "electrostaticConductorLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "uniform-field conductor at equilibrium -> interior field=0",
+        "surface tangential field of an ideal conducting sphere is zero",
+        "cavity inner charge=-q and outer charge=Q+q with zero ledger residual"
+      ]
+    },
+    {
+      "id": "capacitor",
+      "html": "capacitor.html",
+      "script": "capacitor.js",
+      "model": "capacitor-model.js",
+      "api": "capacitorLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "A=0.02m2 and d=0.002m in vacuum -> C=88.542pF",
+        "doubling plate distance halves C; fixed-U halves Q while fixed-Q doubles U",
+        "capacitor energy change equals battery work plus external work"
+      ]
+    },
+    {
+      "id": "ohm-law",
+      "html": "ohm-law.html",
+      "script": "ohm-law.js",
+      "model": "ohm-law-model.js",
+      "api": "ohmLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "U=6V and R=3ohm -> I=2A",
+        "fixed resistor I-U slope equals 1/R",
+        "heated lamp current is lower than fixed-resistance prediction"
+      ]
+    },
+    {
+      "id": "circuit-applications",
+      "html": "circuit-applications.html",
+      "script": "circuit-applications.js",
+      "model": "circuit-applications-model.js",
+      "api": "circuitApplicationsLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "12V across 4ohm+8ohm series -> I=1A, U1=4V, U2=8V",
+        "12V across 6ohm parallel 3ohm -> I1=2A, I2=4A, Req=2ohm",
+        "series KVL and parallel KCL residuals are zero"
+      ]
+    },
+    {
+      "id": "power-source",
+      "html": "power-source.html",
+      "script": "power-source.js",
+      "model": "power-source-model.js",
+      "api": "powerSourceLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "emf=12V, r=2ohm, R=4ohm -> I=2A and terminal U=8V",
+        "maximum load power occurs at R=r and has 50 percent efficiency",
+        "voltage and power ledger residuals are zero"
+      ]
+    },
+    {
+      "id": "magnetic-field",
+      "html": "magnetic-field.html",
+      "script": "magnetic-field.js",
+      "model": "magnetic-field-model.js",
+      "api": "magneticFieldLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "straight-wire field at r=0.10m with I=10A -> B=20 microtesla",
+        "equal same-direction wires cancel at their midpoint",
+        "loop and solenoid fields follow their geometry and current directions"
+      ]
+    },
+    {
+      "id": "charged-particle",
+      "html": "charged-particle.html",
+      "script": "charged-particle.js",
+      "api": "particleLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "pure magnetic field keeps particle speed constant",
+        "magnetic force is perpendicular to instantaneous velocity",
+        "magnetic orbit radius is r=mv/(|q|B)"
+      ]
+    },
+    {
+      "id": "mass-spectrometer",
+      "html": "mass-spectrometer.html",
+      "script": "mass-spectrometer.js",
+      "model": "mass-spectrometer-model.js",
+      "api": "massSpectrometerLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "velocity selector transmits particles at v=E/B with zero net transverse force",
+        "magnetic analyzer radius is r=mv/(|q|B)",
+        "same-speed isotope radii have the same ratio as their masses"
+      ]
+    },
+    {
+      "id": "electromagnetic-induction",
+      "html": "electromagnetic-induction.html",
+      "script": "electromagnetic-induction.js",
+      "api": "inductionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "rate mode follows epsilon=-N dPhi/dt",
+        "open circuit has induced emf but zero continuous current",
+        "rotating coil has maximum flux where induced emf is zero"
+      ]
+    },
+    {
+      "id": "alternating-current",
+      "html": "alternating-current.html",
+      "script": "alternating-current.js",
+      "model": "alternating-current-model.js",
+      "api": "alternatingCurrentLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "311.127V sine peak has a 220V RMS value",
+        "ideal transformer voltage ratio equals turns ratio",
+        "fixed-power transmission loss follows I squared R"
+      ]
+    },
+    {
+      "id": "electromagnetic-oscillation",
+      "html": "electromagnetic-oscillation.html",
+      "script": "electromagnetic-oscillation.js",
+      "model": "electromagnetic-oscillation-model.js",
+      "api": "electromagneticOscillationLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "ideal LC energy is conserved while electric and magnetic energy exchange",
+        "LC charge and current differ by one quarter period",
+        "electromagnetic waves satisfy c=f lambda and E=cB"
+      ]
+    },
+    {
+      "id": "collision",
+      "html": "collision.html",
+      "script": "collision.js",
+      "api": "collisionLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "equal-mass elastic collision exchanges the two velocities",
+        "all restitution values conserve system momentum",
+        "mechanical-energy loss equals one half reduced mass times one minus e squared times relative speed squared"
+      ]
+    },
+    {
+      "id": "oscillation",
+      "html": "oscillation.html",
+      "script": "oscillation.js",
+      "api": "oscillationLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "m=1kg and k=4N/m -> omega=2rad/s and period=pi seconds",
+        "at an endpoint velocity is zero while acceleration and restoring force are maximal",
+        "kinetic plus elastic potential energy remains one half k A squared"
+      ]
+    },
+    {
+      "id": "resonance",
+      "html": "resonance.html",
+      "script": "resonance.js",
+      "model": "resonance-model.js",
+      "api": "resonanceLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "at f=f0 displacement lags force by 90 degrees and average input power is maximal",
+        "with damping ratio 0.1 the displacement peak lies below f0",
+        "half-power bandwidth is 2 zeta f0 and Q is one over 2 zeta"
+      ]
+    },
+    {
+      "id": "waves",
+      "html": "waves.html",
+      "script": "waves.js",
+      "api": "wavesLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "wave speed equals wavelength times frequency while particles remain at fixed horizontal positions",
+        "superposition equals y1 plus y2 at every position and time",
+        "standing-wave node spacing is lambda over two"
+      ]
+    },
+    {
+      "id": "lens",
+      "html": "lens.html",
+      "script": "lens.js",
+      "api": "lensLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "f=10cm, u=30cm -> v=15cm, m=-0.5 and h'=-2cm for h=4cm",
+        "f=10cm, u=5cm -> v=-10cm and an upright virtual image with m=2",
+        "u=f puts the image at infinity and only real images can be accepted by a screen"
+      ]
+    },
+    {
+      "id": "ideal-gas",
+      "html": "ideal-gas.html",
+      "script": "ideal-gas.js",
+      "model": "ideal-gas-model.js",
+      "api": "idealGasLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "n=0.1mol, V=10L, T=300K -> p=24.943kPa",
+        "isothermal compression to half volume doubles pressure and preserves pV",
+        "at equal n, V and T helium and nitrogen have equal pressure but helium has greater rms speed"
+      ]
+    },
+    {
+      "id": "matter-phase",
+      "html": "matter-phase.html",
+      "script": "matter-phase.js",
+      "model": "matter-phase-model.js",
+      "api": "matterPhaseLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "Brownian diffusion coefficient follows D=kT/(6 pi eta r) and mean squared displacement equals 4Dt in two dimensions",
+        "at the midpoint of melting pure water remains at 0C while melt fraction is 0.5",
+        "heater input equals useful heat plus environmental loss"
+      ]
+    },
+    {
+      "id": "thermodynamics",
+      "html": "thermodynamics.html",
+      "script": "thermodynamics.js",
+      "model": "thermodynamics-model.js",
+      "api": "thermodynamicsLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "isothermal ideal-gas expansion has delta U=0 and Q=W=nRT ln(V2/V1)",
+        "clockwise rectangular cycle net work equals enclosed p-V area and cycle delta U is zero",
+        "Th=600K and Tc=300K -> Carnot efficiency=0.5 and any larger requested efficiency is rejected"
+      ]
+    },
+    {
+      "id": "photoelectric", "html": "photoelectric.html", "script": "photoelectric.js", "model": "photoelectric-model.js", "api": "photoelectricLab", "minimumCanvasCount": 3,
+      "referencePoints": ["400nm photon on sodium gives about 0.82eV maximum kinetic energy", "650nm light does not eject electrons from sodium regardless of intensity", "stopping voltage in volts equals maximum kinetic energy in electronvolts"]
+    },
+    {
+      "id": "bohr", "html": "bohr.html", "script": "bohr.js", "model": "bohr-model.js", "api": "bohrLab", "minimumCanvasCount": 3,
+      "referencePoints": ["hydrogen n=3 to n=2 emits the 656nm H-alpha line", "Bohr level energy follows -13.6/n squared", "absorption occurs only when photon energy matches an allowed level difference"]
+    },
+    {
+      "id": "matter-wave", "html": "matter-wave.html", "script": "matter-wave.js", "model": "matter-wave-model.js", "api": "matterWaveLab", "minimumCanvasCount": 3,
+      "referencePoints": ["de Broglie wavelength equals h over momentum", "electron wavelength under accelerating voltage scales as one over square root V", "Bragg ring angle satisfies 2d sin theta=lambda"]
+    },
+    {
+      "id": "radioactive-decay", "html": "radioactive-decay.html", "script": "radioactive-decay.js", "model": "radioactive-decay-model.js", "api": "radioactiveDecayLab", "minimumCanvasCount": 3,
+      "referencePoints": ["expected remaining population is N0/2 after one half-life", "single decay times remain random while ensemble expectation is exponential", "relative statistical fluctuation decreases as sample size grows"]
+    },
+    {
+      "id": "binding-energy", "html": "binding-energy.html", "script": "binding-energy.js", "model": "binding-energy-model.js", "api": "bindingEnergyLab", "minimumCanvasCount": 3,
+      "referencePoints": ["helium-4 mass defect corresponds to about 28.296MeV", "binding energy per nucleon rather than total binding energy compares stability", "D-T fusion conserves A and Z and releases about 17.59MeV"]
+    },
+    {
+      "id": "nuclear-reaction", "html": "nuclear-reaction.html", "script": "nuclear-reaction.js", "model": "nuclear-reaction-model.js", "api": "nuclearReactionLab", "minimumCanvasCount": 3,
+      "referencePoints": ["effective multiplication k equals neutron yield times productive probability", "critical control absorption makes k equal one", "default D-T reference has opportunity index one while classical closest approach exceeds nuclear contact scale"]
+    },
+    {
+      "id": "double-slit",
+      "html": "double-slit.html",
+      "script": "double-slit.js",
+      "api": "doubleSlitLab",
+      "minimumCanvasCount": 3,
+      "referencePoints": [
+        "lambda=600nm, L=1.2m, d=0.30mm -> beta=2.40mm",
+        "first dark fringe is at y=beta/2=1.20mm",
+        "which-path measurement removes the interference modulation"
+      ]
+    }
+  ]
+}

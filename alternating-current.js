@@ -959,6 +959,8 @@
       phaseInput: state.phase,
     };
     Object.entries(values).forEach(([name, value]) => R[name].value = value);
+    [[R.showFieldToggle, "showField"], [R.showFlowToggle, "showFlow"], [R.showRmsToggle, "showRms"], [R.showLedgerToggle, "showLedger"]]
+      .forEach(([input, key]) => input.checked = state[key]);
   }
   function render() {
     const q = current(),
@@ -1063,6 +1065,7 @@
     drawPower(q);
   }
   function setMode(mode) {
+    if (!modes[mode]) return;
     state.mode = mode;
     state.running = false;
     state.phase = 0;
@@ -1246,9 +1249,15 @@
   window.alternatingCurrentLab = {
     getState: () => ({ ...state }),
     setMode,
-    setState(changes) {
-      Object.assign(state, changes);
+    setState(changes = {}) {
+      if (typeof changes.mode === "string" && modes[changes.mode]) state.mode = changes.mode;
+      const numericFields = ["field", "generatorTurns", "areaCm2", "frequency", "peakVoltage", "load", "primaryVoltage", "primaryTurns", "secondaryTurns", "transformerLoad", "sentPowerMW", "transmissionVoltageKV", "lineResistance", "phase"];
+      numericFields.forEach((key) => { if (changes[key] !== undefined && Number.isFinite(Number(changes[key]))) state[key] = Number(changes[key]); });
+      if (changes.guideStep !== undefined) state.guideStep = Math.max(0, Math.min(guide.length - 1, Math.round(changes.guideStep)));
+      ["showField", "showFlow", "showRms", "showLedger"].forEach((key) => { if (changes[key] !== undefined) state[key] = Boolean(changes[key]); });
+      state.running = false;
       syncInputs();
+      R.sceneTabs.forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
       render();
     },
     current,

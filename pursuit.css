@@ -1,0 +1,2 @@
+.pursuit-lab .brand-mark{font-size:12px}.pursuit-lab .instrument-stage{min-width:0}.pursuit-lab .instrument-stage canvas{display:block;width:100%;max-width:100%;min-width:0;aspect-ratio:900 / 470;height:auto;touch-action:none;cursor:ew-resize}.pursuit-lab .state-badge.is-met{color:#79d597;border-color:rgba(121,213,151,.55)}.pursuit-lab .state-badge.is-missed{color:#ff796f;border-color:rgba(255,121,111,.55)}
+@media(max-width:1120px){.pursuit-lab .instrument-stage canvas{min-height:300px}}

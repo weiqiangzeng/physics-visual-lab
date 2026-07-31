@@ -7,8 +7,8 @@
     <title>折射与全反射实验室</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=workspace-3" />
-    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-2" />
-    <link rel="stylesheet" href="./refraction.css?v=flagship-1" />
+    <link rel="stylesheet" href="./lab-workbench.css?v=flagship-3" />
+    <link rel="stylesheet" href="./refraction.css?v=flagship-2" />
   </head>
   <body class="flagship-lab refraction-lab">
     <header class="lab-topbar">
@@ -124,6 +124,11 @@
       </aside>
 
       <section class="stage">
+        <nav class="mobile-scene-tabs" aria-label="实验场景">
+          <button class="scene-tab mobile-scene-tab is-active" type="button" data-mode="refraction"><span>01</span><strong>折射</strong></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="critical"><span>02</span><strong>临界</strong></button>
+          <button class="scene-tab mobile-scene-tab" type="button" data-mode="total"><span>03</span><strong>全反射</strong></button>
+        </nav>
         <header class="stage-head">
           <div class="stage-title">
             <span class="stage-breadcrumb">折射与全反射 / <b id="modeTitle">折射定律</b></span>
@@ -184,6 +189,6 @@
     <script src="./refraction.js?v=flagship-1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=workspace-31"></script>
+    <script src="./platform.js?v=workspace-43"></script>
   </body>
 </html>

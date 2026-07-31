@@ -216,7 +216,7 @@
   }
 
   function setState(next) {
-    if ("m" in next) state.m = clamp(next.m, 0.5, 5); if ("position" in next) state.position = clamp(next.position, state.mode === "spring" ? 0.2 : 1, state.mode === "spring" ? 1.5 : 6); if ("v0" in next) state.v0 = clamp(next.v0, 0, 6); if ("mu" in next) state.mu = clamp(next.mu, 0, 0.5); if ("k" in next) state.k = clamp(next.k, 10, 80); if ("running" in next) state.running = Boolean(next.running); if ("time" in next) state.time = clamp(next.time, 0, solve().duration || 0); render();
+    if ("m" in next) state.m = clamp(next.m, 0.5, 5); if ("position" in next) state.position = clamp(next.position, state.mode === "spring" ? 0.2 : 1, state.mode === "spring" ? 1.5 : 6); if ("v0" in next) state.v0 = clamp(next.v0, 0, 6); if ("mu" in next) state.mu = clamp(next.mu, 0, 0.5); if ("k" in next) state.k = clamp(next.k, 10, 80); if ("running" in next) state.running = Boolean(next.running); if ("time" in next) state.time = clamp(next.time, 0, solve().duration || 0); if (["object", "earth", "full"].includes(next.boundary)) state.boundary = next.boundary; if ("rate" in next) state.rate = clamp(next.rate, .5, 1); if ("guideStep" in next) state.guideStep = clamp(Math.round(next.guideStep), 0, guide.length - 1); [[refs.showVelocityToggle, "showVelocity"], [refs.showForceToggle, "showForce"], [refs.showFlowToggle, "showFlow"], [refs.showReferenceToggle, "showReference"]].forEach(([input, key]) => { if (key in next) state[key] = Boolean(next[key]); input.checked = state[key]; }); render();
   }
 
   function setMode(modeName) {

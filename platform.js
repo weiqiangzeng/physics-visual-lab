@@ -1,6 +1,8 @@
 (function () {
   const lessons = [
     "motion-graphs.html",
+    "pursuit.html",
+    "elevator.html",
     "vertical-motion.html",
     "friction.html",
     "newton-laws.html",
@@ -40,11 +42,78 @@
     "binding-energy.html",
     "nuclear-reaction.html",
   ];
+  const lessonLabels = {
+    "motion-graphs.html": "运动图像",
+    "pursuit.html": "追及与相遇",
+    "elevator.html": "电梯与视重",
+    "vertical-motion.html": "自由落体与竖直上抛",
+    "friction.html": "摩擦力",
+    "newton-laws.html": "牛顿运动定律",
+    "interaction.html": "力与相互作用",
+    "projectile.html": "抛体运动",
+    "circular.html": "匀速圆周运动",
+    "circular-critical.html": "圆周运动临界",
+    "orbital.html": "卫星轨道与宇宙航行",
+    "work-propulsion.html": "功率与推进",
+    "mechanical-energy.html": "机械能守恒",
+    "electric-field.html": "电场强度与电势",
+    "electrostatic-conductor.html": "静电平衡与感应",
+    "capacitor.html": "电容器与电场能量",
+    "ohm-law.html": "欧姆定律",
+    "circuit-applications.html": "电路应用与传感器",
+    "power-source.html": "闭合电路与电源内阻",
+    "magnetic-field.html": "电流的磁场",
+    "charged-particle.html": "带电粒子与电磁场",
+    "mass-spectrometer.html": "速度选择器与质谱仪",
+    "electromagnetic-induction.html": "电磁感应与楞次定律",
+    "alternating-current.html": "交变电流、变压与输电",
+    "electromagnetic-oscillation.html": "LC 振荡与电磁波",
+    "collision.html": "一维碰撞",
+    "oscillation.html": "简谐运动",
+    "resonance.html": "受迫振动与共振",
+    "waves.html": "机械波与驻波",
+    "refraction.html": "折射与全反射",
+    "lens.html": "透镜成像",
+    "double-slit.html": "双缝干涉",
+    "ideal-gas.html": "理想气体",
+    "matter-phase.html": "物态与热运动",
+    "thermodynamics.html": "热力学与热机",
+    "photoelectric.html": "光电效应",
+    "bohr.html": "玻尔模型与原子能级",
+    "matter-wave.html": "物质波与波粒二象性",
+    "radioactive-decay.html": "放射性衰变与半衰期",
+    "binding-energy.html": "质量亏损与结合能",
+    "nuclear-reaction.html": "核裂变与核聚变",
+  };
+  const moduleLessonFiles = {
+    "kinematics": ["motion-graphs.html", "pursuit.html", "elevator.html", "vertical-motion.html"],
+    "forces": ["friction.html", "newton-laws.html", "interaction.html"],
+    "curved-motion": ["projectile.html", "circular.html", "circular-critical.html", "orbital.html"],
+    "energy": ["work-propulsion.html", "mechanical-energy.html"],
+    "electric-field": ["electric-field.html", "electrostatic-conductor.html", "capacitor.html"],
+    "current": ["ohm-law.html", "circuit-applications.html", "power-source.html"],
+    "magnetic-field": ["magnetic-field.html", "charged-particle.html", "mass-spectrometer.html", "electromagnetic-induction.html", "alternating-current.html", "electromagnetic-oscillation.html"],
+    "momentum": ["collision.html"],
+    "waves": ["oscillation.html", "resonance.html", "waves.html"],
+    "optics": ["refraction.html", "lens.html", "double-slit.html"],
+    "thermal": ["ideal-gas.html", "matter-phase.html", "thermodynamics.html"],
+    "modern-physics": ["photoelectric.html", "bohr.html", "matter-wave.html", "radioactive-decay.html", "binding-energy.html", "nuclear-reaction.html"],
+  };
   const lessonTasks = {
     "motion-graphs.html": [
       "切换匀速和匀变速，比较 \\(x-t\\) 图像的斜率。",
       "拖动同一时刻的竖线，对照 \\(x-t\\) 和 \\(v-t\\) 图像上的点。",
       "观察 \\(v-t\\) 图像与时间轴围成的面积，说明它为什么表示位移。",
+    ],
+    "pursuit.html": [
+      "分别写出 A、B 两车的位置函数，定位位置图像的交点。",
+      "让 B 车延迟启动，比较启动前后的分段函数与真实相遇时刻。",
+      "切换到 A 车或 B 车参考系，核对相遇事件是否改变。",
+    ],
+    "elevator.html": [
+      "保持人和重力不变，分别设置向上、向下加速度，比较支持力与重力。",
+      "把向下加速度调到 −g，观察支持力何时降为零并解释失重边界。",
+      "在加速参考系中显示伪力，核对完整受力账本与牛顿第二定律。",
     ],
     "vertical-motion.html": [
       "改变两个物体质量并同时释放，核对真空中高度、速度与落地时刻是否一致。",
@@ -249,6 +318,30 @@
       ],
       takeaway:
         "\\(x-t\\) 图像的斜率表示速度，\\(v-t\\) 图像的斜率表示加速度，\\(v-t\\) 图像的有向面积表示位移。",
+    },
+    "pursuit.html": {
+      goal: "用位置函数和相对运动统一追及、延迟启动、相向运动与参考系变换。",
+      prerequisite:
+        "会用位置、速度和时间描述直线运动；相遇只需比较同一时刻的两个位置，分段运动会在延迟场景中直接呈现。",
+      prompts: [
+        "先写出两车的位置函数，再把位置图像的交点读成相遇事件。",
+        "让 B 车延迟启动，分别检查启动前静止段和启动后运动段。",
+        "切换到随 A 车或 B 车运动的参考系，比较位置和速度读数，确认事件时刻不变。",
+      ],
+      takeaway:
+        "有向间距 \\(\\Delta x=x_A-x_B\\) 的变化率是相对速度；相遇满足 \\(\\Delta x=0\\)，匀速参考系变换会改变读数，但不会改变同一事件的时间。",
+    },
+    "elevator.html": {
+      goal: "用支持力、真实重力和惯性力统一超重、失重与非惯性系受力分析。",
+      prerequisite:
+        "会画物体的受力图，知道合力决定加速度；支持力是秤的读数，伪力只在加速参考系中引入。",
+      prompts: [
+        "先固定人在电梯中的位置，比较静止、向上加速和向下加速的支持力。",
+        "逐渐增大向下加速度，定位 N=0 的失重边界，说明重力并没有消失。",
+        "切换加速参考系，加入 −maꜰ，检查受力账本是否回到平衡形式。",
+      ],
+      takeaway:
+        "惯性系中 \\(N-mg=ma\\)，所以 \\(N=m(g+a)\\)；向上加速超重、向下加速失重，\\(a=-g\\) 时支持力为零；加速系需加入伪力。",
     },
     "vertical-motion.html": {
       goal: "用同一竖直坐标统一自由落体、竖直上抛、参考系变换和空气阻力边界。",
@@ -725,6 +818,7 @@
     : curriculumSource;
   const courseBooks = curriculum.books;
   const storageKey = "physics-visual-lab-progress-v1";
+  const labStateStorageKey = "physics-visual-lab-state-v1";
   const audienceStorageKey = "physics-visual-lab-audience-v1";
   const moduleStorageKey = "physics-visual-lab-module-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
@@ -810,6 +904,172 @@
       chapterIds: ["selective-3-4", "selective-3-5"],
     },
   ];
+  const stateAdapters = {
+    "motion-graphs.html": {
+      api: "motionLab",
+      fields: ["mode", "x0", "v0", "a", "duration", "timeScale", "guideStep", "showGhosts", "showTangent", "showArea", "showAcceleration"],
+    },
+    "pursuit.html": {
+      api: "pursuitLab",
+      fields: ["mode", "gap", "vA", "vB", "aB", "delayB", "frame", "time", "guideStep", "showStrobe", "showVectors", "showMeeting", "showRelative"],
+    },
+    "elevator.html": {
+      api: "elevatorLab",
+      fields: ["mode", "mass", "gravity", "acceleration", "frameAcceleration", "time", "guideStep", "showVectors", "showScale", "showFrame", "showTrail"],
+    },
+    "vertical-motion.html": {
+      api: "verticalMotionLab",
+      fields: ["mode", "heightM", "speedMs", "gravity", "massA", "massB", "frameVelocity", "dragMass", "areaCm2", "dragCoefficient", "progress", "guideStep", "showStrobe", "showVectors", "showGrid", "showForces"],
+    },
+    "friction.html": {
+      api: "frictionLab",
+      fields: ["mass", "muS", "muK", "targetForce", "rampRate", "mode", "guideStep", "showForces", "showNet", "showContact", "showTrail"],
+    },
+    "newton-laws.html": {
+      api: "newtonLab",
+      fields: ["mass", "rightForce", "leftForce", "initialVelocity", "speed", "mode", "guideStep", "showForces", "showNet", "showVelocity", "showTrail"],
+    },
+    "interaction.html": {
+      api: "interactionLab",
+      fields: ["mode", "force1", "force2", "angle", "mass1", "mass2", "deformation", "k", "guideStep", "showComponents", "showFreeBody", "showValues", "showResidual"],
+    },
+    "projectile.html": {
+      api: "projectileLab",
+      fields: ["speed", "angle", "gravity", "target", "timeScale", "mode", "guideStep", "showComponents", "showAcceleration", "showStrobe", "showCompare"],
+    },
+    "circular.html": {
+      api: "circularLab",
+      fields: ["mass", "radius", "speed", "phase", "timeScale", "mode", "guideStep", "showVelocity", "showAcceleration", "showForce", "showDelta"],
+    },
+    "circular-critical.html": {
+      api: "circularCriticalLab",
+      fields: ["mode", "mass", "radius", "speed", "mu", "bank", "progress", "rate", "guideStep", "showForces", "showRadial", "showLimit", "showTrail", "showTheory"],
+    },
+    "orbital.html": {
+      api: "orbitalLab",
+      fields: ["mode", "altitudeKm", "targetKm", "speedRatio", "progress", "rate", "guideStep", "showVelocity", "showGravity", "showEnergy", "showScale", "showTheory"],
+    },
+    "mechanical-energy.html": {
+      api: "mechanicalEnergyLab",
+      fields: ["m", "position", "v0", "mu", "k", "mode", "boundary", "rate", "guideStep", "showVelocity", "showForce", "showFlow", "showReference"],
+    },
+    "work-propulsion.html": {
+      api: "workPropulsionLab",
+      fields: ["mode", "force", "angle", "distance", "mass", "speed", "ratio", "step", "showVectors", "showLedger", "showEnergy", "showExhaust"],
+    },
+    "refraction.html": {
+      api: "refractionLab",
+      fields: ["angle", "medium1", "medium2", "wavelength", "mode", "guideStep", "showNormal", "showAngles", "showReflection", "showCritical"],
+    },
+    "electric-field.html": {
+      api: "electricFieldLab",
+      fields: ["mode", "q1", "q2", "separation", "uniformField", "testCharge", "probeX", "probeY", "path", "progress", "playbackRate", "guideStep", "showFieldLines", "showVectors", "showEquipotential", "showForce", "showPotentialMap"],
+    },
+    "electrostatic-conductor.html": {
+      api: "electrostaticConductorLab",
+      fields: ["mode", "field", "radius", "chargeNc", "distanceRatio", "boundary", "probeRatio", "probeAngleDeg", "cavityChargeNc", "conductorChargeNc", "progress", "guideStep", "showCharges", "showField", "showEquipotential", "showProbe"],
+    },
+    "capacitor.html": {
+      api: "capacitorLab",
+      fields: ["mode", "areaCm2", "distanceMm", "voltage", "constraint", "kappa", "fraction", "guideStep", "showCharges", "showField", "showDipoles", "showEnergy"],
+    },
+    "double-slit.html": {
+      api: "doubleSlitLab",
+      fields: ["wavelength", "slit", "slitWidth", "screen", "cursorRatio", "mode", "guideStep", "showRays", "showWaves", "showEnvelope", "showLabels", "whichPath", "photonRate"],
+    },
+    "ohm-law.html": {
+      api: "ohmLab",
+      fields: ["mode", "component", "voltage", "resistance", "compare", "guideStep", "showElectrons", "showField", "showConventional", "showHeat"],
+    },
+    "circuit-applications.html": {
+      api: "circuitApplicationsLab",
+      fields: ["mode", "voltage", "r1", "r2", "time", "sensor", "stimulus", "threshold", "guideStep", "showCurrent", "showMeters", "showPower", "showLedger"],
+    },
+    "power-source.html": {
+      api: "powerSourceLab",
+      fields: ["mode", "emf", "internal", "load", "healthy", "guideStep", "showCharges", "showVoltage", "showHeat", "showFit"],
+    },
+    "magnetic-field.html": {
+      api: "magneticFieldLab",
+      fields: ["mode", "current", "current2", "probe", "spacing", "turns", "radius", "length", "progress", "guideStep", "showField", "showLines", "showCompass", "showComponents"],
+    },
+    "charged-particle.html": {
+      api: "particleLab",
+      fields: ["mode", "charge", "mass", "electric", "magnetic", "speed", "angle", "guideStep", "showTrail", "showVectors", "showField", "showDecomposition"],
+    },
+    "electromagnetic-induction.html": {
+      api: "inductionLab",
+      fields: ["field", "motion", "turns", "area", "resistance", "pole", "direction", "circuit", "mode", "playbackRate", "guideStep", "showField", "showFlux", "showInduced", "showCarriers"],
+    },
+    "alternating-current.html": {
+      api: "alternatingCurrentLab",
+      fields: ["mode", "field", "generatorTurns", "areaCm2", "frequency", "peakVoltage", "load", "primaryVoltage", "primaryTurns", "secondaryTurns", "transformerLoad", "sentPowerMW", "transmissionVoltageKV", "lineResistance", "phase", "guideStep", "showField", "showFlow", "showRms", "showLedger"],
+    },
+    "mass-spectrometer.html": {
+      api: "massSpectrometerLab",
+      fields: ["mode", "charge", "electricKv", "selectorB", "speed1e5", "analyzerB", "lightMass", "heavyMass", "progress", "guideStep", "showForces", "showFields", "showRejected", "showDetector"],
+    },
+    "electromagnetic-oscillation.html": {
+      api: "electromagneticOscillationLab",
+      fields: ["mode", "inductanceMh", "capacitanceUf", "voltage", "resistance", "driveRatio", "quality", "waveLogFrequency", "fieldAmplitude", "direction", "phase", "guideStep", "showCharge", "showField", "showEnergy", "showScale"],
+    },
+    "collision.html": {
+      api: "collisionLab",
+      fields: ["m1", "m2", "u1", "u2", "e", "mode", "guideStep", "showVelocity", "showGhosts", "showCenter", "showMomentum"],
+    },
+    "oscillation.html": {
+      api: "oscillationLab",
+      fields: ["mass", "spring", "amplitude", "phase", "timeScale", "mode", "guideStep", "showVelocity", "showAcceleration", "showForce", "showProjection"],
+    },
+    "resonance.html": {
+      api: "resonanceLab",
+      fields: ["mode", "mass", "spring", "damping", "force", "frequency", "guideStep", "showForce", "showPhase", "showEnvelope", "showPower"],
+    },
+    "waves.html": {
+      api: "wavesLab",
+      fields: ["amplitude", "wavelength", "frequency", "phase", "probe", "mode", "guideStep", "showComponents", "showMarkers", "showParticles", "showEnvelope"],
+    },
+    "lens.html": {
+      api: "lensLab",
+      fields: ["focal", "objectDistance", "objectHeight", "screenDistance", "mode", "guideStep", "showRays", "showExtensions", "showMarkers", "showScreen"],
+    },
+    "ideal-gas.html": {
+      api: "idealGasLab",
+      fields: ["mode", "amount", "baseVolume", "baseTemperature", "species", "progress", "playbackRate", "guideStep", "showVelocity", "showTrails", "showCollisions", "showPressure", "showSample"],
+    },
+    "matter-phase.html": {
+      api: "matterPhaseLab",
+      fields: ["mode", "temperatureC", "radiusUm", "viscosityMpas", "massKg", "powerW", "efficiency", "timeS", "step", "showMolecules", "showTrail", "showRms", "showEnergy"],
+    },
+    "thermodynamics.html": {
+      api: "thermodynamicsLab",
+      fields: ["mode", "process", "temperatureK", "pressureBar", "ratio", "gamma", "highPressureBar", "highVolumeL", "hotK", "coldK", "heatInputKJ", "requestedEfficiency", "progress", "guideStep", "showParticles", "showFlow", "showArea", "showLimit"],
+    },
+    "photoelectric.html": {
+      api: "photoelectricLab",
+      fields: ["mode", "wavelengthNm", "intensity", "voltage", "material", "playbackRate", "guideStep", "showPhotons", "showElectrons", "showEnergy", "showField", "showEvents"],
+    },
+    "bohr.html": {
+      api: "bohrLab",
+      fields: ["mode", "initial", "final", "probeNm", "progress", "playbackRate", "guideStep", "showOrbit", "showPhoton", "showEnergy", "showLabels", "showSpectrum"],
+    },
+    "matter-wave.html": {
+      api: "matterWaveLab",
+      fields: ["mode", "particle", "speedExponent", "voltage", "latticeSpacingNm", "screenDistanceM", "totalEvents", "seed", "progress", "playbackRate", "guideStep", "showWave", "showParticle", "showCrystal", "showBragg", "showTheory"],
+    },
+    "radioactive-decay.html": {
+      api: "radioactiveDecayLab",
+      fields: ["mode", "initialCount", "halfLife", "tau", "seed", "playbackRate", "guideStep", "showExpected", "showBand", "showEvents", "showLabels", "showFocus"],
+    },
+    "binding-energy.html": {
+      api: "bindingEnergyLab",
+      fields: ["mode", "isotope", "compare", "reaction", "progress", "playbackRate", "guideStep", "showNucleons", "showEnergy", "showLabels", "showTrend", "showLedger"],
+    },
+    "nuclear-reaction.html": {
+      api: "nuclearReactionLab",
+      fields: ["mode", "neutronYield", "fissionProbability", "escapeFraction", "controlAbsorption", "temperatureKeV", "densityRatio", "confinementS", "progress", "playbackRate", "guideStep", "showNeutrons", "showLosses", "showEnergy", "showLabels", "showTheory"],
+    },
+  };
   let katexPromise = null;
   let mathTypesetRequest = 0;
   let controlValueObserver = null;
@@ -1187,6 +1447,94 @@
     }
   }
 
+  function readLabStates() {
+    try {
+      const parsed = JSON.parse(
+        window.localStorage.getItem(labStateStorageKey) || "{}",
+      );
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeLabStates(states) {
+    try {
+      window.localStorage.setItem(labStateStorageKey, JSON.stringify(states));
+    } catch {
+      // Restoring a lab is optional and must not block the simulation.
+    }
+  }
+
+  function stateAdapter() {
+    const config = stateAdapters[currentPage];
+    const api = config ? window[config.api] : null;
+    return config && api && typeof api.getState === "function" &&
+        typeof api.setState === "function"
+      ? { config, api }
+      : null;
+  }
+
+  function pickState(state, fields) {
+    const snapshot = {};
+    fields.forEach((field) => {
+      const value = state?.[field];
+      if (["string", "number", "boolean"].includes(typeof value)) {
+        snapshot[field] = value;
+      }
+    });
+    return snapshot;
+  }
+
+  function saveCurrentLabState() {
+    const adapter = stateAdapter();
+    if (!adapter) return null;
+    const states = readLabStates();
+    const snapshot = pickState(adapter.api.getState(), adapter.config.fields);
+    states[currentPage] = { version: 1, savedAt: Date.now(), state: snapshot };
+    writeLabStates(states);
+    return snapshot;
+  }
+
+  function restoreCurrentLabState() {
+    const adapter = stateAdapter();
+    if (!adapter) return false;
+    const params = new URLSearchParams(window.location.search);
+    const states = readLabStates();
+    if (params.get("reset") === "1") {
+      delete states[currentPage];
+      writeLabStates(states);
+      return false;
+    }
+    const saved = states[currentPage];
+    if (!saved || saved.version !== 1 || !saved.state) return false;
+    if (typeof saved.state.mode === "string" && typeof adapter.api.setMode === "function") {
+      adapter.api.setMode(saved.state.mode);
+    }
+    adapter.api.setState(saved.state);
+    document.body.dataset.labStateRestored = "true";
+    return true;
+  }
+
+  let stateSaveTimer = 0;
+  function scheduleLabStateSave() {
+    if (!stateAdapters[currentPage]) return;
+    window.clearTimeout(stateSaveTimer);
+    stateSaveTimer = window.setTimeout(saveCurrentLabState, 120);
+  }
+
+  window.physicsLabState = {
+    STORAGE_KEY: labStateStorageKey,
+    read: () => readLabStates()[currentPage] || null,
+    save: saveCurrentLabState,
+    restore: restoreCurrentLabState,
+    clear: () => {
+      const states = readLabStates();
+      delete states[currentPage];
+      writeLabStates(states);
+    },
+  };
+
   const progress = readProgress();
   if (!isHome && lessons.includes(currentPage)) {
     progress.visited[currentPage] = true;
@@ -1442,6 +1790,79 @@
     actions.prepend(link);
   }
 
+  function renderLabCatalog() {
+    if (isHome || !actions || !lessons.includes(currentPage) ||
+      document.querySelector(".lab-catalog-dialog")) return;
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "toolbar-button icon-command lab-catalog-toggle";
+    trigger.textContent = "☷";
+    trigger.title = "打开实验目录";
+    trigger.setAttribute("aria-label", "打开实验目录");
+    trigger.setAttribute("aria-haspopup", "dialog");
+
+    const dialog = document.createElement("dialog");
+    dialog.className = "lab-catalog-dialog";
+    dialog.setAttribute("aria-labelledby", "labCatalogTitle");
+    const shell = document.createElement("div");
+    shell.className = "lab-catalog-shell";
+    const header = document.createElement("header");
+    header.className = "lab-catalog-head";
+    header.innerHTML = `
+      <div><span>PHYSICS VISUAL LAB</span><h2 id="labCatalogTitle">实验目录</h2><p>按物理模型顺序浏览 ${lessons.length} 个实验</p></div>
+      <div class="lab-catalog-head-actions"><a href="./index.html">完整目录</a><button type="button" aria-label="关闭实验目录">×</button></div>`;
+    shell.append(header);
+
+    const modules = document.createElement("div");
+    modules.className = "lab-catalog-modules";
+    courseModules.forEach((module, moduleIndex) => {
+      const files = moduleLessonFiles[module.id] || [];
+      if (!files.length) return;
+      const section = document.createElement("details");
+      section.className = "lab-catalog-module";
+      section.open = files.includes(currentPage);
+      const completedCount = files.filter((file) => progress.completed[file]).length;
+      const summary = document.createElement("summary");
+      summary.innerHTML = `<span>${String(moduleIndex + 1).padStart(2, "0")}</span><strong>${module.title}</strong><small>${completedCount}/${files.length}</small>`;
+      section.append(summary);
+      const list = document.createElement("nav");
+      list.setAttribute("aria-label", `${module.title}实验`);
+      files.forEach((file) => {
+        const link = document.createElement("a");
+        link.href = `./${file}`;
+        link.dataset.catalogLesson = file;
+        link.classList.toggle("is-current", file === currentPage);
+        link.classList.toggle("is-complete", Boolean(progress.completed[file]));
+        link.classList.toggle("is-visited", Boolean(progress.visited[file]));
+        if (file === currentPage) link.setAttribute("aria-current", "page");
+        const index = lessons.indexOf(file) + 1;
+        const status = file === currentPage
+          ? "当前"
+          : progress.completed[file]
+          ? "完成"
+          : progress.visited[file]
+          ? "已浏览"
+          : "未开始";
+        link.innerHTML = `<span>${String(index).padStart(2, "0")}</span><strong>${lessonLabels[file] || file}</strong><small>${status}</small>`;
+        list.append(link);
+      });
+      section.append(list);
+      modules.append(section);
+    });
+    shell.append(modules);
+    dialog.append(shell);
+    document.body.append(dialog);
+
+    const closeButton = header.querySelector("button");
+    trigger.addEventListener("click", () => dialog.showModal());
+    closeButton.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    actions.insertBefore(trigger, actions.querySelector(".completion-toggle"));
+  }
+
   function renderCompletionToggle() {
     if (isHome || !actions || !lessons.includes(currentPage)) return;
     const button = document.createElement("button");
@@ -1500,6 +1921,11 @@
     }
   }
 
+  restoreCurrentLabState();
+  ["input", "change", "pointerup", "click"].forEach((eventName) =>
+    document.addEventListener(eventName, scheduleLabStateSave, true)
+  );
+  renderLabCatalog();
   renderTaskPanel();
   renderCompletionToggle();
   renderExperimentNavigation();

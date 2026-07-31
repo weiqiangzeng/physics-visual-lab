@@ -406,6 +406,28 @@
     sync();
   }
 
+  function setMode(modeName) {
+    if (!MODES[modeName]) return;
+    state.mode = modeName;
+    if (modeName === "rays") state.showRays = true;
+    if (modeName === "screen") state.showScreen = true;
+    sync();
+  }
+
+  function setState(patch) {
+    if (!patch || typeof patch !== "object") return;
+    if (Number.isFinite(Number(patch.focal))) state.focal = clamp(Number(patch.focal), 5, 20);
+    if (Number.isFinite(Number(patch.objectDistance))) state.objectDistance = clamp(Number(patch.objectDistance), 3, 60);
+    if (Number.isFinite(Number(patch.objectHeight))) state.objectHeight = clamp(Number(patch.objectHeight), 1, 8);
+    if (Number.isFinite(Number(patch.screenDistance))) state.screenDistance = clamp(Number(patch.screenDistance), 5, 60);
+    if (typeof patch.mode === "string" && MODES[patch.mode]) state.mode = patch.mode;
+    if (Number.isFinite(Number(patch.guideStep))) state.guideStep = clamp(Math.round(Number(patch.guideStep)), 0, GUIDE_STEPS.length - 1);
+    ["showRays", "showExtensions", "showMarkers", "showScreen"].forEach((key) => {
+      if (typeof patch[key] === "boolean") state[key] = patch[key];
+    });
+    sync();
+  }
+
   function recordSample() {
     const d = calculate();
     if (d.atFocus) return;
@@ -424,7 +446,7 @@
   [[refs.focalInput, "focal"], [refs.objectDistanceInput, "objectDistance"], [refs.objectHeightInput, "objectHeight"], [refs.screenInput, "screenDistance"]].forEach(([input, key]) => input.addEventListener("input", (event) => setParameter(key, input, event.target.value)));
   refs.objectDistanceNumber.addEventListener("input", (event) => { if (event.target.value !== "") setParameter("objectDistance", refs.objectDistanceInput, event.target.value); });
   refs.nudgeButtons.forEach((button) => button.addEventListener("click", () => setParameter("objectDistance", refs.objectDistanceInput, state.objectDistance + Number(button.dataset.nudge))));
-  refs.modeButtons.forEach((button) => button.addEventListener("click", () => { state.mode = button.dataset.mode; if (state.mode === "rays") state.showRays = true; if (state.mode === "screen") state.showScreen = true; sync(); }));
+  refs.modeButtons.forEach((button) => button.addEventListener("click", () => setMode(button.dataset.mode)));
   refs.guideButtons.forEach((button) => button.addEventListener("click", () => { state.guideStep = Number(button.dataset.guideStep); sync(); }));
   refs.regionButtons.forEach((button) => button.addEventListener("click", () => setRegion(button.dataset.region)));
   [[refs.raysToggle, "showRays"], [refs.extensionsToggle, "showExtensions"], [refs.markersToggle, "showMarkers"], [refs.screenToggle, "showScreen"]].forEach(([control, key]) => control.addEventListener("change", () => { state[key] = control.checked; sync(); }));
@@ -463,7 +485,8 @@
   window.lensLab = {
     calculate: (patch) => calculate({ ...state, ...(patch || {}) }),
     getState: () => JSON.parse(JSON.stringify(state)),
-    setState: (patch) => { Object.assign(state, patch || {}); sync(); },
+    setState,
+    setMode,
     setRegion,
     recordSample
   };

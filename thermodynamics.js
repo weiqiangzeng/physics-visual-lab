@@ -325,9 +325,22 @@
   }
   function setRangeFill(input){const min=Number(input.min),max=Number(input.max),value=Number(input.value);input.style.setProperty("--range-progress",`${(value-min)/(max-min)*100}%`);}
   function render(){const q=current();updateReadouts(q);drawMain(q);drawPath(q);drawLedger(q);document.querySelectorAll('input[type="range"]').forEach(setRangeFill);}
-  function setMode(mode){state.mode=mode;R.sceneTabs.forEach(t=>t.classList.toggle("is-active",t.dataset.mode===mode));R.processTypeSection.hidden=mode==="cycle"||mode==="carnot";R.processSection.hidden=mode==="cycle"||mode==="carnot";R.cycleSection.hidden=mode!=="cycle";R.engineSection.hidden=mode!=="carnot";render();}
+  function setMode(mode){if(!modes[mode])return;state.mode=mode;R.sceneTabs.forEach(t=>t.classList.toggle("is-active",t.dataset.mode===mode));R.processTypeSection.hidden=mode==="cycle"||mode==="carnot";R.processSection.hidden=mode==="cycle"||mode==="carnot";R.cycleSection.hidden=mode!=="cycle";R.engineSection.hidden=mode!=="carnot";render();}
   function syncInputs(){R.temperatureInput.value=state.temperatureK;R.pressureInput.value=state.pressureBar;R.ratioInput.value=state.ratio;R.highPressureInput.value=state.highPressureBar;R.highVolumeInput.value=state.highVolumeL;R.hotInput.value=state.hotK;R.coldInput.max=Math.max(200,state.hotK-10);if(state.coldK>=state.hotK)state.coldK=Math.max(200,state.hotK-10);R.coldInput.value=state.coldK;R.heatInput.value=state.heatInputKJ;R.efficiencyInput.value=state.requestedEfficiency;R.processButtons.forEach(b=>b.classList.toggle("is-active",b.dataset.process===state.process));R.gammaButtons.forEach(b=>b.classList.toggle("is-active",Math.abs(Number(b.dataset.gamma)-state.gamma)<.01));}
-  function reset(){Object.assign(state,{mode:"process",process:"isobaric",temperatureK:300,pressureBar:1,ratio:1.5,gamma:5/3,highPressureBar:3,highVolumeL:30,hotK:600,coldK:300,heatInputKJ:1,requestedEfficiency:.3,progress:0,running:false,guideStep:0});syncInputs();setMode("process");}
+  function reset(){Object.assign(state,{mode:"process",process:"isobaric",temperatureK:300,pressureBar:1,ratio:1.5,gamma:5/3,highPressureBar:3,highVolumeL:30,hotK:600,coldK:300,heatInputKJ:1,requestedEfficiency:.3,progress:0,running:false,guideStep:0,showParticles:true,showFlow:true,showArea:true,showLimit:true,dragging:false});[[R.showParticlesToggle,"showParticles"],[R.showFlowToggle,"showFlow"],[R.showAreaToggle,"showArea"],[R.showLimitToggle,"showLimit"]].forEach(([input,key])=>input.checked=state[key]);R.routeSteps.forEach((x,j)=>x.classList.toggle("is-active",j===0));syncInputs();setMode("process");}
+  function setState(next={}){
+    if(!next||typeof next!=="object")return;
+    const ranges={temperatureK:[200,800],pressureBar:[.5,4],ratio:[.4,2.5],highPressureBar:[1.2,6],highVolumeL:[12,50],hotK:[350,1000],coldK:[200,990],heatInputKJ:[.2,5],requestedEfficiency:[0,.8],progress:[0,1]};
+    Object.entries(ranges).forEach(([key,[min,max]])=>{if(Number.isFinite(Number(next[key])))state[key]=Math.max(min,Math.min(max,Number(next[key])));});
+    if(typeof next.mode==="string"&&modes[next.mode])state.mode=next.mode;
+    if(typeof next.process==="string"&&processNames[next.process])state.process=next.process;
+    if([1.4,5/3].some(value=>Math.abs(value-Number(next.gamma))<.01))state.gamma=Number(next.gamma);
+    if(Number.isFinite(Number(next.guideStep)))state.guideStep=Math.max(0,Math.min(guide.length-1,Math.round(Number(next.guideStep))));
+    ["showParticles","showFlow","showArea","showLimit"].forEach(key=>{if(typeof next[key]==="boolean")state[key]=next[key];});
+    state.coldK=Math.min(state.coldK,state.hotK-10);state.running=false;state.dragging=false;
+    [[R.showParticlesToggle,"showParticles"],[R.showFlowToggle,"showFlow"],[R.showAreaToggle,"showArea"],[R.showLimitToggle,"showLimit"]].forEach(([input,key])=>input.checked=state[key]);
+    R.routeSteps.forEach((x,j)=>x.classList.toggle("is-active",state.guideStep===j));syncInputs();setMode(state.mode);
+  }
   function bind(input,key,after){input.addEventListener("input",()=>{state[key]=Number(input.value);if(after)after();render();});}
   bind(R.temperatureInput,"temperatureK");bind(R.pressureInput,"pressureBar");bind(R.ratioInput,"ratio");bind(R.highPressureInput,"highPressureBar");bind(R.highVolumeInput,"highVolumeL");bind(R.hotInput,"hotK",syncInputs);bind(R.coldInput,"coldK");bind(R.heatInput,"heatInputKJ");bind(R.efficiencyInput,"requestedEfficiency");
   R.progressInput.addEventListener("input",()=>{state.progress=Number(R.progressInput.value);state.running=false;render();});
@@ -341,5 +354,16 @@
   [[R.showParticlesToggle,"showParticles"],[R.showFlowToggle,"showFlow"],[R.showAreaToggle,"showArea"],[R.showLimitToggle,"showLimit"]].forEach(([input,key])=>input.addEventListener("change",()=>{state[key]=input.checked;render();}));
   function pointerProgress(event){const rect=R.canvas.getBoundingClientRect();state.progress=Math.max(0,Math.min(.999,(event.clientX-rect.left)/rect.width));state.running=false;render();}
   R.canvas.addEventListener("pointerdown",e=>{state.dragging=true;R.canvas.setPointerCapture?.(e.pointerId);pointerProgress(e);});R.canvas.addEventListener("pointermove",e=>{if(state.dragging)pointerProgress(e);});R.canvas.addEventListener("pointerup",()=>state.dragging=false);R.canvas.addEventListener("pointercancel",()=>state.dragging=false);window.addEventListener("resize",render);
+  window.thermodynamicsLab={
+    idealGasProcess:M.idealGasProcess,
+    rectangularCycle:M.rectangularCycle,
+    carnotEngine:M.carnotEngine,
+    actualEngine:M.actualEngine,
+    calculate:()=>current(),
+    getState:()=>({...state}),
+    setMode,
+    setState,
+    reset,
+  };
   let previous=performance.now();function frame(now){const dt=Math.min(.05,(now-previous)/1000);previous=now;if(state.running){state.progress=(state.progress+dt*.14)%1;render();}requestAnimationFrame(frame);}syncInputs();setMode("process");requestAnimationFrame(frame);
 })();

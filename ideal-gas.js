@@ -153,6 +153,26 @@
   }
   function setMode(modeName) { if (!modes[modeName]) return; state.mode = modeName; state.progress = 0; state.running = modeName === "microscopic"; collisionFlashes = []; renderUi(); }
   function reset() { Object.assign(state, { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, showVelocity: true, showTrails: true, showCollisions: true, showPressure: true, showSample: true }); [refs.showVelocityToggle, refs.showTrailsToggle, refs.showCollisionsToggle, refs.showPressureToggle, refs.showSampleToggle].forEach((input) => { input.checked = true; }); rebuildParticles(); renderUi(); }
+  function setState(next = {}) {
+    if (!next || typeof next !== "object") return;
+    const previousAmount = state.amount;
+    if (typeof next.mode === "string" && modes[next.mode]) state.mode = next.mode;
+    if (Number.isFinite(Number(next.amount))) state.amount = clamp(next.amount, 0.02, 0.3);
+    if (Number.isFinite(Number(next.baseVolume))) state.baseVolume = clamp(next.baseVolume, 4, 30);
+    if (Number.isFinite(Number(next.baseTemperature))) state.baseTemperature = clamp(next.baseTemperature, 150, 900);
+    if (typeof next.species === "string" && model.SPECIES[next.species]) state.species = next.species;
+    if (Number.isFinite(Number(next.progress))) state.progress = clamp(next.progress, 0, 1);
+    if ([0.25, 0.5, 1, 2].includes(Number(next.playbackRate))) state.playbackRate = Number(next.playbackRate);
+    if (Number.isFinite(Number(next.guideStep))) state.guideStep = clamp(Math.round(Number(next.guideStep)), 0, guide.length - 1);
+    ["showVelocity", "showTrails", "showCollisions", "showPressure", "showSample"].forEach((key) => {
+      if (typeof next[key] === "boolean") state[key] = next[key];
+    });
+    state.running = false;
+    state.dragging = false;
+    if (state.amount !== previousAmount) rebuildParticles();
+    [[refs.showVelocityToggle, "showVelocity"], [refs.showTrailsToggle, "showTrails"], [refs.showCollisionsToggle, "showCollisions"], [refs.showPressureToggle, "showPressure"], [refs.showSampleToggle, "showSample"]].forEach(([input, key]) => { input.checked = state[key]; });
+    renderUi();
+  }
   function setProgressFromPointer(event) { const rect = refs.canvas.getBoundingClientRect(); const current = sample(); const box = containerGeometry(rect.width, rect.height, current); if (state.mode === "microscopic") { const fraction = clamp((event.clientX - rect.left - box.left) / Math.max(1, box.maximumRight - box.left), 0, 1); state.baseVolume = Math.round((4 + fraction * 11) * 2) / 2; refs.volumeInput.value = state.baseVolume; } else state.progress = clamp((event.clientX - rect.left - box.left) / Math.max(1, box.maximumRight - box.left), 0, 1); state.running = false; renderUi(); }
 
   [[refs.amountInput, "amount"], [refs.volumeInput, "baseVolume"], [refs.temperatureInput, "baseTemperature"]].forEach(([input, key]) => input.addEventListener("input", () => { state[key] = Number(input.value); state.progress = 0; if (key === "amount") rebuildParticles(); renderUi(); }));
@@ -163,6 +183,6 @@
   refs.guideButton.addEventListener("click", () => refs.guideDialog.showModal()); refs.stepButton.addEventListener("click", () => { state.guideStep = (state.guideStep + 1) % guide.length; renderUi(); }); refs.focusButton.addEventListener("click", () => { const active = document.body.classList.toggle("focus-mode"); refs.focusButton.setAttribute("aria-pressed", String(active)); }); refs.fullscreenButton.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
   refs.canvas.addEventListener("pointerdown", (event) => { state.dragging = true; refs.canvas.setPointerCapture(event.pointerId); setProgressFromPointer(event); }); refs.canvas.addEventListener("pointermove", (event) => { if (state.dragging) setProgressFromPointer(event); }); refs.canvas.addEventListener("pointerup", (event) => { state.dragging = false; if (refs.canvas.hasPointerCapture(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId); }); refs.canvas.addEventListener("pointercancel", () => { state.dragging = false; }); window.addEventListener("resize", renderUi);
   let lastFrame = performance.now(); function frame(now) { const delta = Math.min(0.04, (now - lastFrame) / 1000); lastFrame = now; const current = sample(); if (state.running) { state.elapsed += delta * state.playbackRate; if (state.mode !== "microscopic") { state.progress += delta * state.playbackRate / 3.8; if (state.progress >= 1) { state.progress = 1; state.running = false; } } updateParticles(delta, current); frameCount += 1; drawGasScene(); if (frameCount % 3 === 0) renderUi(); } requestAnimationFrame(frame); }
-  window.idealGasLab = { solve: (input = {}) => model.processState({ ...state, ...input }, input.progress ?? state.progress), getState: () => ({ ...state }), setMode, setState: (next = {}) => { Object.assign(state, next); if ("amount" in next) rebuildParticles(); renderUi(); }, reset };
+  window.idealGasLab = { solve: (input = {}) => model.processState({ ...state, ...input }, input.progress ?? state.progress), getState: () => ({ ...state }), setMode, setState, reset };
   rebuildParticles(); renderUi(); requestAnimationFrame(frame);
 })();

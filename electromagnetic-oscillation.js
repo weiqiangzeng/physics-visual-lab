@@ -683,6 +683,7 @@
     document.querySelectorAll("input[type=range]").forEach(setRangeFill);
   }
   function setMode(mode) {
+    if (!modes[mode]) return;
     state.mode = mode;
     R.sceneTabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.mode === mode));
     R.lcSection.hidden = mode === "wave";
@@ -691,8 +692,25 @@
     R.waveSection.hidden = mode !== "wave";
     render();
   }
+  function setState(next = {}) {
+    [[R.inductanceInput, "inductanceMh"], [R.capacitanceInput, "capacitanceUf"], [R.voltageInput, "voltage"], [R.resistanceInput, "resistance"], [R.driveRatioInput, "driveRatio"], [R.qualityInput, "quality"], [R.waveFrequencyInput, "waveLogFrequency"], [R.fieldAmplitudeInput, "fieldAmplitude"], [R.phaseInput, "phase"]].forEach(([input, key]) => {
+      if (next[key] !== undefined) state[key] = M.clamp(next[key], Number(input.min), Number(input.max));
+    });
+    if (next.direction !== undefined) state.direction = Number(next.direction) < 0 ? -1 : 1;
+    if (next.guideStep !== undefined) state.guideStep = M.clamp(Math.round(next.guideStep), 0, guide.length - 1);
+    [[R.showChargeToggle, "showCharge"], [R.showFieldToggle, "showField"], [R.showEnergyToggle, "showEnergy"], [R.showScaleToggle, "showScale"]].forEach(([input, key]) => {
+      if (next[key] !== undefined) state[key] = Boolean(next[key]);
+      input.checked = state[key];
+    });
+    if (typeof next.mode === "string" && modes[next.mode]) state.mode = next.mode;
+    state.running = false;
+    R.routeSteps.forEach((item, index) => item.classList.toggle("is-active", index === state.guideStep));
+    syncInputs();
+    setMode(state.mode);
+  }
   function reset() {
-    Object.assign(state, {inductanceMh:20,capacitanceUf:5,voltage:12,resistance:2,driveRatio:1,quality:8,waveLogFrequency:8,fieldAmplitude:30,direction:1,phase:0,running:false,guideStep:0});
+    Object.assign(state, {inductanceMh:20,capacitanceUf:5,voltage:12,resistance:2,driveRatio:1,quality:8,waveLogFrequency:8,fieldAmplitude:30,direction:1,phase:0,running:false,guideStep:0,showCharge:true,showField:true,showEnergy:true,showScale:true});
+    [[R.showChargeToggle,"showCharge"],[R.showFieldToggle,"showField"],[R.showEnergyToggle,"showEnergy"],[R.showScaleToggle,"showScale"]].forEach(([input,key])=>input.checked=state[key]);
     syncInputs();
     setMode("lc");
   }
@@ -754,6 +772,12 @@
     if(state.running){state.phase=(state.phase+dt*.18)%1;render();}
     requestAnimationFrame(frame);
   }
+  window.electromagneticOscillationLab = {
+    solve: current,
+    getState: () => ({ ...state }),
+    setState,
+    setMode,
+  };
   syncInputs();
   setMode("lc");
   requestAnimationFrame(frame);

@@ -710,6 +710,7 @@
     drawLedger();
   }
   function setMode(mode) {
+    if (!modes[mode]) return;
     state.mode = mode;
     Object.assign(state, defaults[mode]);
     state.running = false;
@@ -850,8 +851,19 @@
     getState: () => ({ ...state }),
     setMode,
     current,
-    setState(changes) {
-      Object.assign(state, changes);
+    setState(changes = {}) {
+      if (typeof changes.mode === "string" && modes[changes.mode]) state.mode = changes.mode;
+      ["current", "current2", "probe", "spacing", "turns", "radius", "length", "progress"].forEach((key) => {
+        if (changes[key] !== undefined && Number.isFinite(Number(changes[key]))) state[key] = Number(changes[key]);
+      });
+      if (changes.guideStep !== undefined) state.guideStep = Math.max(0, Math.min(guide.length - 1, Math.round(changes.guideStep)));
+      [[R.showFieldToggle, "showField"], [R.showLinesToggle, "showLines"], [R.showCompassToggle, "showCompass"], [R.showComponentsToggle, "showComponents"]].forEach(([input, key]) => {
+        if (changes[key] !== undefined) state[key] = Boolean(changes[key]);
+        input.checked = state[key];
+      });
+      Object.entries({ currentInput: "current", current2Input: "current2", probeInput: "probe", spacingInput: "spacing", turnsInput: "turns", radiusInput: "radius", lengthInput: "length", progressInput: "progress" })
+        .forEach(([id, key]) => R[id].value = state[key]);
+      state.running = false;
       sync();
     },
   };

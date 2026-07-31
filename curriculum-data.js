@@ -128,6 +128,50 @@
       lab: "motion-graphs.html",
     }),
     model({
+      id: "pursuit-encounter",
+      chapterId: "required-1-1",
+      title: "追及与相遇",
+      category: "运动与力",
+      visual: "位置图像与相对运动",
+      summary: "用两条位置函数、相对间距和参考系变换统一追及、延迟启动与相向运动。",
+      hook: "两辆车的速度都在变，怎样不用猜图像而直接找到它们相遇的时刻？",
+      model:
+        "相遇是同一时刻的两个位置相等；有向间距的零点给出事件，延迟启动需要分段写位置函数。",
+      relations: ["xA(t)=xB(t)", "Δx=xA−xB", "d(Δx)/dt=vA−vB", "参考系变换不改变事件"],
+      explore: [
+        "在同向追及和相向运动之间切换，比较相对速度符号。",
+        "给 B 车设置延迟，核对分段位置函数与图像交点。",
+        "切换地面、A 车和 B 车参考系，检查相遇时刻是否保持。",
+      ],
+      misconceptions: "相遇不是路程相等；相对速度带方向，延迟启动不能把全程时间直接代入运动公式。",
+      prerequisite:
+        "知道位置、速度和时间的基本含义，会在数轴上判断正方向；位置函数和参考系变换由实验逐步建立。",
+      status: "open",
+      lab: "pursuit.html",
+    }),
+    model({
+      id: "elevator-apparent-weight",
+      chapterId: "required-1-4",
+      title: "电梯与视重",
+      category: "运动与力",
+      visual: "受力图与支持力读数",
+      summary: "用支持力读数理解超重、失重和加速参考系中的惯性力。",
+      hook: "电梯向上加速时人的重力变大了吗？秤上的数字究竟测量什么？",
+      model:
+        "在惯性系中 N−mg=ma，支持力就是视重；在电梯加速参考系中加入 −maꜰ 后受力账本保持一致。",
+      relations: ["N−mg=ma", "N=m(g+a)", "N/mg=1+a/g", "F伪=−maꜰ"],
+      explore: [
+        "比较静止、向上加速和向下加速的秤上读数。",
+        "定位 a=−g 的失重边界，区分支持力消失和重力消失。",
+        "切换加速参考系，观察伪力如何补齐受力方程。",
+      ],
+      misconceptions: "超重不是重力变大，失重不是重力消失；秤测的是支持力，伪力只属于加速参考系。",
+      prerequisite:
+        "会画重力和支持力，会用合力方向判断加速度；非惯性系的伪力由实验逐步引入。",
+      status: "open",
+      lab: "elevator.html",
+    }),
+    model({
       id: "uniform-acceleration",
       chapterId: "required-1-2",
       title: "匀变速直线运动",

@@ -678,6 +678,7 @@
   }
 
   function setState(next) {
+    if ("mode" in next && modes[next.mode]) state.mode = next.mode;
     if ("q1" in next) state.q1 = clamp(next.q1, -8, 8);
     if ("q2" in next) state.q2 = clamp(next.q2, -8, 8);
     if ("separation" in next) state.separation = clamp(next.separation, 1.2, 5);
@@ -687,6 +688,13 @@
     if ("probeY" in next) state.probeY = clamp(next.probeY, WORLD.yMin + .2, WORLD.yMax - .2);
     if ("progress" in next) state.progress = clamp(next.progress, 0, 1);
     if ("running" in next) state.running = Boolean(next.running);
+    if ("path" in next && ["direct", "curve"].includes(next.path)) state.path = next.path;
+    if ("playbackRate" in next && [.5, 1].includes(Number(next.playbackRate))) state.playbackRate = Number(next.playbackRate);
+    if ("guideStep" in next) state.guideStep = clamp(Math.round(next.guideStep), 0, guide.length - 1);
+    [["showFieldLines", refs.showFieldLinesToggle], ["showVectors", refs.showVectorsToggle], ["showEquipotential", refs.showEquipotentialToggle], ["showForce", refs.showForceToggle], ["showPotentialMap", refs.showPotentialMapToggle]].forEach(([key, input]) => {
+      if (key in next) state[key] = Boolean(next[key]);
+      input.checked = state[key];
+    });
     render();
   }
 

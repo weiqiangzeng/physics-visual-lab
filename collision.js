@@ -545,14 +545,20 @@
     syncUI();
   }
 
-  function setState(patch) {
+  function setState(patch = {}) {
+    if (typeof patch.mode === "string" && modes[patch.mode]) state.mode = patch.mode;
     if (patch.m1 !== undefined) state.m1 = clamp(patch.m1, 0.5, 5);
     if (patch.m2 !== undefined) state.m2 = clamp(patch.m2, 0.5, 5);
     if (patch.u1 !== undefined) state.u1 = clamp(patch.u1, -2, 6);
     if (patch.u2 !== undefined) state.u2 = clamp(patch.u2, -4, 4);
     if (patch.e !== undefined) state.e = clamp(patch.e, 0, 1);
     if (patch.time !== undefined) state.time = clamp(patch.time, 0, DURATION);
-    if (patch.running !== undefined) state.running = Boolean(patch.running);
+    if (patch.guideStep !== undefined) state.guideStep = clamp(Math.round(patch.guideStep), 0, guide.length - 1);
+    [[refs.showVelocityToggle, "showVelocity"], [refs.showGhostsToggle, "showGhosts"], [refs.showCenterToggle, "showCenter"], [refs.showMomentumToggle, "showMomentum"]].forEach(([input, key]) => {
+      if (patch[key] !== undefined) state[key] = Boolean(patch[key]);
+      input.checked = state[key];
+    });
+    state.running = patch.running !== undefined ? Boolean(patch.running) : false;
     render();
   }
 

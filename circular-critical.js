@@ -850,6 +850,35 @@
     R.progressInput.value = 0;
     render();
   }
+  function setState(next = {}) {
+    [[R.massInput, "mass"], [R.radiusInput, "radius"], [R.speedInput, "speed"], [R.frictionInput, "mu"], [R.bankInput, "bank"]].forEach(([input, key]) => {
+      if (next[key] !== undefined) state[key] = M.clamp(next[key], Number(input.min), Number(input.max));
+      input.value = state[key];
+    });
+    if (next.progress !== undefined) state.progress = M.clamp(next.progress, 0, 1);
+    if (next.rate !== undefined) state.rate = M.clamp(next.rate, .5, 1);
+    if (next.guideStep !== undefined) state.guideStep = M.clamp(Math.round(next.guideStep), 0, guide.length - 1);
+    [[R.showForcesToggle, "showForces"], [R.showRadialToggle, "showRadial"], [R.showLimitToggle, "showLimit"], [R.showTrailToggle, "showTrail"], [R.showTheoryToggle, "showTheory"]].forEach(([input, key]) => {
+      if (next[key] !== undefined) state[key] = Boolean(next[key]);
+      input.checked = state[key];
+    });
+    if (typeof next.mode === "string" && defaults[next.mode]) state.mode = next.mode;
+    state.running = false;
+    R.progressInput.value = state.progress;
+    render();
+  }
+  let progressDragging = false;
+  function setProgressFromPointer(event) {
+    const rect = R.canvas.getBoundingClientRect();
+    state.progress = M.clamp((event.clientX - rect.left) / rect.width, 0, 1);
+    state.running = false;
+    R.progressInput.value = state.progress;
+    render();
+  }
+  R.canvas.addEventListener("pointerdown", (event) => { progressDragging = true; R.canvas.setPointerCapture?.(event.pointerId); setProgressFromPointer(event); });
+  R.canvas.addEventListener("pointermove", (event) => { if (progressDragging) setProgressFromPointer(event); });
+  R.canvas.addEventListener("pointerup", (event) => { progressDragging = false; if (R.canvas.hasPointerCapture?.(event.pointerId)) R.canvas.releasePointerCapture(event.pointerId); });
+  R.canvas.addEventListener("pointercancel", () => { progressDragging = false; });
   R.sceneTabs.forEach((b) =>
     b.addEventListener("click", () => setMode(b.dataset.mode))
   );
@@ -982,6 +1011,7 @@
     }
     requestAnimationFrame(frame);
   }
+  window.circularCriticalLab = { getState: () => ({ ...state }), setState, setMode, solve: current };
   window.addEventListener("resize", render);
   render();
   requestAnimationFrame(frame);

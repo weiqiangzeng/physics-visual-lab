@@ -332,6 +332,11 @@ function setParameters(patch) {
   if (patch.velocity !== undefined) state.velocity = Math.max(0, Number(patch.velocity));
   if (patch.sliding !== undefined) state.sliding = Boolean(patch.sliding);
   if (patch.position !== undefined) state.position = Math.max(0, Number(patch.position));
+  if (patch.guideStep !== undefined) state.guideStep = clamp(Math.round(Number(patch.guideStep)), 0, guide.length - 1);
+  [["showForces", refs.showForcesToggle], ["showNet", refs.showNetToggle], ["showContact", refs.showContactToggle], ["showTrail", refs.showTrailToggle]].forEach(([key, input]) => {
+    if (patch[key] !== undefined) state[key] = Boolean(patch[key]);
+    input.checked = state[key];
+  });
   if (!state.running && patch.targetForce !== undefined && patch.appliedForce === undefined) state.appliedForce = state.targetForce;
   if (!state.sliding && state.appliedForce > calculate().maxStatic + EPSILON) state.sliding = true;
   refs.massInput.value = state.mass; refs.staticMuInput.value = state.muS; refs.kineticMuInput.value = state.muK; refs.forceInput.value = state.targetForce; refs.rampRateInput.value = state.rampRate;
@@ -359,6 +364,18 @@ refs.kineticMuInput.addEventListener("input", () => setParameters({ muK: refs.ki
 refs.forceInput.addEventListener("input", () => setParameters({ targetForce: refs.forceInput.value }));
 refs.rampRateInput.addEventListener("input", () => setParameters({ rampRate: refs.rampRateInput.value }));
 refs.sceneTabs.forEach(button => button.addEventListener("click", () => applyMode(button.dataset.mode)));
+let forceDragging = false;
+function setForceFromPointer(event) {
+  const rect = refs.canvas.getBoundingClientRect();
+  const force = clamp((event.clientX - rect.left) / rect.width * 30, 0, 30);
+  state.running = false;
+  state.ramping = false;
+  setParameters({ targetForce: force, appliedForce: force });
+}
+refs.canvas.addEventListener("pointerdown", event => { forceDragging = true; refs.canvas.setPointerCapture?.(event.pointerId); setForceFromPointer(event); });
+refs.canvas.addEventListener("pointermove", event => { if (forceDragging) setForceFromPointer(event); });
+refs.canvas.addEventListener("pointerup", event => { forceDragging = false; if (refs.canvas.hasPointerCapture?.(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId); });
+refs.canvas.addEventListener("pointercancel", () => { forceDragging = false; });
 refs.routeSteps.forEach((button, index) => button.addEventListener("click", () => { state.guideStep = index; render(); }));
 refs.scanButton.addEventListener("click", startScan);
 refs.pauseButton.addEventListener("click", () => { state.running = false; state.ramping = false; render(); });
