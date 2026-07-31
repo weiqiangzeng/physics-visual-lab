@@ -1185,3 +1185,550 @@ summary:focus-visible {
     grid-column: auto;
   }
 }
+
+/* The directory uses the same instrument-panel language as the lab workbenches. */
+.platform-home {
+  --platform-paper: #191d1a;
+  --platform-strong: #69d18e;
+  --platform-blue: #64c7d9;
+  --platform-border: rgba(240, 241, 232, 0.11);
+  --bg: #0d100e;
+  --panel: #191d1a;
+  --ink: #f0f1e8;
+  --muted: #9ca69f;
+  min-width: 0;
+  background: #0d100e;
+  color: var(--ink);
+}
+
+.platform-home .app {
+  width: min(1600px, 100%);
+  margin: 0 auto;
+  padding: 0;
+}
+
+.platform-home .stage {
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background: #111412;
+  box-shadow: none;
+}
+
+.platform-home .platform-hero {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  min-height: 58px;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(240, 241, 232, 0.12);
+  background: rgba(17, 20, 18, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.platform-home .platform-hero::before {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #69d18e;
+  box-shadow: 0 0 12px rgba(105, 209, 142, 0.55);
+  content: "";
+}
+
+.platform-home .hero-copy {
+  display: grid;
+  width: 100%;
+  max-width: none;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.platform-home .platform-hero .platform-kicker {
+  color: #69d18e;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.67rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.platform-home .platform-hero h1 {
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.02rem;
+  font-weight: 760;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.platform-home .platform-hero p {
+  margin: 0;
+  color: #9ca69f;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.platform-home .simple-catalog {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto auto auto;
+  column-gap: 24px;
+  padding: 26px 28px 38px;
+}
+
+.platform-home .simple-catalog > .section-heading,
+.platform-home .simple-catalog > .catalog-tools,
+.platform-home .simple-catalog > .recent-lesson,
+.platform-home .simple-catalog > .volume-empty,
+.platform-home .simple-catalog > .experiment-grid {
+  grid-column: 2;
+}
+
+.platform-home .simple-catalog > .section-heading { grid-row: 1; }
+.platform-home .simple-catalog > .catalog-tools { grid-row: 2; }
+.platform-home .simple-catalog > .recent-lesson { grid-row: 3; }
+.platform-home .simple-catalog > .volume-empty { grid-row: 4; }
+.platform-home .simple-catalog > .experiment-grid { grid-row: 5; }
+
+.platform-home .simple-catalog > .module-tabs {
+  position: sticky;
+  top: 82px;
+  grid-column: 1;
+  grid-row: 1 / span 5;
+  align-self: start;
+}
+
+.platform-home .simple-catalog > .model-library {
+  grid-column: 1 / -1;
+  grid-row: 6;
+}
+
+.platform-home .section-heading {
+  align-items: flex-start;
+  min-height: 76px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--platform-border);
+}
+
+.platform-home .section-heading h2 {
+  margin-top: 5px;
+  color: #f0f1e8;
+  font-size: 1.42rem;
+}
+
+.platform-home .platform-kicker,
+.platform-home .chapter-tag {
+  color: #7f8a83;
+  letter-spacing: 0.04em;
+}
+
+.platform-home .module-description {
+  margin-top: 6px;
+  color: #9ca69f;
+}
+
+.platform-home .progress-summary {
+  min-width: 148px;
+  padding: 9px 11px;
+  border: 1px solid var(--platform-border);
+  border-radius: 4px;
+  background: #191d1a;
+}
+
+.platform-home .progress-summary strong,
+.platform-home .catalog-result strong {
+  color: #69d18e;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.platform-home .progress-track {
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 0;
+  background: #2b312d;
+}
+
+.platform-home .progress-track span {
+  border-radius: 0;
+  background: #69d18e;
+}
+
+.platform-home .module-tabs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  margin: 0;
+  padding: 5px;
+  border-color: var(--platform-border);
+  border-radius: 5px;
+  background: #151916;
+}
+
+.platform-home .module-tabs::before {
+  padding: 10px 10px 8px;
+  color: #7f8a83;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  content: "MODEL INDEX";
+}
+
+.platform-home .module-tabs button {
+  justify-content: flex-start;
+  min-height: 40px;
+  padding: 7px 10px;
+  border-radius: 3px;
+  color: #9ca69f;
+  font-size: 0.77rem;
+  text-align: left;
+}
+
+.platform-home .module-tabs button:hover {
+  background: #202521;
+  color: #f0f1e8;
+}
+
+.platform-home .module-tabs button.active {
+  background: #26372c;
+  color: #dff8e7;
+  box-shadow: inset 3px 0 0 #69d18e;
+}
+
+.platform-home .module-count {
+  margin-left: auto;
+  border-radius: 3px;
+  background: #252b27;
+  color: #9ca69f;
+}
+
+.platform-home .module-tabs button.active .module-count {
+  background: rgba(105, 209, 142, 0.16);
+  color: #9ee2b5;
+}
+
+.platform-home .catalog-tools {
+  grid-template-columns: minmax(240px, 1fr) minmax(160px, 210px) 120px;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.platform-home .catalog-search,
+.platform-home .catalog-filter {
+  color: #7f8a83;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.platform-home .catalog-search input,
+.platform-home .catalog-filter select {
+  min-height: 42px;
+  border-color: var(--platform-border);
+  border-radius: 4px;
+  background: #191d1a;
+  color: #f0f1e8;
+}
+
+.platform-home .catalog-search input::placeholder {
+  color: #69736d;
+}
+
+.platform-home .catalog-search input:focus,
+.platform-home .catalog-filter select:focus {
+  border-color: rgba(100, 199, 217, 0.62);
+  outline: 2px solid rgba(100, 199, 217, 0.14);
+}
+
+.platform-home .catalog-result {
+  min-height: 42px;
+  padding: 0 10px;
+  border-left: 1px solid var(--platform-border);
+}
+
+.platform-home .recent-lesson {
+  margin-top: 10px;
+  padding: 11px 13px;
+  border-color: rgba(100, 199, 217, 0.2);
+  border-radius: 4px;
+  background: rgba(100, 199, 217, 0.055);
+}
+
+.platform-home .recent-lesson-link {
+  color: #64c7d9;
+}
+
+.platform-home .simple-catalog .experiment-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.platform-home .experiment-card {
+  position: relative;
+  min-height: 184px;
+  padding: 15px;
+  overflow: hidden;
+  border-color: var(--platform-border);
+  border-radius: 5px;
+  background: #191d1a;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.platform-home .experiment-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: #59645d;
+  content: "";
+}
+
+.platform-home .experiment-card.featured {
+  border-color: rgba(105, 209, 142, 0.22);
+  background: #1b211d;
+}
+
+.platform-home .experiment-card.featured::before { background: #69d18e; }
+
+.platform-home .experiment-card:hover {
+  border-color: rgba(100, 199, 217, 0.42);
+  background: #202521;
+  transform: translateY(-2px);
+}
+
+.platform-home .experiment-card.search-match {
+  border-color: rgba(100, 199, 217, 0.55);
+  box-shadow: 0 0 0 2px rgba(100, 199, 217, 0.09);
+}
+
+.platform-home .subject-tag {
+  border-radius: 3px;
+  background: #252b27;
+  color: #b8c1bb;
+}
+
+.platform-home .subject-tag.electromagnetism {
+  background: rgba(105, 209, 142, 0.12);
+  color: #8cdfa8;
+}
+
+.platform-home .subject-tag.waves {
+  background: rgba(100, 199, 217, 0.12);
+  color: #87d5e3;
+}
+
+.platform-home .subject-tag.optics {
+  background: rgba(181, 140, 229, 0.13);
+  color: #c5a4ed;
+}
+
+.platform-home .subject-tag.thermal {
+  background: rgba(242, 184, 75, 0.13);
+  color: #f2c56f;
+}
+
+.platform-home .subject-tag.modern {
+  background: rgba(100, 199, 217, 0.12);
+  color: #87d5e3;
+}
+
+.platform-home .experiment-card h3 {
+  margin: 17px 0 8px;
+  color: #f0f1e8;
+  font-size: 1.04rem;
+}
+
+.platform-home .simple-catalog .card-focus {
+  color: #aab3ad;
+  font-family: "Times New Roman", "Cambria Math", serif;
+  line-height: 1.55;
+}
+
+.platform-home .card-link {
+  border-color: var(--platform-border);
+  color: #64c7d9;
+  font-size: 0.82rem;
+}
+
+.platform-home .volume-empty {
+  margin-top: 12px;
+  border-left-color: #f2b84b;
+  background: rgba(242, 184, 75, 0.07);
+  color: #c8b88e;
+}
+
+.platform-home .model-library {
+  margin-top: 34px;
+  padding-top: 26px;
+  border-color: var(--platform-border);
+}
+
+.platform-home .model-library-heading h3,
+.platform-home .model-card h3 {
+  color: #f0f1e8;
+}
+
+.platform-home .model-card {
+  min-height: 224px;
+  border-color: var(--platform-border);
+  border-radius: 5px;
+  background: #191d1a;
+}
+
+.platform-home .model-card.is-open {
+  border-color: rgba(105, 209, 142, 0.26);
+  background: #1b211d;
+}
+
+.platform-home .model-card.is-open .model-status {
+  color: #69d18e;
+}
+
+.platform-home .model-filter {
+  min-height: 34px;
+  border-color: var(--platform-border);
+  border-radius: 4px;
+  color: #9ca69f;
+}
+
+.platform-home .model-filter:hover {
+  background: #202521;
+  color: #f0f1e8;
+}
+
+.platform-home .model-filter.active {
+  border-color: #69d18e;
+  background: #26372c;
+  color: #dff8e7;
+}
+
+.platform-home a:focus-visible,
+.platform-home button:focus-visible,
+.platform-home input:focus-visible,
+.platform-home select:focus-visible {
+  outline-color: rgba(100, 199, 217, 0.55);
+}
+
+@media (max-width: 900px) {
+  .platform-home .simple-catalog {
+    grid-template-columns: 190px minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 22px 18px 34px;
+  }
+
+  .platform-home .catalog-tools {
+    grid-template-columns: 1fr 160px;
+  }
+
+  .platform-home .catalog-result {
+    display: none;
+  }
+
+  .platform-home .model-catalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .platform-home .platform-hero {
+    min-height: 54px;
+    padding: 0 14px;
+  }
+
+  .platform-home .platform-hero::before,
+  .platform-home .platform-hero .platform-kicker {
+    display: none;
+  }
+
+  .platform-home .hero-copy {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .platform-home .platform-hero h1 {
+    font-size: 0.94rem;
+  }
+
+  .platform-home .platform-hero p {
+    font-size: 0.64rem;
+  }
+
+  .platform-home .simple-catalog {
+    display: block;
+    padding: 18px 14px 30px;
+  }
+
+  .platform-home .simple-catalog > .section-heading {
+    min-height: 0;
+  }
+
+  .platform-home .section-heading {
+    display: grid;
+    gap: 14px;
+  }
+
+  .platform-home .section-heading h2 {
+    font-size: 1.2rem;
+  }
+
+  .platform-home .progress-summary {
+    width: 100%;
+    text-align: left;
+  }
+
+  .platform-home .simple-catalog > .module-tabs {
+    position: static;
+  }
+
+  .platform-home .module-tabs {
+    display: flex;
+    margin-top: 16px;
+    padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .platform-home .module-tabs::before {
+    display: none;
+  }
+
+  .platform-home .module-tabs button {
+    flex: 0 0 168px;
+    min-height: 42px;
+  }
+
+  .platform-home .catalog-tools {
+    grid-template-columns: 1fr;
+    margin-top: 14px;
+  }
+
+  .platform-home .recent-lesson {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .platform-home .simple-catalog .experiment-grid,
+  .platform-home .model-catalog {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-home .experiment-card {
+    min-height: 170px;
+  }
+
+  .platform-home .model-library-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .platform-home .model-library-heading p {
+    max-width: none;
+    text-align: left;
+  }
+}
