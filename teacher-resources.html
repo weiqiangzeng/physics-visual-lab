@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教师课堂资源｜高中物理可视化实验</title>
+    <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
+    <link rel="stylesheet" href="./teacher-resources.css?v=teacher-1" />
+  </head>
+  <body class="teacher-resources-page">
+    <header class="teacher-topbar">
+      <a class="teacher-brand" href="./index.html"><span>PHYSICS VISUAL LAB</span><strong>教师课堂资源</strong></a>
+      <nav aria-label="资源中心导航">
+        <a href="./index.html">实验目录</a>
+        <a href="./knowledge-base.html">使用知识库</a>
+        <a id="teacherFeedbackLink" href="#" target="_blank" rel="noreferrer">反馈</a>
+      </nav>
+    </header>
+
+    <main class="teacher-main">
+      <section class="teacher-intro" aria-labelledby="teacherTitle">
+        <div>
+          <span class="teacher-kicker">READY FOR CLASS</span>
+          <h1 id="teacherTitle">10 套可直接上课的实验方案</h1>
+          <p>以问题、操作、证据和迁移组织课堂。全部内容原创，实验参数可一键复现。</p>
+        </div>
+        <dl class="teacher-summary" aria-label="资源概览">
+          <div><dt>10</dt><dd>核心模型</dd></div>
+          <div><dt>30</dt><dd>课堂预设</dd></div>
+          <div><dt>12–15</dt><dd>分钟/方案</dd></div>
+        </dl>
+      </section>
+
+      <section class="teacher-toolbar" aria-label="筛选课堂方案">
+        <label><span>搜索</span><input id="teacherSearch" type="search" placeholder="模型、概念或误区" autocomplete="off" /></label>
+        <label><span>模块</span><select id="teacherModule"><option value="all">全部模块</option></select></label>
+        <label><span>用途</span><select id="teacherUse"><option value="all">全部用途</option></select></label>
+        <p><strong id="teacherResultCount">10</strong><span>套方案</span></p>
+      </section>
+
+      <div class="teacher-layout">
+        <section class="teacher-catalog" aria-labelledby="catalogTitle">
+          <div class="teacher-section-head"><span class="teacher-kicker">CATALOG</span><h2 id="catalogTitle">课堂方案</h2></div>
+          <div id="teacherPackList" class="teacher-pack-list"></div>
+          <p id="teacherEmpty" class="teacher-empty" hidden>没有匹配的课堂方案。</p>
+        </section>
+
+        <aside class="teacher-local-data" aria-labelledby="localDataTitle">
+          <div class="teacher-section-head"><span class="teacher-kicker">THIS DEVICE</span><h2 id="localDataTitle">本机使用记录</h2></div>
+          <p>仅保存在当前浏览器，不上传姓名、学校或课堂内容。</p>
+          <dl id="teacherMetrics"></dl>
+          <button id="teacherResetMetrics" type="button">清除本机记录</button>
+        </aside>
+      </div>
+
+      <article id="teacherPackDetail" class="teacher-detail" hidden aria-live="polite"></article>
+    </main>
+
+    <script src="./teacher-packs.js?v=teacher-1"></script>
+    <script src="./teacher-tools.js?v=teacher-1"></script>
+    <script src="./teacher-resources.js?v=teacher-1"></script>
+  </body>
+</html>

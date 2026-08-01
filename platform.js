@@ -2038,6 +2038,23 @@
     return true;
   }
 
+  function restoreSharedScene() {
+    const tools = window.physicsTeacherTools;
+    const adapter = stateAdapter();
+    if (!tools || !adapter) return false;
+    const scene = tools.readScene();
+    if (!scene || scene.lesson !== currentPage) return false;
+    const snapshot = pickState(scene.state, adapter.config.fields);
+    if (!Object.keys(snapshot).length) return false;
+    if (typeof snapshot.mode === "string" && typeof adapter.api.setMode === "function") {
+      adapter.api.setMode(snapshot.mode);
+    }
+    adapter.api.setState(snapshot);
+    document.body.dataset.sharedSceneRestored = "true";
+    tools.record("scene-opened", { lesson: currentPage });
+    return true;
+  }
+
   let stateSaveTimer = 0;
   function scheduleLabStateSave() {
     if (!stateAdapters[currentPage]) return;
@@ -2055,6 +2072,15 @@
       delete states[currentPage];
       writeLabStates(states);
     },
+  };
+
+  window.physicsSceneShare = {
+    createUrl: () => {
+      const tools = window.physicsTeacherTools;
+      const snapshot = saveCurrentLabState();
+      return tools && snapshot ? tools.buildSceneUrl(currentPage, snapshot) : null;
+    },
+    restore: restoreSharedScene,
   };
 
   const progress = readProgress();
@@ -2312,6 +2338,126 @@
     actions.prepend(link);
   }
 
+  function renderSupportLink() {
+    if (isHome || !actions || actions.querySelector(".support-link")) return;
+    const link = document.createElement("a");
+    link.className = "support-link";
+    link.href = "./knowledge-base.html?lesson=" + encodeURIComponent(currentPage);
+    link.textContent = "使用帮助";
+    link.title = "搜索操作、现象解释与故障排查";
+    const directoryLink = actions.querySelector('a[href="./index.html"]');
+    directoryLink ? directoryLink.insertAdjacentElement("afterend", link) : actions.prepend(link);
+  }
+
+  function renderTeacherTools() {
+    const tools = window.physicsTeacherTools;
+    const pack = window.physicsTeacherPacks?.get(currentPage);
+    if (isHome || !actions || !tools || !pack || document.querySelector(".teacher-pack-dialog")) return;
+
+    const packTrigger = document.createElement("button");
+    packTrigger.type = "button";
+    packTrigger.className = "toolbar-button icon-command teacher-pack-toggle";
+    packTrigger.innerHTML = '<span aria-hidden="true">▤</span><span class="teacher-tool-label">课堂方案</span>';
+    packTrigger.title = "打开课堂方案";
+    packTrigger.setAttribute("aria-label", "打开课堂方案");
+    packTrigger.setAttribute("aria-haspopup", "dialog");
+
+    const shareTrigger = document.createElement("button");
+    shareTrigger.type = "button";
+    shareTrigger.className = "toolbar-button icon-command teacher-share-toggle";
+    shareTrigger.innerHTML = '<span aria-hidden="true">↗</span><span class="teacher-tool-label">分享场景</span>';
+    shareTrigger.title = "分享当前实验场景";
+    shareTrigger.setAttribute("aria-label", "分享当前实验场景");
+    shareTrigger.setAttribute("aria-haspopup", "dialog");
+
+    const packDialog = document.createElement("dialog");
+    packDialog.className = "teacher-tool-dialog teacher-pack-dialog";
+    packDialog.innerHTML = `
+      <div class="teacher-tool-shell">
+        <header><div><span>READY FOR CLASS · ${pack.duration} 分钟</span><h2>${pack.title}</h2></div><button type="button" data-close aria-label="关闭课堂方案">×</button></header>
+        <p class="teacher-tool-summary">${pack.summary}</p>
+        <div class="teacher-tool-misconception"><strong>关键误区</strong><span>${pack.misconception}</span></div>
+        <div class="teacher-tool-presets" aria-label="课堂预设"></div>
+        <footer><a href="./teacher-resources.html?lesson=${encodeURIComponent(currentPage)}">查看完整教案与学生记录单</a><a href="${tools.feedbackUrl(currentPage, pack.title)}" target="_blank" rel="noreferrer">反馈课堂使用情况</a></footer>
+      </div>`;
+    const presetList = packDialog.querySelector(".teacher-tool-presets");
+    pack.presets.forEach((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.innerHTML = `<strong>${preset.title}</strong><span>${preset.note}</span>`;
+      button.addEventListener("click", () => {
+        const adapter = stateAdapter();
+        if (!adapter) return;
+        const snapshot = pickState(preset.state, adapter.config.fields);
+        if (typeof snapshot.mode === "string" && typeof adapter.api.setMode === "function") adapter.api.setMode(snapshot.mode);
+        adapter.api.setState(snapshot);
+        saveCurrentLabState();
+        tools.record("preset-applied", { lesson: currentPage });
+        packDialog.close();
+      });
+      presetList.append(button);
+    });
+
+    const shareDialog = document.createElement("dialog");
+    shareDialog.className = "teacher-tool-dialog teacher-share-dialog";
+    shareDialog.innerHTML = `
+      <div class="teacher-tool-shell">
+        <header><div><span>SCENE LINK</span><h2>分享当前实验场景</h2></div><button type="button" data-close aria-label="关闭分享场景">×</button></header>
+        <p class="teacher-tool-summary">链接会保存当前参数和显示选项，不包含姓名、学校或本机学习记录。</p>
+        <label class="teacher-share-url"><span>场景链接</span><input type="text" readonly aria-label="当前实验场景链接" /></label>
+        <div class="teacher-share-body"><div class="teacher-share-qr" aria-live="polite"></div><div class="teacher-share-actions"><button type="button" data-copy>复制链接</button><button type="button" data-native-share hidden>系统分享</button><small role="status">接收者打开链接即可复现此场景。</small></div></div>
+      </div>`;
+
+    const closeOnBackdrop = (dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+    [packDialog, shareDialog].forEach((dialog) => {
+      dialog.querySelector("[data-close]").addEventListener("click", () => dialog.close());
+      closeOnBackdrop(dialog);
+      document.body.append(dialog);
+    });
+
+    packTrigger.addEventListener("click", () => {
+      tools.record("pack-dialog-opened", { lesson: currentPage });
+      packDialog.showModal();
+    });
+    shareTrigger.addEventListener("click", async () => {
+      const snapshot = saveCurrentLabState();
+      if (!snapshot) return;
+      const url = tools.buildSceneUrl(currentPage, snapshot);
+      const input = shareDialog.querySelector("input");
+      const qr = shareDialog.querySelector(".teacher-share-qr");
+      const status = shareDialog.querySelector("[role=status]");
+      input.value = url;
+      qr.textContent = "正在生成二维码…";
+      shareDialog.showModal();
+      tools.record("scene-created", { lesson: currentPage });
+      try { await tools.renderQr(qr, url, { label: `${pack.title}场景二维码`, cellSize: 4 }); }
+      catch { qr.textContent = "二维码生成失败，仍可复制链接。"; }
+      status.textContent = "接收者打开链接即可复现此场景。";
+    });
+    shareDialog.querySelector("[data-copy]").addEventListener("click", async () => {
+      const input = shareDialog.querySelector("input");
+      const status = shareDialog.querySelector("[role=status]");
+      try {
+        await navigator.clipboard.writeText(input.value);
+        status.textContent = "已复制链接。";
+      } catch {
+        input.select();
+        status.textContent = "已选中链接，请手动复制。";
+      }
+      tools.record("scene-copied", { lesson: currentPage });
+    });
+    const nativeShare = shareDialog.querySelector("[data-native-share]");
+    if (navigator.share) {
+      nativeShare.hidden = false;
+      nativeShare.addEventListener("click", async () => {
+        const url = shareDialog.querySelector("input").value;
+        try { await navigator.share({ title: pack.title, url }); tools.record("scene-shared", { lesson: currentPage }); } catch { /* user cancelled */ }
+      });
+    }
+
+    actions.append(packTrigger, shareTrigger);
+  }
+
   function renderLabCatalog() {
     if (isHome || !actions || !lessons.includes(currentPage) ||
       document.querySelector(".lab-catalog-dialog")) return;
@@ -2443,11 +2589,13 @@
     }
   }
 
-  restoreCurrentLabState();
+  if (!restoreSharedScene()) restoreCurrentLabState();
   ["input", "change", "pointerup", "click"].forEach((eventName) =>
     document.addEventListener(eventName, scheduleLabStateSave, true)
   );
   renderLabCatalog();
+  renderSupportLink();
+  renderTeacherTools();
   renderTaskPanel();
   renderCompletionToggle();
   renderExperimentNavigation();
