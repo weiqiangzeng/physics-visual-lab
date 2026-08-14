@@ -153,6 +153,13 @@ async function verifyLab(browser, lab, viewport) {
     }
     await nav.locator(`.scene-tab[data-mode="${modes[0]}"]`).click();
 
+    if (viewport.width <= 820) {
+      const mobileControlsToggle = page.locator("#mobileControlsToggle");
+      if (await mobileControlsToggle.count() && !(await page.locator(".controls").isVisible())) {
+        await mobileControlsToggle.click();
+      }
+    }
+
     const perturbControl = page.locator(lab.perturb[0]);
     if (await perturbControl.evaluate((element) => element.tagName === "SELECT")) await perturbControl.selectOption(lab.perturb[1]);
     else await perturbControl.fill(lab.perturb[1]);
