@@ -19,6 +19,7 @@ const refs = {
 };
 
 const ctx = refs.canvas.getContext("2d"), positionCtx = refs.positionChart.getContext("2d"), secondaryCtx = refs.secondaryChart.getContext("2d");
+const projectileGeometry = { launchHandle: null, origin: null, vectorScale: 1 };
 const modes = {
   decompose: { title:"运动分解", goal:"曲线运动来自两个方向的独立演化", hint:"拖动发射矢量可同时改变速度与角度" },
   apex: { title:"最高点", goal:"最高点竖直速度为零，但物体并未静止", hint:"时间已定位到最高点" },
@@ -50,6 +51,7 @@ function targetSolutions(source=state){
 function pointAt(t,source=state){ return calculate({...source,time:t}); }
 function setCanvasSize(canvas,context){ const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.max(320,Math.round(r.width)),h=Math.max(180,Math.round(r.height)); if(canvas.width!==w*d||canvas.height!==h*d){canvas.width=w*d;canvas.height=h*d;} context.setTransform(d,0,0,d,0,0); return {width:w,height:h}; }
 function arrow(c,x1,y1,x2,y2,color,label,width=3){ const a=Math.atan2(y2-y1,x2-x1); c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=width;c.lineCap="round";c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-10*Math.cos(a-.52),y2-10*Math.sin(a-.52));c.lineTo(x2-10*Math.cos(a+.52),y2-10*Math.sin(a+.52));c.closePath();c.fill();c.font="700 11px ui-monospace,monospace";c.textAlign=x2>=x1?"left":"right";c.fillText(label,x2+(x2>=x1?7:-7),y2-7);c.restore(); }
+function drawHandle(point, color, label, active = false){ if(!point)return;ctx.save();ctx.fillStyle=active?"#eef3ef":color;ctx.strokeStyle=active?color:`${color}88`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(point.x,point.y,active?9:7,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.strokeStyle=`${color}55`;ctx.beginPath();ctx.arc(point.x,point.y,14,0,Math.PI*2);ctx.stroke();ctx.fillStyle=active?"#eef3ef":color;ctx.font="700 10px ui-monospace,monospace";ctx.textAlign="center";ctx.fillText(label,point.x,point.y+27);ctx.restore(); }
 
 function sceneMap(width,height,d){
   const pad={l:46,r:25,t:28,b:42},xMax=Math.max(12,d.range*1.12,state.target*1.08),yMax=Math.max(5,d.maxHeight*1.35);
@@ -73,9 +75,10 @@ function drawScene(){
   const apex=pointAt(d.apexTime),ax=map.x(apex.x),ay=map.y(apex.y);ctx.fillStyle="#f2b84b";ctx.beginPath();ctx.arc(ax,ay,4,0,Math.PI*2);ctx.fill();ctx.font="700 10px system-ui,sans-serif";ctx.textAlign="center";ctx.fillText("最高点 vy=0",ax,ay-12);
   if(state.mode==="predict"){ctx.strokeStyle="#b58ce5";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(map.x(state.target),map.y(0)-18);ctx.lineTo(map.x(state.target),map.y(0)+4);ctx.stroke();ctx.fillStyle="#b58ce5";ctx.fillText(`目标 ${fmt(state.target,1)} m`,map.x(state.target),map.y(0)-24);}
   const px=map.x(p.x),py=map.y(p.y);ctx.fillStyle="#ecebdd";ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.fill();
-  const vectorScale=Math.min(4.5,width/180);if(state.showComponents){arrow(ctx,px,py,px+p.vx*vectorScale,py,"#64c7d9",`vx ${fmt(p.vx,1)}`);if(Math.abs(p.vy)>.03)arrow(ctx,px,py,px,py-p.vy*vectorScale,"#f2b84b",`vy ${fmt(p.vy,1)}`);arrow(ctx,px,py,px+p.vx*vectorScale,py-p.vy*vectorScale,"#69d18e","v",2);}
+  const vectorScale=Math.min(4.5,width/180),ox=map.x(0),oy=map.y(0),launchHandle={x:ox+d.vx0*vectorScale,y:oy-d.vy0*vectorScale};projectileGeometry.origin={x:ox,y:oy};projectileGeometry.vectorScale=vectorScale;projectileGeometry.launchHandle=launchHandle;
+  if(state.showComponents){arrow(ctx,px,py,px+p.vx*vectorScale,py,"#64c7d9",`vx ${fmt(p.vx,1)}`);if(Math.abs(p.vy)>.03)arrow(ctx,px,py,px,py-p.vy*vectorScale,"#f2b84b",`vy ${fmt(p.vy,1)}`);arrow(ctx,px,py,px+p.vx*vectorScale,py-p.vy*vectorScale,"#69d18e","v",2);}
   if(state.showAcceleration)arrow(ctx,px+10,py+8,px+10,py+8+Math.min(54,state.gravity*4),"#ff7a68","g",3);
-  if(state.time<.02){const ox=map.x(0),oy=map.y(0);ctx.strokeStyle="rgba(105,209,142,.2)";ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+d.vx0*vectorScale,oy-d.vy0*vectorScale);ctx.stroke();}
+  ctx.save();ctx.globalAlpha=state.time<.02?.95:.42;arrow(ctx,ox,oy,launchHandle.x,launchHandle.y,"#69d18e","v₀",3);ctx.restore();drawHandle(launchHandle,"#69d18e","拖动 v₀",state.dragging);
   ctx.fillStyle="#9ca69f";ctx.textAlign="left";ctx.font="10px ui-monospace,monospace";ctx.fillText(`R = ${fmt(d.range)} m   H = ${fmt(d.maxHeight)} m   T = ${fmt(d.flightTime)} s`,map.pad.l,height-4);
 }
 
@@ -110,7 +113,9 @@ refs.resetButton.addEventListener("click",()=>{Object.assign(state,{speed:18,ang
 [[refs.showComponentsToggle,"showComponents"],[refs.showAccelerationToggle,"showAcceleration"],[refs.showStrobeToggle,"showStrobe"],[refs.showCompareToggle,"showCompare"]].forEach(([input,key])=>input.addEventListener("change",()=>{state[key]=input.checked;render();}));
 refs.guideButton.addEventListener("click",()=>refs.guideDialog.showModal());refs.stepButton.addEventListener("click",()=>{state.guideStep=(state.guideStep+1)%3;render();});refs.focusButton.addEventListener("click",()=>{const active=document.body.classList.toggle("focus-mode");refs.focusButton.setAttribute("aria-pressed",String(active));});refs.fullscreenButton.addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
 function pointerToLaunch(event){const r=refs.canvas.getBoundingClientRect(),d=calculate(),map=sceneMap(r.width,r.height,d),ox=map.x(0),oy=map.y(0),dx=event.clientX-r.left-ox,dy=oy-(event.clientY-r.top),visual=Math.hypot(dx,dy),angle=Math.atan2(Math.max(0,dy),Math.max(1,dx))*180/Math.PI,speed=clamp(visual/4.5,5,35);state.running=false;state.time=0;setState({speed,angle});}
-refs.canvas.addEventListener("pointerdown",e=>{state.dragging=true;refs.canvas.setPointerCapture(e.pointerId);pointerToLaunch(e);});refs.canvas.addEventListener("pointermove",e=>{if(state.dragging)pointerToLaunch(e);});refs.canvas.addEventListener("pointerup",e=>{state.dragging=false;refs.canvas.releasePointerCapture(e.pointerId);});refs.canvas.addEventListener("pointercancel",()=>{state.dragging=false;});window.addEventListener("resize",render);
+refs.canvas.addEventListener("pointerdown",e=>{const r=refs.canvas.getBoundingClientRect(),point={x:e.clientX-r.left,y:e.clientY-r.top},handle=projectileGeometry.launchHandle;if(!handle||Math.hypot(point.x-handle.x,point.y-handle.y)>30)return;state.dragging=true;refs.canvas.classList.add("is-dragging");refs.canvas.setPointerCapture(e.pointerId);});
+refs.canvas.addEventListener("pointermove",e=>{const r=refs.canvas.getBoundingClientRect(),point={x:e.clientX-r.left,y:e.clientY-r.top},handle=projectileGeometry.launchHandle;if(!state.dragging){refs.canvas.style.cursor=handle&&Math.hypot(point.x-handle.x,point.y-handle.y)<=30?"grab":"default";return;}refs.canvas.style.cursor="grabbing";pointerToLaunch(e);});
+refs.canvas.addEventListener("pointerup",e=>{state.dragging=false;refs.canvas.classList.remove("is-dragging");refs.canvas.style.cursor="default";refs.canvas.releasePointerCapture(e.pointerId);render();});refs.canvas.addEventListener("pointercancel",()=>{state.dragging=false;refs.canvas.classList.remove("is-dragging");refs.canvas.style.cursor="default";render();});window.addEventListener("resize",render);
 let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(state.running){const d=calculate();state.time=Math.min(d.flightTime,state.time+dt*state.timeScale);if(state.time>=d.flightTime-.0001)state.running=false;render();}requestAnimationFrame(frame);}
-window.projectileLab={calculate:s=>calculate({...state,...s}),targetSolutions:s=>targetSolutions({...state,...s}),pointAt:(t,s={})=>pointAt(t,{...state,...s}),getState:()=>({...state,samples:state.samples.map(x=>({...x}))}),setState,setMode,record};
+window.projectileLab={calculate:s=>calculate({...state,...s}),targetSolutions:s=>targetSolutions({...state,...s}),pointAt:(t,s={})=>pointAt(t,{...state,...s}),getState:()=>({...state,samples:state.samples.map(x=>({...x}))}),getInteractionGeometry:()=>JSON.parse(JSON.stringify(projectileGeometry)),setState,setMode,record};
 render();requestAnimationFrame(frame);

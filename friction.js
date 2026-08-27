@@ -14,6 +14,7 @@ const state = {
   sliding: false,
   running: false,
   ramping: false,
+  dragging: false,
   mode: "adaptive",
   guideStep: 0,
   showForces: true,
@@ -81,6 +82,7 @@ const refs = {
 const ctx = refs.canvas.getContext("2d");
 const responseCtx = refs.responseChart.getContext("2d");
 const secondaryCtx = refs.secondaryChart.getContext("2d");
+const sceneGeometry = { forceHandle: null, block: null, forceBaseX: 0, forceScale: 1 };
 
 const modes = {
   adaptive: { title: "静摩擦自适应", goal: "静止时，摩擦力恰好抵消外力", hint: "拖动外力滑块或开始扫描" },
@@ -192,6 +194,22 @@ function arrow(context, x1, y1, x2, y2, color, label, lineWidth = 3) {
   context.restore();
 }
 
+function drawHandle(point, color, label, active = false) {
+  if (!point) return;
+  ctx.save();
+  ctx.fillStyle = active ? "#eef3ef" : color;
+  ctx.strokeStyle = active ? color : `${color}88`;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(point.x, point.y, active ? 9 : 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = `${color}55`;
+  ctx.beginPath(); ctx.arc(point.x, point.y, 14, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = active ? "#eef3ef" : color;
+  ctx.font = "700 10px ui-monospace, monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(label, point.x, point.y + 28);
+  ctx.restore();
+}
+
 function drawContactInset(width, derived) {
   if (!state.showContact || width < 590) return;
   const x = 22, y = 22, w = 188, h = 88;
@@ -221,6 +239,12 @@ function drawScene() {
   const travel = Math.max(0, trackRight - trackLeft - blockW);
   const blockX = trackLeft + ((state.position * 45) % Math.max(1, travel));
   const blockY = centerY - blockH;
+  const forceY = blockY + blockH * .48;
+  const horizontalScale = Math.min(8, width / 110);
+  sceneGeometry.block = { x: blockX, y: blockY, width: blockW, height: blockH };
+  sceneGeometry.forceBaseX = blockX + blockW + 22;
+  sceneGeometry.forceScale = horizontalScale;
+  sceneGeometry.forceHandle = { x: sceneGeometry.forceBaseX + state.appliedForce * horizontalScale, y: forceY };
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#0c0f0e"; ctx.fillRect(0, 0, width, height);
   for (let i = 0; i < 9; i += 1) { ctx.strokeStyle = `rgba(105,209,142,${0.025 + i * 0.006})`; ctx.beginPath(); ctx.moveTo(0, centerY + 42 + i * 10); ctx.lineTo(width, centerY + 42 + i * 10); ctx.stroke(); }
@@ -232,10 +256,10 @@ function drawScene() {
   }
   ctx.fillStyle = d.sliding ? "#33231f" : "#172a2d"; ctx.strokeStyle = d.sliding ? "#ff7a68" : "#64c7d9"; ctx.lineWidth = 2; ctx.fillRect(blockX, blockY, blockW, blockH); ctx.strokeRect(blockX, blockY, blockW, blockH);
   ctx.fillStyle = "#eef3ef"; ctx.font = `700 ${clamp(width * .018, 13, 18)}px system-ui, sans-serif`; ctx.textAlign = "center"; ctx.fillText(`${format(state.mass, 1)} kg`, blockX + blockW / 2, blockY + blockH / 2 + 6);
-  const horizontalScale = Math.min(8, width / 110);
   const verticalLength = Math.min(76, height * .19);
   if (state.showForces) {
-    arrow(ctx, blockX + blockW, blockY + blockH * .48, blockX + blockW + 22 + state.appliedForce * horizontalScale, blockY + blockH * .48, "#69d18e", `F外 ${format(state.appliedForce,1)} N`);
+    arrow(ctx, blockX + blockW, forceY, sceneGeometry.forceHandle.x, forceY, "#69d18e", `F外 ${format(state.appliedForce,1)} N`);
+    drawHandle(sceneGeometry.forceHandle, "#69d18e", "拖动 F外", state.dragging);
     if (d.friction > .01) arrow(ctx, blockX, blockY + blockH * .62, blockX - 22 - d.friction * horizontalScale, blockY + blockH * .62, d.sliding ? "#ff7a68" : "#64c7d9", `f ${format(d.friction,1)} N`);
     arrow(ctx, blockX + blockW * .42, blockY, blockX + blockW * .42, blockY - verticalLength, "#64c7d9", "N");
     arrow(ctx, blockX + blockW * .58, blockY + blockH, blockX + blockW * .58, blockY + blockH + verticalLength, "#b58ce5", "mg");
@@ -367,15 +391,42 @@ refs.sceneTabs.forEach(button => button.addEventListener("click", () => applyMod
 let forceDragging = false;
 function setForceFromPointer(event) {
   const rect = refs.canvas.getBoundingClientRect();
-  const force = clamp((event.clientX - rect.left) / rect.width * 30, 0, 30);
+  const localX = event.clientX - rect.left;
+  const force = clamp((localX - sceneGeometry.forceBaseX) / sceneGeometry.forceScale, 0, 30);
   state.running = false;
   state.ramping = false;
   setParameters({ targetForce: force, appliedForce: force });
 }
-refs.canvas.addEventListener("pointerdown", event => { forceDragging = true; refs.canvas.setPointerCapture?.(event.pointerId); setForceFromPointer(event); });
-refs.canvas.addEventListener("pointermove", event => { if (forceDragging) setForceFromPointer(event); });
-refs.canvas.addEventListener("pointerup", event => { forceDragging = false; if (refs.canvas.hasPointerCapture?.(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId); });
-refs.canvas.addEventListener("pointercancel", () => { forceDragging = false; });
+refs.canvas.addEventListener("pointerdown", event => {
+  const rect = refs.canvas.getBoundingClientRect();
+  const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  const handle = sceneGeometry.forceHandle;
+  if (!state.showForces || !handle || Math.hypot(point.x - handle.x, point.y - handle.y) > 30) return;
+  forceDragging = true;
+  state.dragging = true;
+  refs.canvas.classList.add("is-dragging");
+  refs.canvas.setPointerCapture?.(event.pointerId);
+});
+refs.canvas.addEventListener("pointermove", event => {
+  const rect = refs.canvas.getBoundingClientRect();
+  const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  const handle = sceneGeometry.forceHandle;
+  if (!forceDragging) {
+    refs.canvas.style.cursor = state.showForces && handle && Math.hypot(point.x - handle.x, point.y - handle.y) <= 30 ? "grab" : "default";
+    return;
+  }
+  refs.canvas.style.cursor = "grabbing";
+  setForceFromPointer(event);
+});
+refs.canvas.addEventListener("pointerup", event => {
+  forceDragging = false;
+  state.dragging = false;
+  refs.canvas.classList.remove("is-dragging");
+  refs.canvas.style.cursor = "default";
+  if (refs.canvas.hasPointerCapture?.(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId);
+  render();
+});
+refs.canvas.addEventListener("pointercancel", () => { forceDragging = false; state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; render(); });
 refs.routeSteps.forEach((button, index) => button.addEventListener("click", () => { state.guideStep = index; render(); }));
 refs.scanButton.addEventListener("click", startScan);
 refs.pauseButton.addEventListener("click", () => { state.running = false; state.ramping = false; render(); });
@@ -412,6 +463,7 @@ function frame(now) {
 window.frictionLab = {
   calculate: source => calculate({ ...state, ...source }),
   getState: () => ({ ...state, history: state.history.map(point => ({ ...point })), samples: state.samples.map(point => ({ ...point })) }),
+  getInteractionGeometry: () => JSON.parse(JSON.stringify(sceneGeometry)),
   setState: patch => setParameters(patch),
   setMode: applyMode,
   resetMotion,

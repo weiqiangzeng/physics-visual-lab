@@ -293,16 +293,40 @@ async function verifyLab(browser, lab, viewport) {
       const canvas = page.locator("#frictionCanvas");
       await canvas.scrollIntoViewIfNeeded();
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.5);
+      const handle = await page.evaluate(() => window.frictionLab.getInteractionGeometry().forceHandle);
+      const forceScale = await page.evaluate(() => window.frictionLab.getInteractionGeometry().forceScale);
+      await page.mouse.move(box.x + handle.x, box.y + handle.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * 0.85, box.y + box.height * 0.5);
+      await page.mouse.move(box.x + Math.min(box.width - 6, handle.x + forceScale * 25), box.y + handle.y);
       await page.mouse.up();
-      assert((await page.evaluate(() => window.frictionLab.getState().targetForce)) > 24, `${lab.id}/${viewport.name}: direct force drag did not update state`);
+      assert((await page.evaluate(() => window.frictionLab.getState().targetForce)) > 20, `${lab.id}/${viewport.name}: direct force drag did not update state`);
     }
 
     if (lab.id === "newton-laws") {
       const reference = await page.evaluate(() => window.newtonLab.calculate({ mass: 2, rightForce: 6, leftForce: 2 }));
       assert(closeTo(reference.netForce, 4, 1e-9) && closeTo(reference.acceleration, 2, 1e-9), `${lab.id}/${viewport.name}: F=ma reference mismatch`);
+      const canvas = page.locator("#newtonCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const box = await canvas.boundingBox();
+      const beforeForce = await page.evaluate(() => window.newtonLab.getState());
+      const forceGeometry = await page.evaluate(() => window.newtonLab.getInteractionGeometry());
+      const rightForce = forceGeometry.handles.right;
+      await page.mouse.move(box.x + rightForce.x, box.y + rightForce.y);
+      await page.mouse.down();
+      await page.mouse.move(box.x + rightForce.x + box.width * .12, box.y + rightForce.y);
+      await page.mouse.up();
+      const afterForce = await page.evaluate(() => window.newtonLab.getState());
+      assert(Math.abs(afterForce.rightForce - beforeForce.rightForce) > .2, `${lab.id}/${viewport.name}: direct right-force handle drag did not update state`);
+      await page.evaluate(() => window.newtonLab.setMode("mass"));
+      const beforeMass = await page.evaluate(() => window.newtonLab.getState().mass);
+      const massGeometry = await page.evaluate(() => window.newtonLab.getInteractionGeometry());
+      const massHandle = massGeometry.cart;
+      await page.mouse.move(box.x + massHandle.x, box.y + massHandle.top - 12);
+      await page.mouse.down();
+      await page.mouse.move(box.x + massHandle.x, box.y + massHandle.top - 52);
+      await page.mouse.up();
+      const afterMass = await page.evaluate(() => window.newtonLab.getState().mass);
+      assert(afterMass > beforeMass + .2, `${lab.id}/${viewport.name}: direct mass handle drag did not update state`);
     }
 
     if (lab.id === "interaction") {
@@ -337,9 +361,10 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const before = await page.evaluate(() => window.hookeMeasurementLab.getState().loadIndex);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .5);
+      const handle = await page.evaluate(() => window.hookeMeasurementLab.getInteractionGeometry().hook);
+      await page.mouse.move(box.x + handle.x, box.y + handle.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .08);
+      await page.mouse.move(box.x + handle.x, box.y + box.height * .08);
       await page.mouse.up();
       const after = await page.evaluate(() => window.hookeMeasurementLab.getState().loadIndex);
       assert(Math.abs(after - before) >= 4, `${lab.id}/${viewport.name}: direct weight-stack drag did not update load`);
@@ -366,12 +391,44 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const before = await page.evaluate(() => window.forceCompositionLab.getState());
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * .5, box.y + box.height * .5);
+      const geometry = await page.evaluate(() => window.forceCompositionLab.getInteractionGeometry());
+      const f2 = geometry.handles.force2;
+      await page.mouse.move(box.x + f2.x, box.y + f2.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * .75, box.y + box.height * .25);
+      await page.mouse.move(box.x + f2.x + box.width * .16, box.y + f2.y - box.height * .16);
       await page.mouse.up();
       const after = await page.evaluate(() => window.forceCompositionLab.getState());
       assert(Math.abs(after.force2N - before.force2N) > 1 || Math.abs(after.direction2Deg - before.direction2Deg) > 10, `${lab.id}/${viewport.name}: direct vector drag did not update state`);
+      await page.evaluate(() => window.forceCompositionLab.reset());
+      await page.evaluate(() => window.forceCompositionLab.setMode("decompose"));
+      const inverseBefore = await page.evaluate(() => window.forceCompositionLab.getState());
+      const inverseGeometry = await page.evaluate(() => window.forceCompositionLab.getInteractionGeometry());
+      const target = inverseGeometry.handles.target;
+      await page.mouse.move(box.x + target.x, box.y + target.y);
+      await page.mouse.down();
+      await page.mouse.move(box.x + target.x + box.width * .12, box.y + target.y - box.height * .08);
+      await page.mouse.up();
+      const inverseAfter = await page.evaluate(() => window.forceCompositionLab.getState());
+      assert(Math.abs(inverseAfter.targetForceN - inverseBefore.targetForceN) > .5 || Math.abs(inverseAfter.targetDirectionDeg - inverseBefore.targetDirectionDeg) > 5, `${lab.id}/${viewport.name}: target handle drag did not update state`);
+      const directionGeometry = await page.evaluate(() => window.forceCompositionLab.getInteractionGeometry());
+      const direction1 = directionGeometry.handles.direction1;
+      const directionBefore = await page.evaluate(() => window.forceCompositionLab.getState().direction1Deg);
+      await page.mouse.move(box.x + direction1.x, box.y + direction1.y);
+      await page.mouse.down();
+      await page.mouse.move(box.x + direction1.x + box.width * .1, box.y + direction1.y + box.height * .05);
+      await page.mouse.up();
+      const directionAfter = await page.evaluate(() => window.forceCompositionLab.getState().direction1Deg);
+      assert(Math.abs(directionAfter - directionBefore) > 5, `${lab.id}/${viewport.name}: decomposition direction handle did not update state`);
+      await page.evaluate(() => window.forceCompositionLab.setMode("boundary"));
+      const boundaryBefore = await page.evaluate(() => window.forceCompositionLab.getState());
+      const boundaryGeometry = await page.evaluate(() => window.forceCompositionLab.getInteractionGeometry());
+      const boundaryTarget = boundaryGeometry.handles.target;
+      await page.mouse.move(box.x + boundaryTarget.x, box.y + boundaryTarget.y);
+      await page.mouse.down();
+      await page.mouse.move(box.x + boundaryTarget.x - box.width * .08, box.y + boundaryTarget.y + box.height * .06);
+      await page.mouse.up();
+      const boundaryAfter = await page.evaluate(() => window.forceCompositionLab.getState());
+      assert(Math.abs(boundaryAfter.targetForceN - boundaryBefore.targetForceN) > .3 || Math.abs(boundaryAfter.targetDirectionDeg - boundaryBefore.targetDirectionDeg) > 3, `${lab.id}/${viewport.name}: boundary target handle did not update state`);
     }
 
     if (lab.id === "motion-composition") {
@@ -434,11 +491,37 @@ async function verifyLab(browser, lab, viewport) {
     if (lab.id === "projectile") {
       const reference = await page.evaluate(() => window.projectileLab.calculate({ speed: 20, angle: 45, gravity: 10 }));
       assert(closeTo(reference.range, 40, 1e-9), `${lab.id}/${viewport.name}: projectile-range reference mismatch`);
+      const canvas = page.locator("#projectileCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const box = await canvas.boundingBox();
+      const before = await page.evaluate(() => ({ state: window.projectileLab.getState(), geometry: window.projectileLab.getInteractionGeometry() }));
+      const handle = before.geometry.launchHandle;
+      await page.mouse.move(box.x + handle.x, box.y + handle.y);
+      await page.mouse.down();
+      const atStart = await page.evaluate(() => window.projectileLab.getState());
+      await page.mouse.move(box.x + handle.x + box.width * .08, box.y + handle.y - box.height * .08);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.projectileLab.getState());
+      assert(Math.abs(atStart.speed - before.state.speed) < .1 && Math.abs(atStart.angle - before.state.angle) < .1, `${lab.id}/${viewport.name}: launch drag jumped on pointerdown`);
+      assert(Math.abs(after.speed - before.state.speed) > .3 || Math.abs(after.angle - before.state.angle) > 2, `${lab.id}/${viewport.name}: direct launch-vector drag did not update state`);
     }
 
     if (lab.id === "circular") {
       const reference = await page.evaluate(() => window.circularLab.calculate({ mass: 2, radius: 2, speed: 4 }));
       assert(closeTo(reference.acceleration, 8, 1e-9) && closeTo(reference.force, 16, 1e-9), `${lab.id}/${viewport.name}: centripetal reference mismatch`);
+      const canvas = page.locator("#circularCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const box = await canvas.boundingBox();
+      const before = await page.evaluate(() => ({ state: window.circularLab.getState(), geometry: window.circularLab.getInteractionGeometry() }));
+      const object = before.geometry.object;
+      await page.mouse.move(box.x + object.x, box.y + object.y);
+      await page.mouse.down();
+      const atStart = await page.evaluate(() => window.circularLab.getState().phase);
+      await page.mouse.move(box.x + before.geometry.center.x, box.y + before.geometry.center.y - before.geometry.radiusPx);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.circularLab.getState().phase);
+      assert(Math.abs(atStart - before.state.phase) < .02, `${lab.id}/${viewport.name}: object drag jumped on pointerdown`);
+      assert(Math.abs(after - before.state.phase) > .5, `${lab.id}/${viewport.name}: direct object drag did not update phase`);
     }
 
     if (lab.id === "circular-critical") {
@@ -536,6 +619,19 @@ async function verifyLab(browser, lab, viewport) {
       }));
       assert(closeTo(reference.magnitude, 13.482, 0.002), `${lab.id}/${viewport.name}: field reference mismatch`);
       assert(closeTo(reference.potential, 26.964, 0.002), `${lab.id}/${viewport.name}: potential reference mismatch`);
+      const canvas = page.locator("#fieldCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const box = await canvas.boundingBox();
+      const before = await page.evaluate(() => ({ state: window.electricFieldLab.getState(), geometry: window.electricFieldLab.getInteractionGeometry() }));
+      const probe = before.geometry.probe;
+      await page.mouse.move(box.x + probe.x, box.y + probe.y);
+      await page.mouse.down();
+      const atStart = await page.evaluate(() => window.electricFieldLab.getState());
+      await page.mouse.move(box.x + probe.x + box.width * .08, box.y + probe.y - box.height * .08);
+      await page.mouse.up();
+      const after = await page.evaluate(() => window.electricFieldLab.getState());
+      assert(Math.abs(atStart.probeX - before.state.probeX) < .01 && Math.abs(atStart.probeY - before.state.probeY) < .01, `${lab.id}/${viewport.name}: probe drag jumped on pointerdown`);
+      assert(Math.abs(after.probeX - before.state.probeX) > .1 || Math.abs(after.probeY - before.state.probeY) > .1, `${lab.id}/${viewport.name}: direct probe drag did not update state`);
     }
 
     if (lab.id === "electrostatic-conductor") {
@@ -550,9 +646,11 @@ async function verifyLab(browser, lab, viewport) {
       const canvas = page.locator("#conductorCanvas");
       await canvas.scrollIntoViewIfNeeded();
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * 0.15, box.y + box.height * 0.5);
+      const geometry = await page.evaluate(() => window.electrostaticConductorLab.getInteractionGeometry());
+      const handle = geometry.progressHandle;
+      await page.mouse.move(box.x + handle.x, box.y + handle.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * 0.82, box.y + box.height * 0.5);
+      await page.mouse.move(box.x + geometry.progressLeft + geometry.progressWidth * 0.82, box.y + handle.y);
       await page.mouse.up();
       assert((await page.evaluate(() => window.electrostaticConductorLab.getState().progress)) > 0.75, `${lab.id}/${viewport.name}: direct redistribution drag did not update state`);
     }
@@ -572,9 +670,10 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const beforeDrag = await page.evaluate(() => window.capacitorLab.getState().distanceMm);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * 0.48, box.y + box.height * 0.35);
+      const geometry = await page.evaluate(() => window.capacitorLab.getInteractionGeometry());
+      await page.mouse.move(box.x + geometry.plateHandle.x, box.y + geometry.plateHandle.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * 0.48, box.y + box.height * 0.75);
+      await page.mouse.move(box.x + geometry.plateHandle.x, box.y + geometry.plateHandle.y + 80);
       await page.mouse.up();
       const afterDrag = await page.evaluate(() => window.capacitorLab.getState().distanceMm);
       assert(Math.abs(afterDrag - beforeDrag) > 1, `${lab.id}/${viewport.name}: direct plate-distance drag did not update state`);
@@ -588,12 +687,22 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const beforeDrag = await page.evaluate(() => window.ohmLab.getState().voltage);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.5);
+      const geometry = await page.evaluate(() => window.ohmLab.getInteractionGeometry());
+      await page.mouse.move(box.x + geometry.voltageHandle.x, box.y + geometry.voltageHandle.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * 0.85, box.y + box.height * 0.5);
+      await page.mouse.move(box.x + geometry.right, box.y + geometry.voltageHandle.y);
       await page.mouse.up();
       const afterDrag = await page.evaluate(() => window.ohmLab.getState().voltage);
       assert(Math.abs(afterDrag - beforeDrag) > 1, `${lab.id}/${viewport.name}: direct voltage drag did not update state`);
+      await page.evaluate(() => window.ohmLab.setMode("resistance"));
+      const resistanceBefore = await page.evaluate(() => window.ohmLab.getState().resistance);
+      const resistanceGeometry = await page.evaluate(() => window.ohmLab.getInteractionGeometry());
+      await page.mouse.move(box.x + resistanceGeometry.resistanceHandle.x, box.y + resistanceGeometry.resistanceHandle.y);
+      await page.mouse.down();
+      await page.mouse.move(box.x + resistanceGeometry.right, box.y + resistanceGeometry.resistanceHandle.y);
+      await page.mouse.up();
+      const resistanceAfter = await page.evaluate(() => window.ohmLab.getState().resistance);
+      assert(Math.abs(resistanceAfter - resistanceBefore) > 1, `${lab.id}/${viewport.name}: direct resistance drag did not update state`);
     }
 
     if (lab.id === "circuit-applications") {
@@ -642,6 +751,19 @@ async function verifyLab(browser, lab, viewport) {
       }));
       assert(closeTo(reference.wire.magnitudeT, 2e-5, 1e-12) && closeTo(reference.wire.radialDotT, 0, 1e-15), `${lab.id}/${viewport.name}: straight-wire field mismatch`);
       assert(closeTo(reference.midpoint.magnitudeT, 0, 1e-15) && closeTo(reference.midpoint.componentResidualT, 0, 1e-15), `${lab.id}/${viewport.name}: two-wire superposition mismatch`);
+      await page.evaluate(() => window.magneticFieldLab.setMode("wire"));
+      const canvas = page.locator("#magneticCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const beforeProbe = await page.evaluate(() => window.magneticFieldLab.getState().probe);
+      const box = await canvas.boundingBox();
+      const geometry = await page.evaluate(() => window.magneticFieldLab.getInteractionGeometry());
+      await page.mouse.move(box.x + geometry.probe.x, box.y + geometry.probe.y);
+      await page.mouse.down();
+      const pressedProbe = await page.evaluate(() => window.magneticFieldLab.getState().probe);
+      await page.mouse.move(box.x + geometry.probe.x + 70, box.y + geometry.probe.y);
+      await page.mouse.up();
+      const afterProbe = await page.evaluate(() => window.magneticFieldLab.getState().probe);
+      assert(pressedProbe === beforeProbe && Math.abs(afterProbe - beforeProbe) > 1, `${lab.id}/${viewport.name}: direct probe drag did not update state`);
     }
 
     if (lab.id === "charged-particle") {
@@ -655,6 +777,18 @@ async function verifyLab(browser, lab, viewport) {
       assert(closeTo(reference.sample.speed, 4e6, 1e-6), `${lab.id}/${viewport.name}: magnetic field changed speed`);
       assert(closeTo(reference.sample.fbx * reference.sample.vx + reference.sample.fby * reference.sample.vy, 0, 1e-12), `${lab.id}/${viewport.name}: magnetic force is not perpendicular to velocity`);
       assert(reference.radius > 0 && Number.isFinite(reference.radius), `${lab.id}/${viewport.name}: magnetic radius invalid`);
+      const canvas = page.locator("#particleCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const box = await canvas.boundingBox();
+      const geometry = await page.evaluate(() => window.particleLab.getInteractionGeometry());
+      const beforeSpeed = await page.evaluate(() => window.particleLab.getState().speed);
+      await page.mouse.move(box.x + geometry.velocityHandle.x, box.y + geometry.velocityHandle.y);
+      await page.mouse.down();
+      const pressedSpeed = await page.evaluate(() => window.particleLab.getState().speed);
+      await page.mouse.move(box.x + geometry.velocityHandle.x + 20, box.y + geometry.velocityHandle.y - 16);
+      await page.mouse.up();
+      const afterSpeed = await page.evaluate(() => window.particleLab.getState().speed);
+      assert(Math.abs(pressedSpeed - beforeSpeed) < 1e-9 && Math.abs(afterSpeed - beforeSpeed) > .1, `${lab.id}/${viewport.name}: direct initial-velocity drag did not update state`);
     }
 
     if (lab.id === "mass-spectrometer") {

@@ -43,3 +43,4 @@
     aspect-ratio: 1.35;
   }
 }
+.magnetic-source-lab #magneticCanvas.is-dragging{cursor:grabbing}

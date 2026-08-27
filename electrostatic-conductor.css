@@ -28,6 +28,7 @@
   cursor:crosshair;
   touch-action:none;
 }
+.electrostatic-conductor-lab #conductorCanvas.is-dragging { cursor:grabbing; }
 .electrostatic-conductor-lab .state-badge.is-moving {
   color:var(--critical-amber);
   border-color:rgba(239,185,80,.5);

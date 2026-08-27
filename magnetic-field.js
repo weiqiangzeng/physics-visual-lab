@@ -131,6 +131,32 @@
     loop: { current: 4, turns: 80, radius: 10, probe: 0 },
     solenoid: { current: 3, turns: 400, radius: 5, length: 40, probe: 0 },
   };
+  const magneticGeometry = { probe: null, mode: null, cx: 0, cy: 0, scale: 1 };
+  function sceneGeometry(w, h) {
+    if (state.mode === "wire" || state.mode === "double") {
+      const cx = w * .47, cy = h * .51, scale = Math.min(w, h) * 2.2;
+      return state.mode === "wire"
+        ? { x: cx + Math.sign(state.probe || 1) * Math.max(2, Math.abs(state.probe)) / 100 * scale, y: cy, cx, cy, scale }
+        : { x: cx, y: cy - state.probe / 100 * scale, cx, cy, scale };
+    }
+    const cx = w * .48, cy = h * .52, scale = Math.min(w * .38, 260) / .35;
+    return { x: cx + state.probe / 100 * scale, y: cy, cx, cy, scale };
+  }
+  function drawProbeHandle() {
+    const p = magneticGeometry.probe;
+    if (!p) return;
+    ctx.save();
+    ctx.strokeStyle = state.dragging ? C.white : C.cyan;
+    ctx.lineWidth = state.dragging ? 2.5 : 1.5;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, state.dragging ? 11 : 8, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = state.dragging ? C.white : C.cyan;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
   function fmt(v, d = 2) {
     return Number(v).toFixed(d);
   }
@@ -489,6 +515,8 @@
     state.mode === "wire" || state.mode === "double"
       ? drawTop(q, w, h)
       : drawAxial(q, w, h);
+    Object.assign(magneticGeometry, { mode: state.mode, probe: sceneGeometry(w, h), cx: sceneGeometry(w, h).cx, cy: sceneGeometry(w, h).cy, scale: sceneGeometry(w, h).scale });
+    drawProbeHandle();
     ctx.fillStyle = C.muted;
     ctx.font = "10px ui-monospace,monospace";
     ctx.fillText(
@@ -817,23 +845,40 @@
         ? document.exitFullscreen()
         : document.documentElement.requestFullscreen(),
   );
+  let magneticDragTarget = null;
   R.canvas.addEventListener("pointerdown", (e) => {
+    const r = R.canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    e.stopImmediatePropagation();
+    if (!magneticGeometry.probe || Math.hypot(x - magneticGeometry.probe.x, y - magneticGeometry.probe.y) > 30) return;
+    magneticDragTarget = "probe";
     state.dragging = true;
+    R.canvas.classList.add("is-dragging");
     R.canvas.setPointerCapture(e.pointerId);
-  });
+  }, true);
   R.canvas.addEventListener("pointermove", (e) => {
-    if (!state.dragging) return;
-    const r = R.canvas.getBoundingClientRect(),
-      ratio = (e.clientX - r.left) / r.width;
-    state.probe = Math.max(-30, Math.min(30, (ratio - .48) * 75));
+    const r = R.canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    const overProbe = magneticGeometry.probe && Math.hypot(x - magneticGeometry.probe.x, y - magneticGeometry.probe.y) <= 30;
+    R.canvas.style.cursor = magneticDragTarget ? "grabbing" : overProbe ? "grab" : "default";
+    e.stopImmediatePropagation();
+    if (!magneticDragTarget) return;
+    const p = magneticGeometry.probe;
+    state.probe = state.mode === "wire"
+      ? Math.max(2, Math.min(30, Math.abs((x - p.cx) / p.scale * 100))) * (x >= p.cx ? 1 : -1)
+      : Math.max(-30, Math.min(30, (state.mode === "double" ? (p.cy - y) : (x - p.cx)) / p.scale * 100));
     R.probeInput.value = state.probe;
     state.running = false;
     sync();
-  });
-  R.canvas.addEventListener("pointerup", (e) => {
+  }, true);
+  function endMagneticDrag(e) {
+    e.stopImmediatePropagation();
+    magneticDragTarget = null;
     state.dragging = false;
-    R.canvas.releasePointerCapture(e.pointerId);
-  });
+    R.canvas.classList.remove("is-dragging");
+    if (R.canvas.hasPointerCapture?.(e.pointerId)) R.canvas.releasePointerCapture(e.pointerId);
+    sync();
+  }
+  R.canvas.addEventListener("pointerup", endMagneticDrag, true);
+  R.canvas.addEventListener("pointercancel", endMagneticDrag, true);
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(.05, (now - last) / 1000);
@@ -849,6 +894,7 @@
   window.addEventListener("resize", sync);
   window.magneticFieldLab = {
     getState: () => ({ ...state }),
+    getInteractionGeometry: () => ({ ...magneticGeometry, probe: magneticGeometry.probe ? { ...magneticGeometry.probe } : null }),
     setMode,
     current,
     setState(changes = {}) {

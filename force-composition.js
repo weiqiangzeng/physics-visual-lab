@@ -4,10 +4,10 @@
   if (!M) throw new Error("ForceCompositionModel is required");
 
   const MODES = {
-    compose: ["正向合成", "拖动 F₂ 端点，观察两分力怎样共同决定合力"],
+    compose: ["正向合成", "拖动 F₁、F₂ 端点，观察两分力怎样共同决定合力"],
     decompose: ["逆向分解", "固定合力与两条方向，用分量方程反求两个分力"],
-    apparatus: ["实验装置", "读取三只弹簧秤和量角器，检查圆环的闭合残差"],
-    boundary: ["模型边界", "让两方向接近共线，观察角度误差怎样被放大"],
+    apparatus: ["实验装置", "拖动两支测力计，读取平衡力并检查圆环闭合残差"],
+    boundary: ["模型边界", "拖动目标 R 或两条方向，观察角度误差怎样被放大"],
   };
   const STEPS = [
     ["先做几何闭合", "为什么两个力不能只把大小直接相加，而必须同时保留方向？"],
@@ -23,7 +23,7 @@
     mode: "compose", force1N: 6, force2N: 8, direction1Deg: 0, direction2Deg: 90,
     targetForceN: 10, targetDirectionDeg: 53.13010235415598, forceResolutionN: .1,
     angleResolutionDeg: .5, readingNoise: .25, seed: 41, guideStep: 0,
-    showComponents: true, showParallelogram: true, showValues: true, showUncertainty: true, dragging: false,
+    showComponents: true, showParallelogram: true, showValues: true, showUncertainty: true, dragging: false, dragRole: null,
   };
   const $ = (id) => document.getElementById(id);
   const R = {
@@ -33,7 +33,7 @@
     force1Value: $("force1Value"), force2Value: $("force2Value"), direction1Value: $("direction1Value"), direction2Value: $("direction2Value"), targetValue: $("targetValue"), targetDirectionValue: $("targetDirectionValue"),
     forceResolutionValue: $("forceResolutionValue"), angleResolutionValue: $("angleResolutionValue"), noiseValue: $("noiseValue"), seedValue: $("seedValue"),
     force1Metric: $("force1Metric"), force2Metric: $("force2Metric"), resultantMetric: $("resultantMetric"), angleMetric: $("angleMetric"), closureMetric: $("closureMetric"), conditionMetric: $("conditionMetric"),
-    modeTitle: $("modeTitle"), modeGoal: $("modeGoal"), badge: $("stateBadge"), nature: $("natureText"), explanation: $("explanationText"),
+    modeTitle: $("modeTitle"), modeGoal: $("modeGoal"), interactionHint: $("interactionModeHint"), stageHint: document.querySelector(".drag-hint"), badge: $("stateBadge"), nature: $("natureText"), explanation: $("explanationText"),
     dataKicker: $("dataKicker"), dataTitle: $("dataTitle"), dataStatus: $("dataStatus"), evidenceKicker: $("evidenceKicker"), evidenceTitle: $("evidenceTitle"), evidenceStatus: $("evidenceStatus"),
     stepIndex: $("stepIndex"), stepTitle: $("stepTitle"), stepPrompt: $("stepPrompt"), formula: $("formulaReadout"),
     components: $("showComponentsToggle"), parallelogram: $("showParallelogramToggle"), values: $("showValuesToggle"), uncertainty: $("showUncertaintyToggle"),
@@ -72,32 +72,73 @@
     if (state.mode === "apparatus") return { kind: "apparatus", result: M.apparatus(state) };
     return { kind: "decompose", result: M.decompose(state), sensitivity: M.sensitivity(state) };
   }
-  function drawMain(solution) {
-    const viewport = size(R.main, ctx, 280); background(ctx, viewport.width, viewport.height);
-    const origin = { x: viewport.width * .42, y: viewport.height * .57 };
-    const q = solution.result;
+  function pointAt(origin, angleDeg, radius) { return { x: origin.x + Math.cos(rad(angleDeg)) * radius, y: origin.y - Math.sin(rad(angleDeg)) * radius }; }
+  function endpoint(origin, vector, scale) { return { x: origin.x + vector.x * scale, y: origin.y - vector.y * scale }; }
+  function mainGeometry(solution, viewport) {
+    const origin = { x: viewport.width * .42, y: viewport.height * .57 }, q = solution.result;
     const f1 = solution.kind === "decompose" ? q.force1 : solution.kind === "apparatus" ? q.measured.force1 : q.force1;
     const f2 = solution.kind === "decompose" ? q.force2 : solution.kind === "apparatus" ? q.measured.force2 : q.force2;
     const resultant = solution.kind === "decompose" ? q.target : solution.kind === "apparatus" ? q.measured.resultant : q.resultant;
     const maximum = Math.max(1, Math.abs(f1?.x || 0), Math.abs(f1?.y || 0), Math.abs(f2?.x || 0), Math.abs(f2?.y || 0), Math.hypot(resultant?.x || 0, resultant?.y || 0));
     const scale = Math.min(viewport.width * .3, viewport.height * .34) / maximum;
+    const f1End = endpoint(origin, f1, scale), f2End = endpoint(origin, f2, scale), resultEnd = endpoint(origin, resultant, scale);
+    const handleRadius = Math.max(58, Math.min(viewport.width, viewport.height) * .16);
+    return { viewport, origin, scale, f1, f2, resultant, f1End, f2End, resultEnd,
+      handles: solution.kind === "decompose" ? {
+        target: resultEnd,
+        direction1: pointAt(origin, state.direction1Deg, handleRadius),
+        direction2: pointAt(origin, state.direction2Deg, handleRadius + 20),
+      } : { force1: f1End, force2: f2End } };
+  }
+  function drawHandle(point, color, label, active) {
+    ctx.save(); ctx.strokeStyle = active ? C.text : color; ctx.lineWidth = active ? 2.5 : 1.5;
+    ctx.fillStyle = active ? color : "rgba(7,11,12,.9)"; ctx.beginPath(); ctx.arc(point.x, point.y, active ? 10 : 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = `${color}99`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(point.x, point.y, 14, 0, Math.PI * 2); ctx.stroke();
+    text(ctx, label, point.x + 17, point.y - 10, active ? C.text : color, 9, "left", 700); ctx.restore();
+  }
+  function drawSpringScale(origin, end, color) {
+    const dx = end.x - origin.x, dy = end.y - origin.y, length = Math.hypot(dx, dy);
+    if (length < 24) return;
+    const angle = Math.atan2(dy, dx), bodyCenter = { x: origin.x + dx * .43, y: origin.y + dy * .43 };
+    ctx.save(); ctx.translate(bodyCenter.x, bodyCenter.y); ctx.rotate(angle);
+    ctx.strokeStyle = `${color}aa`; ctx.lineWidth = 1.2; ctx.fillStyle = "rgba(11,17,17,.94)";
+    ctx.beginPath(); ctx.rect(-26, -8, 52, 16); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = `${color}70`; ctx.lineWidth = 1;
+    for (let tick = -16; tick <= 16; tick += 8) line(ctx, tick, -5, tick, 5, `${color}70`, 1);
+    ctx.restore();
+    line(ctx, origin.x, origin.y, bodyCenter.x - Math.cos(angle) * 27, bodyCenter.y - Math.sin(angle) * 27, `${color}70`, 1.2);
+    line(ctx, bodyCenter.x + Math.cos(angle) * 27, bodyCenter.y + Math.sin(angle) * 27, end.x, end.y, `${color}70`, 1.2);
+  }
+  function drawMain(solution) {
+    const viewport = size(R.main, ctx, 280); background(ctx, viewport.width, viewport.height);
+    const geometry = mainGeometry(solution, viewport); state.mainGeometry = geometry;
+    const { origin, scale, f1, f2, resultant } = geometry, q = solution.result;
     line(ctx, 24, origin.y, viewport.width - 24, origin.y, "rgba(223,229,223,.16)"); line(ctx, origin.x, 24, origin.x, viewport.height - 24, "rgba(223,229,223,.16)");
     text(ctx, "+x", viewport.width - 30, origin.y - 7, C.muted); text(ctx, "+y", origin.x + 7, 31, C.muted);
     if (state.showComponents && resultant) { line(ctx, origin.x, origin.y, origin.x + resultant.x * scale, origin.y, "rgba(242,189,90,.45)", 1, [4,4]); line(ctx, origin.x + resultant.x * scale, origin.y, origin.x + resultant.x * scale, origin.y - resultant.y * scale, "rgba(242,189,90,.45)", 1, [4,4]); }
-    if (state.showParallelogram && f1 && f2) { const p1 = { x: origin.x + f1.x * scale, y: origin.y - f1.y * scale }, p2 = { x: origin.x + f2.x * scale, y: origin.y - f2.y * scale }; line(ctx, p1.x, p1.y, p1.x + f2.x * scale, p1.y - f2.y * scale, "rgba(185,145,232,.55)", 1.4, [5,4]); line(ctx, p2.x, p2.y, p2.x + f1.x * scale, p2.y - f1.y * scale, "rgba(185,145,232,.55)", 1.4, [5,4]); }
+    if (state.showParallelogram && f1 && f2) { const p1 = geometry.f1End, p2 = geometry.f2End; line(ctx, p1.x, p1.y, p1.x + f2.x * scale, p1.y - f2.y * scale, "rgba(185,145,232,.55)", 1.4, [5,4]); line(ctx, p2.x, p2.y, p2.x + f1.x * scale, p2.y - f1.y * scale, "rgba(185,145,232,.55)", 1.4, [5,4]); }
+    if (solution.kind === "apparatus") { drawSpringScale(origin, geometry.f1End, C.violet); drawSpringScale(origin, geometry.f2End, C.cyan); text(ctx, "两支测力计共同拉住同一圆环", 18, 28, C.muted, 10, "left", 700); }
     if (Number.isFinite(f1?.x)) arrow(ctx, origin, f1, scale, C.violet, `F₁ ${fmt(Math.hypot(f1.x,f1.y),1)}N`);
-    if (Number.isFinite(f2?.x)) { const endpoint = arrow(ctx, origin, f2, scale, C.cyan, `F₂ ${fmt(Math.hypot(f2.x,f2.y),1)}N`); ctx.fillStyle = C.cyan; ctx.beginPath(); ctx.arc(endpoint.x, endpoint.y, 7, 0, Math.PI * 2); ctx.fill(); }
+    if (Number.isFinite(f2?.x)) arrow(ctx, origin, f2, scale, C.cyan, `F₂ ${fmt(Math.hypot(f2.x,f2.y),1)}N`);
     if (resultant) arrow(ctx, origin, resultant, scale, C.amber, `${solution.kind === "decompose" ? "目标 R" : "R"} ${fmt(Math.hypot(resultant.x,resultant.y),1)}N`);
     if (solution.kind === "apparatus") {
       arrow(ctx, origin, q.balancing, scale, C.green, `平衡力 ${fmt(q.measuredResultantN,1)}N`);
       ctx.strokeStyle = C.text; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(origin.x, origin.y, 13, 0, Math.PI * 2); ctx.stroke();
-      text(ctx, `仪器闭合残差 ${fmt(q.closureResidualN,3)} N`, 18, 28, q.closureResidualN < state.forceResolutionN ? C.green : C.red, 10, "left", 700);
+      text(ctx, `仪器闭合残差 ${fmt(q.closureResidualN,3)} N`, 18, 47, q.closureResidualN < state.forceResolutionN ? C.green : C.red, 10, "left", 700);
     } else if (solution.kind === "decompose" && state.showUncertainty) {
       const targetLow = M.vector(state.targetForceN, state.targetDirectionDeg - state.angleResolutionDeg), targetHigh = M.vector(state.targetForceN, state.targetDirectionDeg + state.angleResolutionDeg);
       arrow(ctx, origin, targetLow, scale, "rgba(242,189,90,.28)", "", true); arrow(ctx, origin, targetHigh, scale, "rgba(242,189,90,.28)", "", true);
     }
     arcDirection(ctx, origin, state.direction1Deg, 28, C.violet); arcDirection(ctx, origin, state.direction2Deg, 42, C.cyan);
-    text(ctx, state.mode === "compose" ? "拖动青色端点：同时改变 F₂ 大小与方向" : "拖动青色方向端点：改变第二条分解方向", 16, viewport.height - 10, C.muted, 8);
+    if (solution.kind === "decompose") {
+      drawHandle(geometry.handles.target, C.amber, "R", state.dragRole === "target");
+      drawHandle(geometry.handles.direction1, C.violet, "θ₁", state.dragRole === "direction1");
+      drawHandle(geometry.handles.direction2, C.cyan, "θ₂", state.dragRole === "direction2");
+    } else {
+      drawHandle(geometry.handles.force1, C.violet, "F₁", state.dragRole === "force1");
+      drawHandle(geometry.handles.force2, C.cyan, "F₂", state.dragRole === "force2");
+    }
+    text(ctx, solution.kind === "decompose" ? "拖动 R 改变目标，拖动 θ₁ / θ₂ 改变分解方向" : "拖动 F₁ / F₂ 端点：同时改变大小与方向", 16, viewport.height - 10, C.muted, 8);
   }
 
   function drawResponse(solution) {
@@ -128,6 +169,34 @@
     values.forEach((value,index)=>{const x=a.x(index+1);line(ectx,x,a.y(0),x,a.y(value),index%3===2?C.amber:index%3===0?C.violet:C.cyan,12);text(ectx,["F₁x","F₂x","Rx","F₁y","F₂y","Ry"][index],x,viewport.height-10,C.muted,8,"center");}); text(ectx,"分量/N",7,13,C.violet);
   }
 
+  function pointerPoint(event) {
+    const box = R.main.getBoundingClientRect();
+    return { x: event.clientX - box.left, y: event.clientY - box.top };
+  }
+  function hitTest(point) {
+    const geometry = state.mainGeometry;
+    if (!geometry) return null;
+    const entries = state.mode === "decompose" || state.mode === "boundary"
+      ? [["target", geometry.handles.target], ["direction1", geometry.handles.direction1], ["direction2", geometry.handles.direction2]]
+      : [["force1", geometry.handles.force1], ["force2", geometry.handles.force2]];
+    const threshold = 24;
+    return entries.map(([role, handle]) => ({ role, distance: Math.hypot(point.x - handle.x, point.y - handle.y) }))
+      .filter((entry) => entry.distance <= threshold).sort((a, b) => a.distance - b.distance)[0]?.role || null;
+  }
+  function applyDrag(event) {
+    const geometry = state.mainGeometry;
+    if (!geometry || !state.dragRole) return;
+    const point = pointerPoint(event), dx = point.x - geometry.origin.x, dy = geometry.origin.y - point.y;
+    const angle = clamp(Math.atan2(dy, dx) / M.DEG, -170, 170);
+    const magnitude = clamp(Math.hypot(dx, dy) / geometry.scale, 0, 20);
+    if (state.dragRole === "force1") { state.force1N = magnitude; state.direction1Deg = angle; }
+    if (state.dragRole === "force2") { state.force2N = magnitude; state.direction2Deg = angle; }
+    if (state.dragRole === "target") { state.targetForceN = clamp(magnitude, .5, 20); state.targetDirectionDeg = angle; }
+    if (state.dragRole === "direction1") state.direction1Deg = angle;
+    if (state.dragRole === "direction2") state.direction2Deg = angle;
+    render();
+  }
+
   function render() {
     const solution=current(), q=solution.result;
     [[R.force1,state.force1N],[R.force2,state.force2N],[R.direction1,state.direction1Deg],[R.direction2,state.direction2Deg],[R.target,state.targetForceN],[R.targetDirection,state.targetDirectionDeg],[R.forceResolution,state.forceResolutionN],[R.angleResolution,state.angleResolutionDeg],[R.noise,state.readingNoise],[R.seed,state.seed]].forEach(([el,v])=>range(el,v));
@@ -140,7 +209,12 @@
     R.badge.textContent=invalid?"绳张力不可实现":unstable?"误差高度放大":state.mode==="apparatus"?"有限精度闭合":"矢量闭合";R.badge.className=`state-badge${invalid||unstable?" is-warning":""}`;
     R.nature.textContent=invalid?"目标方向超出两条拉力的可实现扇区":unstable?"当前分解几何处于病态区":state.mode==="apparatus"?"仪器读数存在有限闭合残差":"两分力与合力满足矢量闭合";
     R.explanation.textContent=invalid?"负解意味着其中一条绳必须推圆环，而绳不能提供推力":unstable?`条件数 ${fmt(condition,1)}：微小测角误差会被显著放大`:state.mode==="apparatus"?"改变分度值与实验编号，比较重复读数":"合力由 x、y 分量分别相加得到";
-    R.modeTitle.textContent=MODES[state.mode][0];R.modeGoal.textContent=MODES[state.mode][1];R.tabs.forEach(b=>b.classList.toggle("is-active",b.dataset.mode===state.mode));R.route.forEach((b,i)=>b.classList.toggle("is-active",i===state.guideStep));
+    const labRoot = document.querySelector(".force-composition-lab");
+    if (labRoot) labRoot.dataset.mode = state.mode;
+    R.modeTitle.textContent=MODES[state.mode][0];R.modeGoal.textContent=MODES[state.mode][1];
+    R.interactionHint.textContent=state.mode==="decompose"||state.mode==="boundary"?"画布可拖动 R、θ₁、θ₂": "画布可拖动 F₁、F₂";
+    R.stageHint.textContent=state.mode==="apparatus"?"拖动两支测力计端点":state.mode==="decompose"||state.mode==="boundary"?"拖动 R、θ₁、θ₂": "拖动 F₁、F₂ 端点";
+    R.tabs.forEach(b=>b.classList.toggle("is-active",b.dataset.mode===state.mode));R.route.forEach((b,i)=>b.classList.toggle("is-active",i===state.guideStep));
     R.stepIndex.textContent=String(state.guideStep+1).padStart(2,"0");R.stepTitle.textContent=STEPS[state.guideStep][0];R.stepPrompt.textContent=STEPS[state.guideStep][1];R.formula.textContent=state.mode==="compose"?"R=F₁+F₂":state.mode==="apparatus"?"F₁+F₂+F₃≈0":"[F₁ F₂]·c=R";
     if(state.mode==="compose"||state.mode==="apparatus"){R.dataKicker.textContent="ANGLE RESPONSE";R.dataTitle.textContent="夹角改变时的合力";R.dataStatus.textContent=`R=${fmt(resultN,2)}N`;R.evidenceKicker.textContent="COMPONENT LEDGER";R.evidenceTitle.textContent="x / y 分量账本";R.evidenceStatus.textContent=`残差 ${fmt(closure,3)}N`;}
     else if(state.mode==="boundary"){R.dataKicker.textContent="INVERSE RESPONSE";R.dataTitle.textContent="目标方向改变时的分力";R.dataStatus.textContent=`波动 ${fmt(solution.sensitivity.spreadN,2)}N`;R.evidenceKicker.textContent="GEOMETRY CONDITION";R.evidenceTitle.textContent="方向夹角与误差放大";R.evidenceStatus.textContent=`κ=${condition>999?">999":fmt(condition,1)}`;}
@@ -148,13 +222,16 @@
     drawMain(solution);drawResponse(solution);drawEvidence(solution);
   }
   function setMode(mode){if(!MODES[mode])return;state.mode=mode;if(mode==="boundary"&&Math.abs(M.directionSeparation(state.direction1Deg,state.direction2Deg))>8)Object.assign(state,PRESETS.collinear);render();}
-  function reset(){Object.assign(state,{mode:"compose",force1N:6,force2N:8,direction1Deg:0,direction2Deg:90,targetForceN:10,targetDirectionDeg:53.13010235415598,forceResolutionN:.1,angleResolutionDeg:.5,readingNoise:.25,seed:41,guideStep:0,showComponents:true,showParallelogram:true,showValues:true,showUncertainty:true,dragging:false});[[R.components,"showComponents"],[R.parallelogram,"showParallelogram"],[R.values,"showValues"],[R.uncertainty,"showUncertainty"]].forEach(([el,key])=>el.checked=state[key]);render();}
-  function setState(next={}){if(MODES[next.mode])state.mode=next.mode;Object.assign(state,M.normalize({...state,...next}));if(Number.isFinite(+next.guideStep))state.guideStep=Math.round(clamp(+next.guideStep,0,2));["showComponents","showParallelogram","showValues","showUncertainty"].forEach(key=>{if(typeof next[key]==="boolean")state[key]=next[key];});state.dragging=false;render();}
+  function reset(){Object.assign(state,{mode:"compose",force1N:6,force2N:8,direction1Deg:0,direction2Deg:90,targetForceN:10,targetDirectionDeg:53.13010235415598,forceResolutionN:.1,angleResolutionDeg:.5,readingNoise:.25,seed:41,guideStep:0,showComponents:true,showParallelogram:true,showValues:true,showUncertainty:true,dragging:false,dragRole:null});[[R.components,"showComponents"],[R.parallelogram,"showParallelogram"],[R.values,"showValues"],[R.uncertainty,"showUncertainty"]].forEach(([el,key])=>el.checked=state[key]);render();}
+  function setState(next={}){if(MODES[next.mode])state.mode=next.mode;Object.assign(state,M.normalize({...state,...next}));if(Number.isFinite(+next.guideStep))state.guideStep=Math.round(clamp(+next.guideStep,0,2));["showComponents","showParallelogram","showValues","showUncertainty"].forEach(key=>{if(typeof next[key]==="boolean")state[key]=next[key];});state.dragging=false;state.dragRole=null;render();}
   [[R.force1,"force1N"],[R.force2,"force2N"],[R.direction1,"direction1Deg"],[R.direction2,"direction2Deg"],[R.target,"targetForceN"],[R.targetDirection,"targetDirectionDeg"],[R.forceResolution,"forceResolutionN"],[R.angleResolution,"angleResolutionDeg"],[R.noise,"readingNoise"],[R.seed,"seed"]].forEach(([el,key])=>el.addEventListener("input",()=>{state[key]=+el.value;render();}));
   [[R.components,"showComponents"],[R.parallelogram,"showParallelogram"],[R.values,"showValues"],[R.uncertainty,"showUncertainty"]].forEach(([el,key])=>el.addEventListener("change",()=>{state[key]=el.checked;render();}));
   R.tabs.forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));R.route.forEach((b,i)=>b.addEventListener("click",()=>{state.guideStep=i;render();}));R.presets.forEach(b=>b.addEventListener("click",()=>{Object.assign(state,PRESETS[b.dataset.preset]);render();}));
   R.reset.addEventListener("click",reset);R.guide.addEventListener("click",()=>R.dialog.showModal());R.step.addEventListener("click",()=>{state.guideStep=(state.guideStep+1)%3;render();});R.focus.addEventListener("click",()=>{const active=document.body.classList.toggle("focus-mode");R.focus.setAttribute("aria-pressed",String(active));});R.fullscreen.addEventListener("click",()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen());
-  function dragVector(event){const box=R.main.getBoundingClientRect(),origin={x:box.width*.42,y:box.height*.57},dx=event.clientX-box.left-origin.x,dy=origin.y-(event.clientY-box.top),angle=Math.atan2(dy,dx)/M.DEG;if(state.mode==="compose"||state.mode==="apparatus"){const magnitude=clamp(Math.hypot(dx,dy)/Math.min(box.width*.3,box.height*.34)*Math.max(1,state.force1N,state.force2N,M.compose(state).resultantN),0,20);state.force2N=magnitude;}state.direction2Deg=clamp(angle,-170,170);render();}
-  R.main.addEventListener("pointerdown",event=>{state.dragging=true;R.main.setPointerCapture?.(event.pointerId);dragVector(event);});R.main.addEventListener("pointermove",event=>{if(state.dragging)dragVector(event);});R.main.addEventListener("pointerup",()=>{state.dragging=false;});R.main.addEventListener("pointercancel",()=>{state.dragging=false;});window.addEventListener("resize",render);
-  window.forceCompositionLab={compose:M.compose,decompose:M.decompose,apparatus:M.apparatus,sensitivity:M.sensitivity,workEquivalence:M.workEquivalence,getState:()=>({...state}),setState,setMode,reset};render();
+  R.main.addEventListener("pointerdown",event=>{const role=hitTest(pointerPoint(event));if(!role)return;state.dragRole=role;state.dragging=true;R.main.classList.add("is-dragging");R.main.setPointerCapture?.(event.pointerId);applyDrag(event);});
+  R.main.addEventListener("pointermove",event=>{if(state.dragging)applyDrag(event);else R.main.style.cursor=hitTest(pointerPoint(event))?"grab":"crosshair";});
+  R.main.addEventListener("pointerup",()=>{state.dragging=false;state.dragRole=null;R.main.classList.remove("is-dragging");render();});
+  R.main.addEventListener("pointercancel",()=>{state.dragging=false;state.dragRole=null;R.main.classList.remove("is-dragging");render();});
+  window.addEventListener("resize",render);
+  window.forceCompositionLab={compose:M.compose,decompose:M.decompose,apparatus:M.apparatus,sensitivity:M.sensitivity,workEquivalence:M.workEquivalence,getState:()=>({...state}),getInteractionGeometry:()=>state.mainGeometry?{origin:state.mainGeometry.origin,scale:state.mainGeometry.scale,handles:state.mainGeometry.handles}:null,setState,setMode,reset};render();
 })();

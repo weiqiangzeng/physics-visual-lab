@@ -117,6 +117,7 @@
   const canvasContext = refs.canvas.getContext("2d");
   const profileContext = refs.profileChart.getContext("2d");
   const vectorContext = refs.vectorChart.getContext("2d");
+  const fieldGeometry = { probe: null, path: [], mode: null };
   const clamp = model.clamp;
   const signed = (value, digits = 1) => `${value > 1e-10 ? "+" : value < -1e-10 ? "−" : ""}${Math.abs(value).toFixed(digits)}`;
   const finite = (value) => Number.isFinite(value) ? value : 0;
@@ -431,6 +432,14 @@
     context.fill();
     context.stroke();
     context.restore();
+    context.save();
+    context.strokeStyle = state.dragging ? color : `${color}88`;
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(x, y, state.dragging ? 17 : 15, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+    fieldGeometry.probe = { x, y };
     text(context, state.testCharge > 0 ? "+" : state.testCharge < 0 ? "−" : "0", x, y - 1, color, 12, "center", "800");
     text(context, `q₀=${signed(state.testCharge)} nC`, x + 16, y + 17, color, 8, "left", "700");
     if (sample.magnitude > 1e-8) {
@@ -448,6 +457,11 @@
   function drawScene(sample) {
     const { width, height } = resizeCanvas(refs.canvas, canvasContext);
     const map = worldMap(width, height);
+    fieldGeometry.mode = state.mode;
+    fieldGeometry.path = state.mode === "work" ? Array.from({ length: 91 }, (_, index) => {
+      const point = model.pathPoint(state.path, index / 90);
+      return { x: map.x(point.x), y: map.y(point.y), progress: index / 90 };
+    }) : [];
     drawGrid(canvasContext, width, height, map);
     drawPotentialMap(canvasContext, width, height, map);
     drawEquipotentials(canvasContext, width, height, map);
@@ -746,11 +760,9 @@
     if (state.mode === "work") {
       let bestProgress = 0;
       let bestDistance = Infinity;
-      for (let index = 0; index <= 100; index += 1) {
-        const progress = index / 100;
-        const point = model.pathPoint(state.path, progress);
-        const distance = Math.hypot(map.x(point.x) - px, map.y(point.y) - py);
-        if (distance < bestDistance) { bestDistance = distance; bestProgress = progress; }
+      for (const point of fieldGeometry.path) {
+        const distance = Math.hypot(point.x - px, point.y - py);
+        if (distance < bestDistance) { bestDistance = distance; bestProgress = point.progress; }
       }
       setState({ progress: bestProgress, running: false });
       return;
@@ -762,10 +774,32 @@
     setState({ probeX: x, probeY: y, running: false });
   }
 
-  refs.canvas.addEventListener("pointerdown", (event) => { state.dragging = true; refs.canvas.setPointerCapture(event.pointerId); pointerToState(event); });
-  refs.canvas.addEventListener("pointermove", (event) => { if (state.dragging) pointerToState(event); });
-  refs.canvas.addEventListener("pointerup", (event) => { state.dragging = false; refs.canvas.releasePointerCapture(event.pointerId); });
-  refs.canvas.addEventListener("pointercancel", () => { state.dragging = false; });
+  refs.canvas.addEventListener("pointerdown", (event) => {
+    const rect = refs.canvas.getBoundingClientRect();
+    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const target = state.mode === "work"
+      ? fieldGeometry.path.reduce((closest, candidate) => Math.hypot(candidate.x - point.x, candidate.y - point.y) < closest.distance ? { candidate, distance: Math.hypot(candidate.x - point.x, candidate.y - point.y) } : closest, { candidate: null, distance: Infinity })
+      : { candidate: fieldGeometry.probe, distance: fieldGeometry.probe ? Math.hypot(fieldGeometry.probe.x - point.x, fieldGeometry.probe.y - point.y) : Infinity };
+    if (!target.candidate || target.distance > 30) return;
+    state.dragging = true;
+    refs.canvas.classList.add("is-dragging");
+    refs.canvas.setPointerCapture(event.pointerId);
+  });
+  refs.canvas.addEventListener("pointermove", (event) => {
+    const rect = refs.canvas.getBoundingClientRect();
+    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    const target = state.mode === "work"
+      ? fieldGeometry.path.reduce((closest, candidate) => Math.hypot(candidate.x - point.x, candidate.y - point.y) < closest.distance ? { candidate, distance: Math.hypot(candidate.x - point.x, candidate.y - point.y) } : closest, { candidate: null, distance: Infinity })
+      : { candidate: fieldGeometry.probe, distance: fieldGeometry.probe ? Math.hypot(fieldGeometry.probe.x - point.x, fieldGeometry.probe.y - point.y) : Infinity };
+    if (!state.dragging) {
+      refs.canvas.style.cursor = target.candidate && target.distance <= 30 ? "grab" : "default";
+      return;
+    }
+    refs.canvas.style.cursor = "grabbing";
+    pointerToState(event);
+  });
+  refs.canvas.addEventListener("pointerup", (event) => { state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; refs.canvas.releasePointerCapture(event.pointerId); render(); });
+  refs.canvas.addEventListener("pointercancel", () => { state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; render(); });
   window.addEventListener("resize", render);
 
   let lastFrame = performance.now();
@@ -783,6 +817,7 @@
   window.electricFieldLab = {
     solve: (input = {}) => input.mode === "work" ? model.workState({ ...inputState(), ...input }, input.progress ?? state.progress) : model.pointState({ ...inputState(), ...input }),
     getState: () => ({ ...state }),
+    getInteractionGeometry: () => JSON.parse(JSON.stringify(fieldGeometry)),
     setState,
     setMode
   };

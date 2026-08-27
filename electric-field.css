@@ -2,6 +2,7 @@
 .electric-field-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .electric-field-lab .instrument-stage { background:#0b0f0e; }
 .electric-field-lab #fieldCanvas { display:block; width:100%; height:100%; min-height:280px; cursor:crosshair; touch-action:none; }
+.electric-field-lab #fieldCanvas.is-dragging { cursor:grabbing; }
 .electric-field-lab .live-readouts dd { font-size:13px; }
 .electric-field-lab .source1-range { background:linear-gradient(90deg,var(--field-positive) 0 var(--range-progress,88%),#4a514c var(--range-progress,88%) 100%); }
 .electric-field-lab .source2-range { background:linear-gradient(90deg,var(--field-negative) 0 var(--range-progress,13%),#4a514c var(--range-progress,13%) 100%); }

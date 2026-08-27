@@ -2,6 +2,7 @@
 .friction-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .friction-lab .instrument-stage { background:#0c0f0e; }
 .friction-lab #frictionCanvas { display:block; width:100%; height:100%; min-height:280px; }
+.friction-lab #frictionCanvas.is-dragging { cursor: grabbing; }
 .friction-lab .live-readouts dd { font-size:15px; }
 .friction-lab .mass-range { background:linear-gradient(90deg,var(--friction-static) 0 var(--range-progress,33%),#4a514c var(--range-progress,33%) 100%); }
 .friction-lab .static-range { background:linear-gradient(90deg,var(--friction-limit) 0 var(--range-progress,44%),#4a514c var(--range-progress,44%) 100%); }

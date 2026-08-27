@@ -18,7 +18,7 @@
     mode: "loading", springConstantNm: 40, naturalLengthCm: 12, massStepG: 50, gravityMs2: 9.8,
     pointCount: 8, loadIndex: 5, elasticLimitN: 3.2, postYieldRatio: .3, rulerResolutionMm: .5,
     readingNoiseMm: .3, zeroErrorMm: .6, seed: 31, guideStep: 0,
-    showIdeal: true, showFit: true, showInvalid: true, showRuler: true, dragging: false,
+    showIdeal: true, showFit: true, showInvalid: true, showRuler: true, dragging: false, dragHandle: null,
   };
   const $ = (id) => document.getElementById(id);
   const R = {
@@ -60,6 +60,12 @@
     for (let index = 1; index <= turns * 2; index += 1) ctx.lineTo(x + (index % 2 ? amplitude : -amplitude), y1 + (y2 - y1) * index / (turns * 2 + 1));
     ctx.lineTo(x, y2); ctx.stroke();
   }
+  function drawHandle(point, color, label, active = false) {
+    ctx.save(); ctx.strokeStyle = active ? C.text : color; ctx.lineWidth = active ? 2.5 : 1.5; ctx.fillStyle = active ? color : "rgba(7,11,12,.92)";
+    ctx.beginPath(); ctx.arc(point.x, point.y, active ? 10 : 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = `${color}88`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(point.x, point.y, 14, 0, Math.PI * 2); ctx.stroke();
+    text(ctx, label, point.x + 17, point.y - 9, active ? C.text : color, 9, "left", 700); ctx.restore();
+  }
 
   function drawMain(solution) {
     const q = solution.experiment, viewport = size(R.main, ctx, 280); background(ctx, viewport.width, viewport.height);
@@ -68,6 +74,7 @@
     const scale = Math.max(400, (bottom - top - naturalPixels - 42) / maxExtension);
     const naturalEnd = top + naturalPixels;
     const currentEnd = Math.min(bottom - 34, naturalEnd + q.current.trueExtensionM * scale);
+    state.mainGeometry = { hook: { x, y: currentEnd + 5 }, bounds: { x, top: naturalEnd - 8, bottom: bottom - 18 } };
     ctx.fillStyle = "#4e5852"; ctx.fillRect(x - 70, top - 8, 140, 8); line(ctx, x - 70, top, x + 70, top, C.text, 2);
     springPath(x, top, currentEnd, q.current.withinElasticLimit ? C.cyan : C.red);
     line(ctx, x - 32, currentEnd, x + 32, currentEnd, C.amber, 3);
@@ -79,6 +86,7 @@
     }
     if (q.current.index === 0) text(ctx, "空挂钩", x, currentEnd + 24, C.muted, 9, "center");
     else text(ctx, `${q.current.index} × ${fmt(state.massStepG, 0)}g`, x, Math.min(bottom - 4, currentEnd + 24 + visibleWeights * 13), C.amber, 9, "center", 700);
+    drawHandle(state.mainGeometry.hook, q.current.withinElasticLimit ? C.cyan : C.red, "拖动挂钩", state.dragHandle === "load");
     line(ctx, x - 55, naturalEnd, x + 58, naturalEnd, C.violet, 1, [4, 4]); text(ctx, "原长末端", x + 62, naturalEnd + 3, C.violet, 8);
 
     if (state.showRuler) {
@@ -111,7 +119,7 @@
       text(ctx, `${point.massG}g`, panelX, y, C.muted, 8);
       text(ctx, `${fmt(point.measuredExtensionM * 1000, 1)}mm`, viewport.width - 18, y, point.withinElasticLimit ? C.cyan : C.red, 8, "right", 700);
     });
-    text(ctx, "上下拖动挂钩改变砝码数", 16, viewport.height - 10, C.muted, 8);
+    text(ctx, "拖动挂钩或砝码叠改变当前砝码数", 16, viewport.height - 10, C.muted, 8);
   }
 
   function drawForceChart(solution) {
@@ -163,15 +171,26 @@
   }
 
   function setMode(mode) { if (!MODES[mode]) return; state.mode = mode; if (mode === "limit") state.loadIndex = state.pointCount - 1; render(); }
-  function reset() { Object.assign(state, { mode: "loading", springConstantNm: 40, naturalLengthCm: 12, massStepG: 50, gravityMs2: 9.8, pointCount: 8, loadIndex: 5, elasticLimitN: 3.2, postYieldRatio: .3, rulerResolutionMm: .5, readingNoiseMm: .3, zeroErrorMm: .6, seed: 31, guideStep: 0, showIdeal: true, showFit: true, showInvalid: true, showRuler: true, dragging: false }); [[R.ideal, "showIdeal"], [R.fit, "showFit"], [R.invalid, "showInvalid"], [R.ruler, "showRuler"]].forEach(([element, key]) => { element.checked = state[key]; }); render(); }
-  function setState(next = {}) { if (MODES[next.mode]) state.mode = next.mode; Object.assign(state, M.normalize({ ...state, ...next })); if (Number.isFinite(+next.guideStep)) state.guideStep = Math.round(clamp(+next.guideStep, 0, 2)); ["showIdeal", "showFit", "showInvalid", "showRuler"].forEach((key) => { if (typeof next[key] === "boolean") state[key] = next[key]; }); state.dragging = false; render(); }
+  function reset() { Object.assign(state, { mode: "loading", springConstantNm: 40, naturalLengthCm: 12, massStepG: 50, gravityMs2: 9.8, pointCount: 8, loadIndex: 5, elasticLimitN: 3.2, postYieldRatio: .3, rulerResolutionMm: .5, readingNoiseMm: .3, zeroErrorMm: .6, seed: 31, guideStep: 0, showIdeal: true, showFit: true, showInvalid: true, showRuler: true, dragging: false, dragHandle: null }); [[R.ideal, "showIdeal"], [R.fit, "showFit"], [R.invalid, "showInvalid"], [R.ruler, "showRuler"]].forEach(([element, key]) => { element.checked = state[key]; }); render(); }
+  function setState(next = {}) { if (MODES[next.mode]) state.mode = next.mode; Object.assign(state, M.normalize({ ...state, ...next })); if (Number.isFinite(+next.guideStep)) state.guideStep = Math.round(clamp(+next.guideStep, 0, 2)); ["showIdeal", "showFit", "showInvalid", "showRuler"].forEach((key) => { if (typeof next[key] === "boolean") state[key] = next[key]; }); state.dragging = false; state.dragHandle = null; render(); }
 
   [[R.spring, "springConstantNm"], [R.natural, "naturalLengthCm"], [R.massStep, "massStepG"], [R.points, "pointCount"], [R.load, "loadIndex"], [R.limit, "elasticLimitN"], [R.resolution, "rulerResolutionMm"], [R.noise, "readingNoiseMm"], [R.zero, "zeroErrorMm"], [R.seed, "seed"]].forEach(([element, key]) => element.addEventListener("input", () => { state[key] = +element.value; render(); }));
   [[R.ideal, "showIdeal"], [R.fit, "showFit"], [R.invalid, "showInvalid"], [R.ruler, "showRuler"]].forEach(([element, key]) => element.addEventListener("change", () => { state[key] = element.checked; render(); }));
   R.tabs.forEach((button) => button.addEventListener("click", () => setMode(button.dataset.mode))); R.route.forEach((button, index) => button.addEventListener("click", () => { state.guideStep = index; render(); }));
   R.add.addEventListener("click", () => { state.loadIndex = Math.min(state.pointCount - 1, state.loadIndex + 1); render(); }); R.remove.addEventListener("click", () => { state.loadIndex = Math.max(0, state.loadIndex - 1); render(); }); R.reset.addEventListener("click", reset); R.guide.addEventListener("click", () => R.dialog.showModal()); R.step.addEventListener("click", () => { state.guideStep = (state.guideStep + 1) % 3; render(); }); R.focus.addEventListener("click", () => { const active = document.body.classList.toggle("focus-mode"); R.focus.setAttribute("aria-pressed", String(active)); }); R.fullscreen.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
   function dragLoad(event) { const box = R.main.getBoundingClientRect(); const ratio = clamp((event.clientY - box.top) / box.height, .08, .92); state.loadIndex = Math.round((ratio - .08) / .84 * (state.pointCount - 1)); render(); }
-  R.main.addEventListener("pointerdown", (event) => { state.dragging = true; R.main.setPointerCapture?.(event.pointerId); dragLoad(event); }); R.main.addEventListener("pointermove", (event) => { if (state.dragging) dragLoad(event); }); R.main.addEventListener("pointerup", () => { state.dragging = false; }); R.main.addEventListener("pointercancel", () => { state.dragging = false; }); window.addEventListener("resize", render);
-  window.hookeMeasurementLab = { experiment: (next) => M.experiment(next), hysteresis: (next) => M.hysteresis(next), loadingExtension: (force, next) => M.loadingExtension(force, next), unloadingExtension: (force, next) => M.unloadingExtension(force, next), solve: (next) => M.solve(next), getState: () => ({ ...state }), setState, setMode, reset };
+  R.main.addEventListener("pointerdown", (event) => {
+    const box = R.main.getBoundingClientRect(); const point = { x: event.clientX - box.left, y: event.clientY - box.top }; const hook = state.mainGeometry?.hook;
+    if (!hook || Math.hypot(point.x - hook.x, point.y - hook.y) > 30) return;
+    state.dragging = true; state.dragHandle = "load"; R.main.classList.add("is-dragging"); R.main.setPointerCapture?.(event.pointerId); dragLoad(event);
+  });
+  R.main.addEventListener("pointermove", (event) => {
+    const box = R.main.getBoundingClientRect(); const point = { x: event.clientX - box.left, y: event.clientY - box.top }; const hook = state.mainGeometry?.hook;
+    if (!state.dragging) { R.main.style.cursor = hook && Math.hypot(point.x - hook.x, point.y - hook.y) <= 30 ? "grab" : "ns-resize"; return; }
+    R.main.style.cursor = "grabbing"; dragLoad(event);
+  });
+  R.main.addEventListener("pointerup", () => { state.dragging = false; state.dragHandle = null; R.main.classList.remove("is-dragging"); render(); });
+  R.main.addEventListener("pointercancel", () => { state.dragging = false; state.dragHandle = null; R.main.classList.remove("is-dragging"); render(); }); window.addEventListener("resize", render);
+  window.hookeMeasurementLab = { experiment: (next) => M.experiment(next), hysteresis: (next) => M.hysteresis(next), loadingExtension: (force, next) => M.loadingExtension(force, next), solve: (next) => M.solve(next), getState: () => ({ ...state }), getInteractionGeometry: () => state.mainGeometry ? JSON.parse(JSON.stringify(state.mainGeometry)) : null, setState, setMode, reset };
   render();
 })();

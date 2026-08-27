@@ -31,6 +31,10 @@
   touch-action: none;
 }
 
+.hooke-measurement-lab #springCanvas.is-dragging {
+  cursor: grabbing;
+}
+
 .hooke-measurement-lab .live-readouts {
   position: relative;
   grid-column: 2;

@@ -88,7 +88,7 @@
     guideButtons: Array.from(document.querySelectorAll("[data-guide-step]"))
   };
 
-  const apparatus = { ctx: refs.canvas.getContext("2d"), width: 0, height: 0, dpr: 1, cartX: 0, trackLeft: 0, trackRight: 0 };
+  const apparatus = { ctx: refs.canvas.getContext("2d"), width: 0, height: 0, dpr: 1, cartX: 0, trackLeft: 0, trackRight: 0, trackY: 0, cartTop: 0, forceHandles: null };
   const relationPlot = { ctx: refs.relationChart.getContext("2d"), width: 0, height: 0, dpr: 1 };
   const timePlot = { ctx: refs.timeChart.getContext("2d"), width: 0, height: 0, dpr: 1 };
   let dragForce = null;
@@ -139,6 +139,12 @@
     const textX = to.x + (to.x >= from.x ? 6 : -6); const textY = align === "above" ? to.y - 7 : to.y + 13;
     ctx.fillText(`${label} ${value}`, textX, textY); ctx.restore();
   }
+  function drawHandle(ctx, point, color, label) {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.fillStyle = "rgba(12,15,14,.94)";
+    ctx.beginPath(); ctx.arc(point.x, point.y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = `${color}88`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(point.x, point.y, 14, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = color; ctx.font = "700 9px Avenir Next, sans-serif"; ctx.textAlign = "left"; ctx.fillText(label, point.x + 17, point.y - 9); ctx.restore();
+  }
 
   function visualTrackX(position, left, right) {
     const span = right - left;
@@ -152,7 +158,7 @@
     ctx.clearRect(0, 0, width, height); ctx.fillStyle = "#0c0f0e"; ctx.fillRect(0, 0, width, height);
     const trackLeft = 38; const trackRight = width - 38; const trackY = height * .67;
     const cartX = visualTrackX(state.position, trackLeft + 46, trackRight - 46);
-    apparatus.cartX = cartX; apparatus.trackLeft = trackLeft; apparatus.trackRight = trackRight;
+    apparatus.cartX = cartX; apparatus.trackLeft = trackLeft; apparatus.trackRight = trackRight; apparatus.trackY = trackY;
 
     ctx.save(); ctx.strokeStyle = "rgba(240,241,232,.055)"; ctx.lineWidth = 1;
     for (let x = 0; x < width; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
@@ -177,6 +183,7 @@
     }
 
     const cartWidth = 84; const cartHeight = 48; const cartTop = trackY - cartHeight - 8;
+    apparatus.cartTop = cartTop;
     ctx.fillStyle = "rgba(100,199,217,.12)"; ctx.strokeStyle = "#64c7d9"; ctx.lineWidth = 1.5;
     ctx.fillRect(cartX - cartWidth / 2, cartTop, cartWidth, cartHeight); ctx.strokeRect(cartX - cartWidth / 2, cartTop, cartWidth, cartHeight);
     ctx.fillStyle = "#f0f1e8"; ctx.font = "12px Georgia, serif"; ctx.textAlign = "center"; ctx.fillText(`m = ${d.mass.toFixed(1)} kg`, cartX, cartTop + 28);
@@ -185,12 +192,15 @@
     if (state.showForces) {
       const forceY = cartTop + cartHeight * .42;
       const rightLength = 18 + d.rightForce * 7; const leftLength = 18 + d.leftForce * 7;
+      apparatus.forceHandles = { right: { x: cartX + cartWidth / 2 + rightLength, y: forceY }, left: { x: cartX - cartWidth / 2 - leftLength, y: forceY } };
       drawArrow(ctx, { x: cartX + cartWidth / 2, y: forceY }, { x: cartX + cartWidth / 2 + rightLength, y: forceY }, "#64c7d9", "F右", `${d.rightForce.toFixed(1)} N`);
       drawArrow(ctx, { x: cartX - cartWidth / 2, y: forceY }, { x: cartX - cartWidth / 2 - leftLength, y: forceY }, "#ff7a68", "F左", `${d.leftForce.toFixed(1)} N`);
+      if (state.mode === "force" || state.mode === "motion") { drawHandle(ctx, apparatus.forceHandles.right, "#64c7d9", "F右"); drawHandle(ctx, apparatus.forceHandles.left, "#ff7a68", "F左"); }
       const verticalLength = 28 + d.mass * 5;
       drawArrow(ctx, { x: cartX - 14, y: cartTop }, { x: cartX - 14, y: cartTop - verticalLength }, "rgba(105,209,142,.8)", "N", "", "above");
       drawArrow(ctx, { x: cartX + 14, y: cartTop + cartHeight }, { x: cartX + 14, y: cartTop + cartHeight + verticalLength }, "rgba(240,241,232,.62)", "G", "", "below");
     }
+    if (state.mode === "mass") drawHandle(ctx, { x: cartX, y: cartTop - 12 }, "#f2b84b", "m");
 
     if (state.showNet && Math.abs(d.netForce) > .005) {
       const direction = Math.sign(d.netForce); const length = 32 + Math.abs(d.netForce) * 8;
@@ -206,7 +216,7 @@
     }
 
     ctx.fillStyle = "rgba(240,241,232,.5)"; ctx.font = "9px Avenir Next, sans-serif"; ctx.textAlign = "left";
-    ctx.fillText("水平无摩擦轨道 · 箭头长度按教学需要放大", 18, 22);
+    ctx.fillText(state.mode === "mass" ? "拖动车体上方的 m 句柄改变质量" : "拖动左右力箭头端点改变对应外力", 18, 22);
     ctx.fillText(`t=${state.time.toFixed(2)} s`, 18, height - 17);
     ctx.textAlign = "right"; ctx.fillText(`x=${state.position.toFixed(2)} m`, width - 18, height - 17);
   }
@@ -299,7 +309,7 @@
     refs.lawDelta.textContent = `Δ = ${d.residual.toFixed(3)} N`; refs.lawCheckText.textContent = d.residual < 1e-9 ? "F合 与 ma 一致" : "模型状态不一致";
     refs.stateBadge.textContent = physical.badge; refs.stateBadge.classList.toggle("is-left", physical.className === "is-left"); refs.stateBadge.classList.toggle("is-balanced", physical.className === "is-balanced");
     refs.modeTitle.textContent = mode.title; refs.modeGoal.textContent = mode.goal;
-    refs.stageHint.textContent = state.mode === "balance" ? "播放后观察非零速度是否保持" : state.mode === "motion" ? "播放运动并观察 v-t 斜率" : "拖动合力箭头改变外力";
+    refs.stageHint.textContent = state.mode === "balance" ? "播放后观察非零速度是否保持" : state.mode === "mass" ? "拖动车体上方的 m 句柄改变质量" : state.mode === "motion" ? "拖动左右力箭头，再播放运动" : "拖动左右力箭头改变对应外力";
     const massMode = state.mode === "mass";
     refs.relationKicker.textContent = massMode ? "INVERSE MASS RESPONSE" : "FORCE RESPONSE";
     refs.relationTitle.textContent = massMode ? "a – 1/m 关系" : "a – F合 关系";
@@ -366,7 +376,8 @@
   }
 
   function setForceFromPointer(event) {
-    const rect = refs.canvas.getBoundingClientRect(); const x = event.clientX - rect.left;
+    const rect = refs.canvas.getBoundingClientRect(); const x = event.clientX - rect.left; const y = event.clientY - rect.top;
+    if (dragForce === "mass") { state.mass = clamp(2 + (apparatus.trackY - y) / 36, .5, 5); sync(); return; }
     const distance = Math.max(0, Math.abs(x - apparatus.cartX) - 42);
     const force = clamp((distance - 18) / 7, 0, 10);
     if (dragForce === "right") state.rightForce = force; else state.leftForce = force;
@@ -391,13 +402,26 @@
 
   refs.canvas.tabIndex = 0;
   refs.canvas.addEventListener("pointerdown", (event) => {
-    const rect = refs.canvas.getBoundingClientRect(); const x = event.clientX - rect.left;
-    dragForce = x >= apparatus.cartX ? "right" : "left"; event.preventDefault();
+    const rect = refs.canvas.getBoundingClientRect(); const x = event.clientX - rect.left; const y = event.clientY - rect.top;
+    const point = (key) => apparatus.forceHandles?.[key]; const nearPoint = (a, b, radius = 24) => a && Math.hypot(a.x - b.x, a.y - b.y) <= radius;
+    if (state.mode === "mass" && x >= apparatus.cartX - 48 && x <= apparatus.cartX + 48 && y >= apparatus.cartTop - 28 && y <= apparatus.cartTop + 56) dragForce = "mass";
+    else if (state.mode === "force" || state.mode === "motion") dragForce = nearPoint(point("right"), { x, y }) ? "right" : nearPoint(point("left"), { x, y }) ? "left" : null;
+    else dragForce = null;
+    if (!dragForce) return; event.preventDefault();
     try { refs.canvas.setPointerCapture?.(event.pointerId); } catch (error) { /* Synthetic events may not own pointer capture. */ }
     setForceFromPointer(event);
   });
-  refs.canvas.addEventListener("pointermove", (event) => { if (!dragForce) return; event.preventDefault(); setForceFromPointer(event); });
-  refs.canvas.addEventListener("pointerup", () => { dragForce = null; }); refs.canvas.addEventListener("pointercancel", () => { dragForce = null; });
+  refs.canvas.addEventListener("pointermove", (event) => {
+    const rect = refs.canvas.getBoundingClientRect(); const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    if (!dragForce) {
+      const near = (handle, radius = 24) => handle && Math.hypot(handle.x - point.x, handle.y - point.y) <= radius;
+      const hover = state.mode === "mass" ? (point.x >= apparatus.cartX - 48 && point.x <= apparatus.cartX + 48 && point.y >= apparatus.cartTop - 28 && point.y <= apparatus.cartTop + 56) : near(apparatus.forceHandles?.right) || near(apparatus.forceHandles?.left);
+      refs.canvas.style.cursor = hover ? "grab" : state.mode === "balance" ? "default" : "crosshair";
+      return;
+    }
+    event.preventDefault(); refs.canvas.style.cursor = "grabbing"; setForceFromPointer(event);
+  });
+  refs.canvas.addEventListener("pointerup", () => { dragForce = null; refs.canvas.style.cursor = "crosshair"; }); refs.canvas.addEventListener("pointercancel", () => { dragForce = null; refs.canvas.style.cursor = "crosshair"; });
   refs.canvas.addEventListener("keydown", (event) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault(); const delta = event.key === "ArrowRight" ? .1 : -.1;
@@ -416,7 +440,8 @@
     setState: (patch) => { Object.assign(state, patch || {}); sync(); },
     setMode,
     resetMotion,
-    recordSample
+    recordSample,
+    getInteractionGeometry: () => JSON.parse(JSON.stringify({ cart: { x: apparatus.cartX, top: apparatus.cartTop }, handles: apparatus.forceHandles }))
   };
   resetMotion();
 })();

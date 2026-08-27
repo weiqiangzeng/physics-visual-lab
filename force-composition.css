@@ -3,6 +3,7 @@
 .force-composition-lab .instrument-stage { position: relative; grid-template-columns: minmax(0, 1fr) 220px; background: #070b0c; }
 .force-composition-lab canvas { display: block; width: 100%; height: 100%; background: #070b0c; }
 .force-composition-lab #forceCanvas { position: absolute; inset: 0 auto auto 0; width: calc(100% - 220px); height: 100%; min-height: 0; cursor: crosshair; touch-action: none; }
+.force-composition-lab #forceCanvas.is-dragging { cursor: grabbing; }
 .force-composition-lab .live-readouts { position: relative; grid-column: 2; }
 .force-composition-lab .state-badge { color: var(--force-cyan); border-color: rgba(99,207,218,.45); background: rgba(99,207,218,.07); }
 .force-composition-lab .state-badge.is-warning { color: var(--force-red); border-color: rgba(255,127,114,.5); background: rgba(255,127,114,.08); }
@@ -11,6 +12,41 @@
 .force-composition-lab .mobile-scene-tabs { display: none; }
 .force-composition-lab .preset-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; margin-top: 10px; }
 .force-composition-lab .preset-button { min-width: 0; padding: 8px 3px; font-size: 10px; }
+.force-composition-lab .control-note { max-width: 210px; margin: 5px 0 0; color: var(--lab-muted); font-size: 11px; line-height: 1.5; }
+.force-composition-lab .control-section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 11px; color: var(--lab-muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.force-composition-lab .control-section-title small { color: var(--force-cyan); font-size: 10px; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+.force-composition-lab .control-details { margin-top: 12px; border-top: 1px solid var(--lab-line); }
+.force-composition-lab .control-details summary { padding: 11px 0 3px; color: var(--lab-muted); cursor: pointer; font-size: 11px; list-style-position: outside; }
+.force-composition-lab .control-details summary::marker { color: var(--force-amber); }
+.force-composition-lab .control-details-body { padding-top: 11px; }
+.force-composition-lab .control-details-body .toggle-grid { margin-top: 12px; }
+.force-composition-lab .target-control { display: none; }
+.force-composition-lab[data-mode="decompose"] .target-control,
+.force-composition-lab[data-mode="boundary"] .target-control { display: flex; }
+.force-composition-lab[data-mode="decompose"] .primary-controls .control-label:has(+ #force1Input),
+.force-composition-lab[data-mode="decompose"] .primary-controls #force1Input,
+.force-composition-lab[data-mode="decompose"] .primary-controls .control-label:has(+ #force2Input),
+.force-composition-lab[data-mode="decompose"] .primary-controls #force2Input,
+.force-composition-lab[data-mode="boundary"] .primary-controls .control-label:has(+ #force1Input),
+.force-composition-lab[data-mode="boundary"] .primary-controls #force1Input,
+.force-composition-lab[data-mode="boundary"] .primary-controls .control-label:has(+ #force2Input),
+.force-composition-lab[data-mode="boundary"] .primary-controls #force2Input { display: none; }
+.force-composition-lab[data-mode="decompose"] .primary-controls .target-control,
+.force-composition-lab[data-mode="boundary"] .primary-controls .target-control { display: flex; }
+.force-composition-lab .secondary-analysis { align-self: start; min-height: 0; }
+.force-composition-lab .secondary-analysis summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 14px 16px; color: var(--lab-text); cursor: pointer; list-style: none; }
+.force-composition-lab .secondary-analysis summary::-webkit-details-marker { display: none; }
+.force-composition-lab .secondary-analysis summary::after { content: "+"; color: var(--force-amber); font-size: 16px; line-height: 1; }
+.force-composition-lab .secondary-analysis[open] summary::after { content: "−"; }
+.force-composition-lab .secondary-analysis summary > div { min-width: 0; }
+.force-composition-lab .secondary-analysis summary span { display: block; color: var(--lab-muted); font-size: 9px; letter-spacing: .11em; }
+.force-composition-lab .secondary-analysis summary h3 { margin: 4px 0 0; font-size: 13px; font-weight: 600; }
+.force-composition-lab .secondary-analysis summary > strong { color: var(--force-amber); font-size: 11px; white-space: nowrap; }
+.force-composition-lab .secondary-analysis canvas { min-height: 180px; padding: 0 16px 14px; box-sizing: border-box; }
+.force-composition-lab[data-mode="compose"] .drag-hint,
+.force-composition-lab[data-mode="apparatus"] .drag-hint { color: var(--force-cyan); }
+.force-composition-lab[data-mode="decompose"] .drag-hint,
+.force-composition-lab[data-mode="boundary"] .drag-hint { color: var(--force-amber); }
 @media (max-width:1120px) {
   .force-composition-lab .mobile-scene-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin:-10px -10px 10px; border-bottom:1px solid var(--lab-line); background:#121513; }
   .force-composition-lab .mobile-scene-tab { display:flex; align-items:center; justify-content:center; gap:5px; min-height:46px; padding:7px 3px; border-left:0; border-bottom:2px solid transparent; }
@@ -23,4 +59,5 @@
   .force-composition-lab #forceCanvas { position:static; inset:auto; width:100%; height:340px; min-height:340px; aspect-ratio:1.12; }
   .force-composition-lab .live-readouts { grid-column:auto; }
   .force-composition-lab .analysis-grid { min-height:350px; }
+  .force-composition-lab .secondary-analysis canvas { min-height: 190px; }
 }
