@@ -12,6 +12,7 @@
 .force-composition-lab .mobile-scene-tabs { display: none; }
 .force-composition-lab .preset-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; margin-top: 10px; }
 .force-composition-lab .preset-button { min-width: 0; padding: 8px 3px; font-size: 10px; }
+.force-composition-lab .constraint-button { min-width: 0; min-height: 34px; padding: 6px 3px; color: var(--lab-text); font-size: 10px; line-height: 1.25; white-space: normal; }
 .force-composition-lab .control-note { max-width: 210px; margin: 5px 0 0; color: var(--lab-muted); font-size: 11px; line-height: 1.5; }
 .force-composition-lab .control-section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 11px; color: var(--lab-muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 .force-composition-lab .control-section-title small { color: var(--force-cyan); font-size: 10px; letter-spacing: 0; text-transform: none; white-space: nowrap; }
@@ -20,6 +21,12 @@
 .force-composition-lab .control-details summary::marker { color: var(--force-amber); }
 .force-composition-lab .control-details-body { padding-top: 11px; }
 .force-composition-lab .control-details-body .toggle-grid { margin-top: 12px; }
+.force-composition-lab .multi-control,
+.force-composition-lab .force3-readout { display: none; }
+.force-composition-lab[data-mode="multi"] .multi-control,
+.force-composition-lab[data-mode="multi"] .force3-readout { display: flex; }
+.force-composition-lab[data-mode="compose"] .constraint-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.force-composition-lab:not([data-mode="compose"]) .constraint-switch { display: none; }
 .force-composition-lab .target-control { display: none; }
 .force-composition-lab[data-mode="decompose"] .target-control,
 .force-composition-lab[data-mode="boundary"] .target-control { display: flex; }
@@ -48,7 +55,7 @@
 .force-composition-lab[data-mode="decompose"] .drag-hint,
 .force-composition-lab[data-mode="boundary"] .drag-hint { color: var(--force-amber); }
 @media (max-width:1120px) {
-  .force-composition-lab .mobile-scene-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin:-10px -10px 10px; border-bottom:1px solid var(--lab-line); background:#121513; }
+  .force-composition-lab .mobile-scene-tabs { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); margin:-10px -10px 10px; border-bottom:1px solid var(--lab-line); background:#121513; }
   .force-composition-lab .mobile-scene-tab { display:flex; align-items:center; justify-content:center; gap:5px; min-height:46px; padding:7px 3px; border-left:0; border-bottom:2px solid transparent; }
   .force-composition-lab .mobile-scene-tab.is-active { border-bottom-color:var(--force-amber); }
   .force-composition-lab .mobile-scene-tab > span { grid-row:auto; padding:0; }

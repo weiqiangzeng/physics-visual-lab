@@ -16,8 +16,10 @@
     return {
       force1N: clamp(input.force1N ?? 6, 0, 30),
       force2N: clamp(input.force2N ?? 8, 0, 30),
+      force3N: clamp(input.force3N ?? 5, 0, 30),
       direction1Deg: clamp(input.direction1Deg ?? 0, -170, 170),
       direction2Deg: clamp(input.direction2Deg ?? 90, -170, 170),
+      direction3Deg: clamp(input.direction3Deg ?? -120, -170, 170),
       targetForceN: clamp(input.targetForceN ?? 10, .5, 30),
       targetDirectionDeg: clamp(input.targetDirectionDeg ?? 53.13010235415598, -170, 170),
       forceResolutionN: clamp(input.forceResolutionN ?? .1, .01, 1),
@@ -45,6 +47,32 @@
       componentResidualY: resultant.y - force1.y - force2.y,
       cosineLawResidual: resultantN ** 2 - state.force1N ** 2 - state.force2N ** 2
         - 2 * state.force1N * state.force2N * Math.cos((state.direction2Deg - state.direction1Deg) * DEG),
+    };
+  }
+
+  function composeMany(input = {}) {
+    const state = normalize(input);
+    const forces = [
+      vector(state.force1N, state.direction1Deg),
+      vector(state.force2N, state.direction2Deg),
+      vector(state.force3N, state.direction3Deg),
+    ];
+    const resultant = forces.reduce((sum, force) => ({
+      x: sum.x + force.x,
+      y: sum.y + force.y,
+    }), { x: 0, y: 0 });
+    const resultantN = Math.hypot(resultant.x, resultant.y);
+    return {
+      ...state,
+      forces,
+      force1: forces[0],
+      force2: forces[1],
+      force3: forces[2],
+      resultant,
+      resultantN,
+      resultantDirectionDeg: Math.atan2(resultant.y, resultant.x) / DEG,
+      componentResidualX: resultant.x - forces.reduce((sum, force) => sum + force.x, 0),
+      componentResidualY: resultant.y - forces.reduce((sum, force) => sum + force.y, 0),
     };
   }
 
@@ -165,5 +193,5 @@
     return { ...result, displacement, componentWorkJ, resultantWorkJ, residualJ: resultantWorkJ - componentWorkJ };
   }
 
-  return { DEG, clamp, normalize, vector, compose, decompose, apparatus, sensitivity, workEquivalence, directionSeparation };
+  return { DEG, clamp, normalize, vector, compose, composeMany, decompose, apparatus, sensitivity, workEquivalence, directionSeparation };
 });
