@@ -22,6 +22,7 @@
     showScale: true,
     dragging: false,
   };
+  let oscillationGeometry = null;
 
   const $ = (id) => document.getElementById(id);
   const R = {
@@ -100,6 +101,13 @@
     white: "#dfe5df",
     muted: "#84908a",
   };
+  function handleRing(x, y, radius = 12) {
+    ctx.strokeStyle = state.dragging ? C.white : "rgba(240,186,85,.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   const modes = {
     lc: {
       title: "LC 状态交换",
@@ -383,6 +391,9 @@
         ctx.fill();
       }
     }
+    const phasePoint = pointOnCircuit(state.phase, box);
+    oscillationGeometry = { type: "phase", x: phasePoint.x, y: phasePoint.y, radius: 18, circuit: box };
+    handleRing(phasePoint.x, phasePoint.y, 12);
     if (Math.abs(currentRatio) > .05) {
       const y = box.top - 20;
       arrow(ctx, box.cx - 45 * Math.sign(currentRatio), y, box.cx + 45 * Math.sign(currentRatio), y, C.cyan, "i");
@@ -456,6 +467,19 @@
     text(ctx, "调谐回路", receiverX, y + 116, C.violet, "700 11px sans-serif", "center");
     text(ctx, `f/f₀=${fmt(t.frequencyRatio, 2)}`, cx, 28, C.white, "700 12px ui-monospace,monospace", "center");
     text(ctx, `响应 ${fmt(t.normalizedResponse * 100, 1)}%`, cx, height - 24, response > .85 ? C.green : C.amber, "700 11px ui-monospace,monospace", "center");
+    const tuningX = 55 + (width - 110) * (state.driveRatio - .2) / 1.8;
+    ctx.strokeStyle = "rgba(223,229,223,.18)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(55, height - 52);
+    ctx.lineTo(width - 55, height - 52);
+    ctx.stroke();
+    ctx.fillStyle = C.amber;
+    ctx.beginPath();
+    ctx.arc(tuningX, height - 52, 6, 0, Math.PI * 2);
+    ctx.fill();
+    oscillationGeometry = { type: "drive-ratio", x: tuningX, y: height - 52, radius: 18, bounds: { left: 55, right: width - 55 } };
+    handleRing(tuningX, height - 52, 12);
   }
   function drawWave(q, width, height) {
     const w = q.wave;
@@ -512,6 +536,11 @@
       ctx.setLineDash([]);
       text(ctx, `λ=${engineering(w.wavelengthM, "m")}`, (x1 + x2) / 2, height - 42, C.cyan, "700 10px ui-monospace,monospace", "center");
     }
+    const frequencyX = margin + span * (state.waveLogFrequency - 5) / 15;
+    const frequencyPhase = -state.direction * state.phase * Math.PI * 2 + (state.waveLogFrequency - 5) / 15 * cycles * Math.PI * 2;
+    const frequencyY = axisY - Math.sin(frequencyPhase) * Math.min(92, height * .28);
+    oscillationGeometry = { type: "wave-frequency", x: frequencyX, y: frequencyY, radius: 18, bounds: { left: margin, right: width - margin } };
+    handleRing(frequencyX, frequencyY, 12);
   }
   function drawMain(q) {
     const { width, height } = size(R.canvas, ctx);
@@ -756,15 +785,43 @@
   R.focusButton.addEventListener("click",()=>{const active=document.body.classList.toggle("focus-mode");R.focusButton.setAttribute("aria-pressed",String(active));});
   R.fullscreenButton.addEventListener("click",()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();});
   [[R.showChargeToggle,"showCharge"],[R.showFieldToggle,"showField"],[R.showEnergyToggle,"showEnergy"],[R.showScaleToggle,"showScale"]].forEach(([input,key])=>input.addEventListener("change",()=>{state[key]=input.checked;render();}));
-  function pointerPhase(event) {
-    const rect=R.canvas.getBoundingClientRect();
-    state.phase=Math.max(0,Math.min(.999,(event.clientX-rect.left)/rect.width));
-    state.running=false;render();
+  function phaseFromCircuitPoint(x, y, box) {
+    const candidates = [
+      { d: Math.abs(y - box.top), p: M.clamp((x - box.left) / (box.right - box.left), 0, 1) * (box.right - box.left) },
+      { d: Math.abs(x - box.right), p: (box.right - box.left) + M.clamp((y - box.top) / (box.bottom - box.top), 0, 1) * (box.bottom - box.top) },
+      { d: Math.abs(y - box.bottom), p: (box.right - box.left) + (box.bottom - box.top) + (1 - M.clamp((x - box.left) / (box.right - box.left), 0, 1)) * (box.right - box.left) },
+      { d: Math.abs(x - box.left), p: 2 * (box.right - box.left) + (box.bottom - box.top) + (1 - M.clamp((y - box.top) / (box.bottom - box.top), 0, 1)) * (box.bottom - box.top) },
+    ];
+    const closest = candidates.reduce((best, item) => item.d < best.d ? item : best);
+    return (closest.p / (2 * ((box.right - box.left) + (box.bottom - box.top))) + 1) % 1;
   }
-  R.canvas.addEventListener("pointerdown",(event)=>{state.dragging=true;R.canvas.setPointerCapture?.(event.pointerId);pointerPhase(event);});
-  R.canvas.addEventListener("pointermove",(event)=>{if(state.dragging)pointerPhase(event);});
-  R.canvas.addEventListener("pointerup",()=>state.dragging=false);
-  R.canvas.addEventListener("pointercancel",()=>state.dragging=false);
+  function hitInteraction(event) {
+    if (!oscillationGeometry) return false;
+    const rect = R.canvas.getBoundingClientRect();
+    return Math.hypot(event.clientX - rect.left - oscillationGeometry.x, event.clientY - rect.top - oscillationGeometry.y) <= oscillationGeometry.radius;
+  }
+  function dragInteraction(event) {
+    const rect = R.canvas.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top;
+    if (oscillationGeometry.type === "phase") state.phase = phaseFromCircuitPoint(x, y, oscillationGeometry.circuit);
+    else if (oscillationGeometry.type === "drive-ratio") state.driveRatio = .2 + 1.8 * Math.max(0, Math.min(1, (x - oscillationGeometry.bounds.left) / (oscillationGeometry.bounds.right - oscillationGeometry.bounds.left)));
+    else state.waveLogFrequency = 5 + 15 * Math.max(0, Math.min(1, (x - oscillationGeometry.bounds.left) / (oscillationGeometry.bounds.right - oscillationGeometry.bounds.left)));
+    state.running = false;
+    syncInputs();
+    render();
+  }
+  R.canvas.addEventListener("pointerdown", (event) => {
+    if (!hitInteraction(event)) return;
+    state.dragging = true;
+    R.canvas.classList.add("is-dragging");
+    R.canvas.setPointerCapture?.(event.pointerId);
+    render();
+  });
+  R.canvas.addEventListener("pointermove", (event) => {
+    if (!state.dragging) { R.canvas.classList.toggle("is-hovering", hitInteraction(event)); return; }
+    dragInteraction(event);
+  });
+  R.canvas.addEventListener("pointerup", (event) => { state.dragging = false; R.canvas.classList.remove("is-dragging"); R.canvas.releasePointerCapture?.(event.pointerId); render(); });
+  R.canvas.addEventListener("pointercancel", () => { state.dragging = false; R.canvas.classList.remove("is-dragging"); render(); });
   window.addEventListener("resize",render);
   let previous=performance.now();
   function frame(now){
@@ -775,6 +832,7 @@
   window.electromagneticOscillationLab = {
     solve: current,
     getState: () => ({ ...state }),
+    getInteractionGeometry: () => oscillationGeometry,
     setState,
     setMode,
   };

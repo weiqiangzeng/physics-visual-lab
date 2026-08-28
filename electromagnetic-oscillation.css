@@ -26,9 +26,12 @@
   width:100%;
   height:100%;
   min-height:280px;
-  cursor:crosshair;
+  cursor:default;
   touch-action:none;
 }
+.electromagnetic-oscillation-lab #fieldCanvas.is-hovering,
+.electromagnetic-oscillation-lab #fieldCanvas.is-dragging { cursor:grab; }
+.electromagnetic-oscillation-lab #fieldCanvas.is-dragging { cursor:grabbing; }
 .electromagnetic-oscillation-lab .state-badge.is-electric {
   color:var(--critical-amber);
   border-color:rgba(240,186,85,.5);

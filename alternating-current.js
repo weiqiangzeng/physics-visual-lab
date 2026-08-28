@@ -25,6 +25,7 @@
     showLedger: true,
     dragging: false,
   };
+  let acGeometry = null;
   const $ = (id) => document.getElementById(id);
   const R = {
     canvas: $("acCanvas"),
@@ -111,6 +112,13 @@
     white: "#dfe5df",
     muted: "#84908a",
   };
+  function handleRing(x, y, radius = 12) {
+    ctx.strokeStyle = state.dragging ? C.white : "rgba(240,184,77,.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   const modes = {
     generator: {
       title: "交流发电机",
@@ -425,6 +433,8 @@
       C.violet,
       "n",
     );
+    acGeometry = { type: "generator-phase", x: cx + Math.cos(theta) * 100, y: cy - Math.sin(theta) * 48, radius: 18, center: { x: cx, y: cy } };
+    handleRing(acGeometry.x, acGeometry.y, 13);
     ctx.strokeStyle = C.white;
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -541,6 +551,8 @@
       Math.PI * 2,
     );
     ctx.fill();
+    acGeometry = { type: "phase", x: cursor, y: y0 - amp * Math.sin(state.phase * Math.PI * 2), radius: 16 };
+    handleRing(acGeometry.x, acGeometry.y, 11);
   }
   function coil(context, x, y, turns, color) {
     const count = Math.max(5, Math.min(24, Math.round(turns / 70)));
@@ -588,6 +600,24 @@
         ctx.fill();
       }
     }
+    const particlePhase = (state.phase % 1 + 1) % 1;
+    const particlePerimeter = 680 * particlePhase;
+    let particleX, particleY;
+    if (particlePerimeter < 190) {
+      particleX = cx - 95 + particlePerimeter;
+      particleY = cy - 75;
+    } else if (particlePerimeter < 340) {
+      particleX = cx + 95;
+      particleY = cy - 75 + particlePerimeter - 190;
+    } else if (particlePerimeter < 530) {
+      particleX = cx + 95 - (particlePerimeter - 340);
+      particleY = cy + 75;
+    } else {
+      particleX = cx - 95;
+      particleY = cy + 75 - (particlePerimeter - 530);
+    }
+    acGeometry = { type: "phase", x: particleX, y: particleY, radius: 18 };
+    handleRing(particleX, particleY, 12);
     text(
       ctx,
       `N₁=${state.primaryTurns}`,
@@ -690,6 +720,8 @@
       ctx.arc(x + offset, y - 22, 3, 0, Math.PI * 2);
       ctx.fill();
     }
+    acGeometry = { type: "transmission-voltage", x: (lineStart + lineEnd) / 2, y: y - 22, radius: 20, bounds: { left: lineStart, right: lineEnd } };
+    handleRing(acGeometry.x, acGeometry.y, 13);
     ctx.fillStyle = C.green;
     ctx.fillRect(right - 26, y - 35, 52, 70);
     for (let i = 0; i < 6; i++) {
@@ -1209,22 +1241,35 @@
         ? document.exitFullscreen()
         : document.documentElement.requestFullscreen(),
   );
+  function hitInteraction(event) {
+    if (!acGeometry) return false;
+    const rect = R.canvas.getBoundingClientRect();
+    return Math.hypot(event.clientX - rect.left - acGeometry.x, event.clientY - rect.top - acGeometry.y) <= acGeometry.radius;
+  }
   R.canvas.addEventListener("pointerdown", (event) => {
+    if (!hitInteraction(event)) return;
     state.dragging = true;
+    R.canvas.classList.add("is-dragging");
     R.canvas.setPointerCapture(event.pointerId);
+    render();
   });
   R.canvas.addEventListener("pointermove", (event) => {
-    if (!state.dragging) return;
-    const rect = R.canvas.getBoundingClientRect(),
-      ratio = Math.max(
-        0,
-        Math.min(1, (event.clientX - rect.left) / rect.width),
-      );
-    if (state.mode === "transmission") {
+    const rect = R.canvas.getBoundingClientRect();
+    if (!state.dragging) {
+      R.canvas.classList.toggle("is-hovering", hitInteraction(event));
+      return;
+    }
+    const x = event.clientX - rect.left, y = event.clientY - rect.top;
+    if (acGeometry.type === "generator-phase") {
+      const angle = Math.atan2(acGeometry.center.y - y, x - acGeometry.center.x);
+      state.phase = (angle / (Math.PI * 2) + 1) % 1;
+      R.phaseInput.value = state.phase;
+    } else if (acGeometry.type === "transmission-voltage") {
+      const ratio = Math.max(0, Math.min(1, (x - acGeometry.bounds.left) / (acGeometry.bounds.right - acGeometry.bounds.left)));
       state.transmissionVoltageKV = 10 + 490 * ratio;
       R.transmissionVoltageInput.value = state.transmissionVoltageKV;
     } else {
-      state.phase = ratio;
+      state.phase = Math.max(0, Math.min(.999, x / rect.width));
       R.phaseInput.value = state.phase;
     }
     state.running = false;
@@ -1232,8 +1277,10 @@
   });
   R.canvas.addEventListener("pointerup", (event) => {
     state.dragging = false;
+    R.canvas.classList.remove("is-dragging");
     R.canvas.releasePointerCapture(event.pointerId);
   });
+  R.canvas.addEventListener("pointercancel", () => { state.dragging = false; R.canvas.classList.remove("is-dragging"); render(); });
   window.addEventListener("resize", render);
   let last = performance.now();
   function frame(now) {
@@ -1248,6 +1295,7 @@
   }
   window.alternatingCurrentLab = {
     getState: () => ({ ...state }),
+    getInteractionGeometry: () => acGeometry,
     setMode,
     setState(changes = {}) {
       if (typeof changes.mode === "string" && modes[changes.mode]) state.mode = changes.mode;

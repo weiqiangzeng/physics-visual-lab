@@ -736,12 +736,25 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const beforeDrag = await page.evaluate(() => window.powerSourceLab.getState().load);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.5);
+      const geometry = await page.evaluate(() => window.powerSourceLab.getInteractionGeometry());
+      const blankX = box.x + 18;
+      const blankY = box.y + 18;
+      await page.mouse.move(blankX, blankY);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.5);
+      await page.mouse.move(blankX + 120, blankY);
+      await page.mouse.up();
+      const afterBlankDrag = await page.evaluate(() => window.powerSourceLab.getState().load);
+      assert(closeTo(afterBlankDrag, beforeDrag, 1e-12), `${lab.id}/${viewport.name}: blank canvas drag changed load`);
+      const loadX = box.x + geometry.load.x;
+      const loadY = box.y + geometry.load.y;
+      await page.mouse.move(loadX, loadY);
+      await page.mouse.down();
+      const afterPress = await page.evaluate(() => window.powerSourceLab.getState().load);
+      assert(closeTo(afterPress, beforeDrag, 1e-12), `${lab.id}/${viewport.name}: load handle jumped on pointerdown`);
+      await page.mouse.move(loadX + 120, loadY);
       await page.mouse.up();
       const afterDrag = await page.evaluate(() => window.powerSourceLab.getState().load);
-      assert(Math.abs(afterDrag - beforeDrag) > 2, `${lab.id}/${viewport.name}: direct load drag did not update state`);
+      assert(afterDrag > beforeDrag + 5, `${lab.id}/${viewport.name}: direct load drag did not update the resistor`);
     }
 
     if (lab.id === "magnetic-field") {
@@ -827,6 +840,19 @@ async function verifyLab(browser, lab, viewport) {
       }));
       assert(closeTo(reference.closed.emf, -.08, 1e-12) && closeTo(reference.closed.current, -.008, 1e-12), `${lab.id}/${viewport.name}: Faraday reference mismatch`);
       assert(closeTo(reference.open.emf, -.08, 1e-12) && closeTo(reference.open.current, 0, 1e-15), `${lab.id}/${viewport.name}: open-circuit boundary mismatch`);
+      const canvas = page.locator("#inductionCanvas");
+      await canvas.scrollIntoViewIfNeeded();
+      const box = await canvas.boundingBox();
+      await page.evaluate(() => window.inductionLab.setMode("motion"));
+      const geometry = await page.evaluate(() => window.inductionLab.getInteractionGeometry());
+      const beforeTime = await page.evaluate(() => window.inductionLab.getState().time);
+      await page.mouse.move(box.x + geometry.target.x, box.y + geometry.target.y);
+      await page.mouse.down();
+      const pressedTime = await page.evaluate(() => window.inductionLab.getState().time);
+      await page.mouse.move(box.x + geometry.target.x + 70, box.y + geometry.target.y);
+      await page.mouse.up();
+      const afterTime = await page.evaluate(() => window.inductionLab.getState().time);
+      assert(pressedTime === beforeTime && Math.abs(afterTime - beforeTime) > .01, `${lab.id}/${viewport.name}: direct magnet drag did not update time`);
     }
 
     if (lab.id === "rail-rod") {
@@ -842,11 +868,14 @@ async function verifyLab(browser, lab, viewport) {
       for (const value of Object.values(reference)) assert(closeTo(value.energyResidualJ, 0, 1e-12) && closeTo(value.forceResidualN, 0, 1e-12), `${lab.id}/${viewport.name}: rail force or energy ledger mismatch`);
       const canvas = page.locator("#railCanvas");
       await canvas.scrollIntoViewIfNeeded();
-      const before = await page.evaluate(() => window.railRodLab.getState().timeS);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * .2, box.y + box.height * .25); await page.mouse.down(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .25); await page.mouse.up();
+      const geometry = await page.evaluate(() => window.railRodLab.getInteractionGeometry());
+      const before = await page.evaluate(() => window.railRodLab.getState().timeS);
+      await page.mouse.move(box.x + geometry.target.x, box.y + geometry.target.y); await page.mouse.down();
+      const pressed = await page.evaluate(() => window.railRodLab.getState().timeS);
+      await page.mouse.move(box.x + geometry.bounds.right - 10, box.y + geometry.target.y); await page.mouse.up();
       const after = await page.evaluate(() => window.railRodLab.getState().timeS);
-      assert(after > before + 4, `${lab.id}/${viewport.name}: direct time drag did not update state`);
+      assert(pressed === before && after > before + 4, `${lab.id}/${viewport.name}: direct conductor drag did not update state`);
     }
 
     if (lab.id === "double-rail") {
@@ -886,6 +915,26 @@ async function verifyLab(browser, lab, viewport) {
       assert(closeTo(reference.rms.rmsVoltageV, 220, .01) && closeTo(reference.rms.powerResidualW, 0, 1e-9), `${lab.id}/${viewport.name}: RMS reference mismatch`);
       assert(closeTo(reference.transformer.secondaryRmsV, 1100, 1e-12) && closeTo(reference.transformer.powerResidualW, 0, 1e-9), `${lab.id}/${viewport.name}: transformer reference mismatch`);
       assert(closeTo(reference.transmission.lineCurrentA, 10, 1e-12) && closeTo(reference.transmission.lineLossW, 2000, 1e-9) && closeTo(reference.transmission.powerLedgerResidualW, 0, 1e-9), `${lab.id}/${viewport.name}: transmission ledger mismatch`);
+      const canvas = page.locator("#acCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox();
+      const direct = async (mode, key, destination) => {
+        await page.evaluate(({ mode }) => window.alternatingCurrentLab.setMode(mode), { mode });
+        const geometry = await page.evaluate(() => window.alternatingCurrentLab.getInteractionGeometry());
+        const before = await page.evaluate(() => window.alternatingCurrentLab.getState());
+        await page.mouse.move(box.x + 8, box.y + 8); await page.mouse.down(); await page.mouse.up();
+        const blank = await page.evaluate(() => window.alternatingCurrentLab.getState());
+        assert(blank[key] === before[key], `${lab.id}/${viewport.name}: ${mode} blank drag changed state`);
+        await page.mouse.move(box.x + geometry.x, box.y + geometry.y); await page.mouse.down();
+        const pressed = await page.evaluate(() => window.alternatingCurrentLab.getState());
+        assert(pressed[key] === before[key], `${lab.id}/${viewport.name}: ${mode} handle jumped on pointerdown`);
+        const target = typeof destination === "function" ? destination(geometry, box) : destination;
+        await page.mouse.move(box.x + target.x, box.y + target.y); await page.mouse.up();
+        const after = await page.evaluate(() => window.alternatingCurrentLab.getState());
+        assert(Math.abs(after[key] - before[key]) > (key === "transmissionVoltageKV" ? 1 : .05), `${lab.id}/${viewport.name}: ${mode} direct handle did not update state`);
+      };
+      await direct("generator", "phase", { x: box.width * .46, y: box.height * .48 - 90 });
+      await direct("rms", "phase", { x: box.width * .82, y: 180 });
+      await direct("transformer", "phase", { x: box.width * .82, y: 180 });
+      await direct("transmission", "transmissionVoltageKV", { x: box.width - 20, y: box.height * .53 - 22 });
     }
 
     if (lab.id === "electromagnetic-oscillation") {
@@ -895,6 +944,27 @@ async function verifyLab(browser, lab, viewport) {
       }));
       assert(closeTo(reference.lc.energyResidualJ, 0, 1e-15), `${lab.id}/${viewport.name}: LC energy ledger mismatch`);
       assert(closeTo(reference.wave.wavelengthM, 2.99792458, 1e-8) && closeTo(reference.wave.speedResidualMs, 0, 1e-8) && closeTo(reference.wave.fieldRatioResidualVm, 0, 1e-12), `${lab.id}/${viewport.name}: electromagnetic-wave reference mismatch`);
+      const canvas = page.locator("#fieldCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox();
+      const keyForMode = mode => mode === "tuning" ? "driveRatio" : mode === "wave" ? "waveLogFrequency" : "phase";
+      const direct = async (mode, destination) => {
+        await page.evaluate(({ mode }) => window.electromagneticOscillationLab.setMode(mode), { mode });
+        const geometry = await page.evaluate(() => window.electromagneticOscillationLab.getInteractionGeometry());
+        const key = keyForMode(mode), before = await page.evaluate(() => window.electromagneticOscillationLab.getState());
+        await page.mouse.move(box.x + 8, box.y + 8); await page.mouse.down(); await page.mouse.up();
+        const blank = await page.evaluate(() => window.electromagneticOscillationLab.getState());
+        assert(blank[key] === before[key], `${lab.id}/${viewport.name}: ${mode} blank drag changed state`);
+        await page.mouse.move(box.x + geometry.x, box.y + geometry.y); await page.mouse.down();
+        const pressed = await page.evaluate(() => window.electromagneticOscillationLab.getState());
+        assert(pressed[key] === before[key], `${lab.id}/${viewport.name}: ${mode} handle jumped on pointerdown`);
+        const target = typeof destination === "function" ? destination(geometry, box) : destination;
+        await page.mouse.move(box.x + target.x, box.y + target.y); await page.mouse.up();
+        const after = await page.evaluate(() => window.electromagneticOscillationLab.getState());
+        assert(Math.abs(after[key] - before[key]) > (key === "waveLogFrequency" ? .5 : .05), `${lab.id}/${viewport.name}: ${mode} direct handle did not update state`);
+      };
+      await direct("lc", geometry => ({ x: geometry.circuit.right - 4, y: geometry.circuit.top }));
+      await direct("energy", geometry => ({ x: geometry.circuit.right - 4, y: geometry.circuit.bottom }));
+      await direct("tuning", geometry => ({ x: geometry.bounds.right - 8, y: geometry.y }));
+      await direct("wave", geometry => ({ x: geometry.bounds.right - 8, y: geometry.y }));
     }
 
     if (lab.id === "collision") {
@@ -1286,7 +1356,10 @@ async function verifyLab(browser, lab, viewport) {
       const reference = await page.evaluate(() => ({ emitting: window.photoelectricLab.solve({ wavelengthNm: 400, intensity: 60, voltage: 0, material: "sodium" }), blocked: window.photoelectricLab.solve({ wavelengthNm: 650, intensity: 100, voltage: 0, material: "sodium" }) }));
       assert(closeTo(reference.emitting.maxKineticEnergyEv, .8196, .002) && closeTo(reference.emitting.stoppingVoltage, .8196, .002), `${lab.id}/${viewport.name}: Einstein photoelectric reference mismatch`);
       assert(!reference.blocked.emits && reference.blocked.photocurrentNa === 0, `${lab.id}/${viewport.name}: below-threshold emission mismatch`);
-      const canvas = page.locator("#photoCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .5); await page.mouse.down(); await page.mouse.up(); assert((await page.evaluate(() => window.photoelectricLab.getState().wavelengthNm)) > 600, `${lab.id}/${viewport.name}: wavelength drag did not update state`);
+      const canvas = page.locator("#photoCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox(); const geometry = await page.evaluate(() => window.photoelectricLab.getInteractionGeometry()); const before = await page.evaluate(() => window.photoelectricLab.getState().wavelengthNm);
+      await page.mouse.move(box.x + 14, box.y + 14); await page.mouse.down(); await page.mouse.up(); assert((await page.evaluate(() => window.photoelectricLab.getState().wavelengthNm)) === before, `${lab.id}/${viewport.name}: blank canvas click changed wavelength`);
+      await page.mouse.move(box.x + geometry.wavelength.x, box.y + geometry.wavelength.y); await page.mouse.down(); const pressed = await page.evaluate(() => window.photoelectricLab.getState().wavelengthNm); await page.mouse.move(box.x + box.width * .8, box.y + geometry.wavelength.y); await page.mouse.up(); assert(pressed === before && (await page.evaluate(() => window.photoelectricLab.getState().wavelengthNm)) > 600, `${lab.id}/${viewport.name}: wavelength handle drag did not update state`);
+      await page.evaluate(() => window.photoelectricLab.setMode("stopping")); const voltageGeometry = await page.evaluate(() => window.photoelectricLab.getInteractionGeometry()); const voltageBefore = await page.evaluate(() => window.photoelectricLab.getState().voltage); await page.mouse.move(box.x + voltageGeometry.voltage.x, box.y + voltageGeometry.voltage.y); await page.mouse.down(); const voltagePressed = await page.evaluate(() => window.photoelectricLab.getState().voltage); await page.mouse.move(box.x + voltageGeometry.voltage.x, box.y + voltageGeometry.voltage.y - 48); await page.mouse.up(); assert(voltagePressed === voltageBefore && (await page.evaluate(() => window.photoelectricLab.getState().voltage)) < voltageBefore, `${lab.id}/${viewport.name}: voltage handle drag did not update state`);
     }
 
     if (lab.id === "rutherford") {
@@ -1315,12 +1388,14 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const before = await page.evaluate(() => window.rutherfordLab.getState().impactFm);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .5);
+      const geometry = await page.evaluate(() => window.rutherfordLab.getInteractionGeometry());
+      await page.mouse.move(box.x + geometry.target.x, box.y + geometry.target.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * .3, box.y + box.height * .1);
+      const pressed = await page.evaluate(() => window.rutherfordLab.getState().impactFm);
+      await page.mouse.move(box.x + geometry.target.x, box.y + geometry.target.y - 120);
       await page.mouse.up();
       const after = await page.evaluate(() => window.rutherfordLab.getState().impactFm);
-      assert(Math.abs(after - before) > 100, `${lab.id}/${viewport.name}: direct impact-parameter drag did not update state`);
+      assert(pressed === before && Math.abs(after - before) > 100, `${lab.id}/${viewport.name}: direct impact-parameter drag did not update state`);
     }
 
     if (lab.id === "bohr") {
@@ -1328,7 +1403,10 @@ async function verifyLab(browser, lab, viewport) {
       assert(closeTo(reference.halpha.wavelengthNm, 656.1, .5) && reference.halpha.type === "emission" && closeTo(reference.halpha.energyResidualEv, 0, 1e-12), `${lab.id}/${viewport.name}: H-alpha reference mismatch`);
       assert(reference.absorption.resonant && reference.absorption.targetLevel === 3, `${lab.id}/${viewport.name}: resonant absorption mismatch`);
       await page.evaluate(() => window.bohrLab.setMode("emission"));
-      const canvas = page.locator("#atomCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox(); await page.mouse.move(box.x + box.width * .8, box.y + box.height * .5); await page.mouse.down(); await page.mouse.up(); assert((await page.evaluate(() => window.bohrLab.getState().progress)) > .7, `${lab.id}/${viewport.name}: transition drag did not update progress`);
+      const canvas = page.locator("#atomCanvas"); await canvas.scrollIntoViewIfNeeded(); const box = await canvas.boundingBox(); const geometry = await page.evaluate(() => window.bohrLab.getInteractionGeometry()); const before = await page.evaluate(() => window.bohrLab.getState().progress);
+      await page.mouse.move(box.x + 14, box.y + 14); await page.mouse.down(); await page.mouse.up(); assert((await page.evaluate(() => window.bohrLab.getState().progress)) === before, `${lab.id}/${viewport.name}: blank canvas click changed transition state`);
+      await page.mouse.move(box.x + geometry.x, box.y + geometry.y); await page.mouse.down(); const pressed = await page.evaluate(() => window.bohrLab.getState().progress); await page.mouse.move(box.x + geometry.endX, box.y + geometry.y); await page.mouse.up(); const after = await page.evaluate(() => window.bohrLab.getState().progress);
+      assert(pressed === before && after > .95, `${lab.id}/${viewport.name}: direct transition-handle drag did not update state`);
     }
 
     if (lab.id === "matter-wave") {
@@ -1384,12 +1462,17 @@ async function verifyLab(browser, lab, viewport) {
       await canvas.scrollIntoViewIfNeeded();
       const before = await page.evaluate(() => window.singleSlitLab.getState().probeMm);
       const box = await canvas.boundingBox();
-      await page.mouse.move(box.x + box.width * .55, box.y + box.height * .5);
+      const geometry = await page.evaluate(() => window.singleSlitLab.getInteractionGeometry());
+      await page.mouse.move(box.x + 8, box.y + 8); await page.mouse.down(); await page.mouse.up();
+      const blank = await page.evaluate(() => window.singleSlitLab.getState().probeMm);
+      assert(blank === before, `${lab.id}/${viewport.name}: blank drag changed probe position`);
+      await page.mouse.move(box.x + geometry.target.x, box.y + geometry.target.y);
       await page.mouse.down();
-      await page.mouse.move(box.x + box.width * .55, box.y + box.height * .25);
+      const pressed = await page.evaluate(() => window.singleSlitLab.getState().probeMm);
+      await page.mouse.move(box.x + geometry.target.x, box.y + geometry.target.y - 80);
       await page.mouse.up();
       const after = await page.evaluate(() => window.singleSlitLab.getState().probeMm);
-      assert(Math.abs(after - before) > 5, `${lab.id}/${viewport.name}: direct screen-probe drag did not update position`);
+      assert(pressed === before && Math.abs(after - before) > 5, `${lab.id}/${viewport.name}: direct screen-probe drag did not update position`);
     }
 
     if (lab.id === "thin-film") {
