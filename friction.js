@@ -2,474 +2,169 @@ const G = 9.8;
 const EPSILON = 1e-6;
 
 const state = {
-  mass: 2,
-  muS: 0.5,
-  muK: 0.3,
-  targetForce: 14,
-  appliedForce: 0,
-  rampRate: 3,
-  velocity: 0,
-  position: 0,
-  time: 0,
-  sliding: false,
-  running: false,
-  ramping: false,
-  dragging: false,
-  mode: "adaptive",
-  guideStep: 0,
-  showForces: true,
-  showNet: true,
-  showContact: true,
-  showTrail: true,
-  samples: [],
-  history: [{ t: 0, v: 0 }]
+  mass: 2, muS: .5, muK: .3, targetForce: 14, appliedForce: 0,
+  rampRate: 3, velocity: 0, position: 0, time: 0,
+  phase: "static", sliding: false, running: false, ramping: false, replayTime: 0,
+  dragging: false, mode: "adaptive", guideStep: 0,
+  showForces: true, showNet: true, showContact: true, showTrail: true,
+  samples: [], history: [{ t: 0, v: 0 }]
 };
 
 const refs = {
-  canvas: document.getElementById("frictionCanvas"),
-  responseChart: document.getElementById("responseChart"),
-  secondaryChart: document.getElementById("secondaryChart"),
-  sceneTabs: Array.from(document.querySelectorAll(".scene-tab[data-mode]")),
-  routeSteps: Array.from(document.querySelectorAll(".route-step")),
-  modeTitle: document.getElementById("modeTitle"),
-  modeGoal: document.getElementById("modeGoal"),
-  stateBadge: document.getElementById("stateBadge"),
-  stageHint: document.getElementById("stageHint"),
-  massInput: document.getElementById("massInput"),
-  staticMuInput: document.getElementById("staticMuInput"),
-  kineticMuInput: document.getElementById("kineticMuInput"),
-  forceInput: document.getElementById("forceInput"),
-  rampRateInput: document.getElementById("rampRateInput"),
-  massValue: document.getElementById("massValue"),
-  staticMuValue: document.getElementById("staticMuValue"),
-  kineticMuValue: document.getElementById("kineticMuValue"),
-  forceValue: document.getElementById("forceValue"),
-  rampRateValue: document.getElementById("rampRateValue"),
-  timeValue: document.getElementById("timeValue"),
-  appliedMetric: document.getElementById("appliedMetric"),
-  frictionMetric: document.getElementById("frictionMetric"),
-  maxStaticMetric: document.getElementById("maxStaticMetric"),
-  accelerationMetric: document.getElementById("accelerationMetric"),
-  stateNature: document.getElementById("stateNature"),
-  stateExplanation: document.getElementById("stateExplanation"),
-  responseStatus: document.getElementById("responseStatus"),
-  secondaryKicker: document.getElementById("secondaryKicker"),
-  secondaryTitle: document.getElementById("secondaryTitle"),
-  sampleStatus: document.getElementById("sampleStatus"),
-  stepIndex: document.getElementById("stepIndex"),
-  stepTitle: document.getElementById("stepTitle"),
-  stepPrompt: document.getElementById("stepPrompt"),
-  formulaLabel: document.getElementById("formulaLabel"),
-  formulaReadout: document.getElementById("formulaReadout"),
-  resetButton: document.getElementById("resetButton"),
-  scanButton: document.getElementById("scanButton"),
-  pauseButton: document.getElementById("pauseButton"),
-  restartButton: document.getElementById("restartButton"),
-  thresholdButton: document.getElementById("thresholdButton"),
-  recordButton: document.getElementById("recordButton"),
-  clearDataButton: document.getElementById("clearDataButton"),
-  showForcesToggle: document.getElementById("showForcesToggle"),
-  showNetToggle: document.getElementById("showNetToggle"),
-  showContactToggle: document.getElementById("showContactToggle"),
-  showTrailToggle: document.getElementById("showTrailToggle"),
-  guideButton: document.getElementById("guideButton"),
-  guideDialog: document.getElementById("guideDialog"),
-  stepButton: document.getElementById("stepButton"),
-  focusButton: document.getElementById("focusButton"),
-  fullscreenButton: document.getElementById("fullscreenButton")
+  canvas: document.getElementById("frictionCanvas"), responseChart: document.getElementById("responseChart"), secondaryChart: document.getElementById("secondaryChart"),
+  sceneTabs: [...document.querySelectorAll(".scene-tab[data-mode]")], routeSteps: [...document.querySelectorAll(".route-step")],
+  modeTitle: document.getElementById("modeTitle"), modeGoal: document.getElementById("modeGoal"), stateBadge: document.getElementById("stateBadge"), stageHint: document.getElementById("stageHint"),
+  massInput: document.getElementById("massInput"), staticMuInput: document.getElementById("staticMuInput"), kineticMuInput: document.getElementById("kineticMuInput"), forceInput: document.getElementById("forceInput"), rampRateInput: document.getElementById("rampRateInput"),
+  massValue: document.getElementById("massValue"), staticMuValue: document.getElementById("staticMuValue"), kineticMuValue: document.getElementById("kineticMuValue"), forceValue: document.getElementById("forceValue"), rampRateValue: document.getElementById("rampRateValue"), timeValue: document.getElementById("timeValue"),
+  appliedMetric: document.getElementById("appliedMetric"), frictionMetric: document.getElementById("frictionMetric"), maxStaticMetric: document.getElementById("maxStaticMetric"), accelerationMetric: document.getElementById("accelerationMetric"), stateNature: document.getElementById("stateNature"), stateExplanation: document.getElementById("stateExplanation"),
+  responseStatus: document.getElementById("responseStatus"), secondaryKicker: document.getElementById("secondaryKicker"), secondaryTitle: document.getElementById("secondaryTitle"), sampleStatus: document.getElementById("sampleStatus"), stepIndex: document.getElementById("stepIndex"), stepTitle: document.getElementById("stepTitle"), stepPrompt: document.getElementById("stepPrompt"), formulaReadout: document.getElementById("formulaReadout"),
+  resetButton: document.getElementById("resetButton"), scanButton: document.getElementById("scanButton"), pauseButton: document.getElementById("pauseButton"), restartButton: document.getElementById("restartButton"), thresholdButton: document.getElementById("thresholdButton"), breakButton: document.getElementById("breakButton"), recordButton: document.getElementById("recordButton"), clearDataButton: document.getElementById("clearDataButton"),
+  showForcesToggle: document.getElementById("showForcesToggle"), showNetToggle: document.getElementById("showNetToggle"), showContactToggle: document.getElementById("showContactToggle"), showTrailToggle: document.getElementById("showTrailToggle"), guideButton: document.getElementById("guideButton"), guideDialog: document.getElementById("guideDialog"), stepButton: document.getElementById("stepButton"), focusButton: document.getElementById("focusButton"), fullscreenButton: document.getElementById("fullscreenButton")
 };
 
 const ctx = refs.canvas.getContext("2d");
 const responseCtx = refs.responseChart.getContext("2d");
 const secondaryCtx = refs.secondaryChart.getContext("2d");
-const sceneGeometry = { forceHandle: null, block: null, forceBaseX: 0, forceScale: 1 };
-
+const geometry = { handle: null, forceHandle: null, block: null, forceScale: 1, forceBaseX: 0, forceOriginX: 0 };
+let releaseTimer = null;
+const C = { bg: "#0b0f0d", grid: "rgba(216,222,217,.055)", cyan: "#68c9d8", amber: "#f2b84b", red: "#ff786e", green: "#75d491", violet: "#b58ce5", text: "#edf2ed", muted: "#8d9991" };
 const modes = {
-  adaptive: { title: "静摩擦自适应", goal: "静止时，摩擦力恰好抵消外力", hint: "拖动外力滑块或开始扫描" },
-  threshold: { title: "最大静摩擦", goal: "达到临界值仍可静止，再增力才开始滑动", hint: "点击定位按钮，再小幅增加外力" },
-  slide: { title: "滑动与停下", goal: "降低外力后，物块要先减速至零才恢复静摩擦", hint: "先播放，再把目标外力降到滑动摩擦以下" },
-  compare: { title: "参数对照", goal: "改变质量和摩擦因数，比较临界点与突降幅度", hint: "每次只改变一个参数并记录" }
+  adaptive: { title: "静摩擦自适应", goal: "物块不动，摩擦力跟随外力改变", hint: "拖动右侧测力计拉环" },
+  threshold: { title: "最大静摩擦", goal: "物块仍静止，但摩擦力已到上限", hint: "临界点已经定格" },
+  slide: { title: "起滑瞬间", goal: "只增加一点外力，看清摩擦力跳落", hint: "事件回放会自动停住" },
+  compare: { title: "参数对照", goal: "改变接触面，比较临界点和跳落幅度", hint: "一次只改变一个参数" }
 };
-
 const guide = [
-  { title: "先判断接触状态", prompt: "物块静止时，静摩擦力会在 0 到最大值之间自适应。" },
-  { title: "再选择摩擦模型", prompt: "只有达到临界时才有 f静,max = μsN；滑动后才用 f滑 = μkN。" },
-  { title: "最后判断运动", prompt: "滑动时比较 F外 与 f滑，合力决定物块加速、减速或停下。" }
+  { title: "先看物块", prompt: "物块不动，不代表没有摩擦；摩擦力会跟随外力改变。" },
+  { title: "再找临界点", prompt: "慢慢拉动测力计，物块仍静止时，摩擦力箭头会逐渐变长。" },
+  { title: "最后看突变", prompt: "只增加 0.1 N，摩擦模型切换；画面把这个瞬间展开并定格。" }
 ];
-
-function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
-function format(value, digits = 2) { return Number(value).toFixed(digits); }
+const clamp = (v, min, max) => Math.min(max, Math.max(min, Number(v)));
+const format = (v, digits = 2) => Number(v).toFixed(digits);
 
 function calculate(source = state) {
-  const mass = Math.max(0.01, Number(source.mass));
+  const mass = Math.max(.01, Number(source.mass));
   const muS = Math.max(0, Number(source.muS));
   const muK = clamp(Number(source.muK), 0, muS);
   const force = Math.max(0, Number(source.appliedForce));
-  const normal = mass * G;
-  const maxStatic = muS * normal;
-  const kinetic = muK * normal;
-  const moving = Boolean(source.sliding) || Math.abs(Number(source.velocity) || 0) > EPSILON;
-  const sliding = moving || force > maxStatic + EPSILON;
-  if (!sliding) {
-    const limiting = Math.abs(force - maxStatic) < 0.025;
-    return { normal, maxStatic, kinetic, friction: force, netForce: 0, acceleration: 0, sliding: false, regime: limiting ? "limit" : "static" };
+  const normal = mass * G, maxStatic = muS * normal, kinetic = muK * normal;
+  const phase = source.phase || ((source.sliding || Math.abs(Number(source.velocity) || 0) > EPSILON || force > maxStatic + EPSILON) ? "sliding" : "static");
+  if (phase === "static" && force <= maxStatic + EPSILON) {
+    const regime = Math.abs(force - maxStatic) < .025 ? "limit" : "static";
+    return { normal, maxStatic, kinetic, friction: force, netForce: 0, acceleration: 0, sliding: false, regime };
   }
   const netForce = force - kinetic;
   return { normal, maxStatic, kinetic, friction: kinetic, netForce, acceleration: netForce / mass, sliding: true, regime: "sliding" };
 }
 
-function regimeInfo(derived = calculate()) {
-  if (derived.regime === "limit") return { label: "临界静摩擦", nature: "F外 = fs,max", explanation: "静摩擦达到上限；此刻仍可静止，再增力才滑动", className: "is-limit" };
-  if (derived.regime === "sliding") {
-    if (state.velocity > EPSILON && derived.acceleration < -EPSILON) return { label: "滑动减速", nature: "F外 < fk", explanation: "仍在滑动，摩擦力用 μkN；速度降到零后才切回静摩擦", className: "is-decelerating" };
-    return { label: "滑动摩擦", nature: "接触面相对滑动", explanation: derived.acceleration > EPSILON ? "F外 > fk，物块向右加速" : "滑动摩擦力取 μkN", className: "is-sliding" };
-  }
-  return { label: "静摩擦", nature: "F外 ≤ fs,max", explanation: "静摩擦按需要取值，不等于固定的 μsN", className: "" };
+function regimeInfo(d = calculate()) {
+  if (state.phase === "release") return { label: "起滑回放", nature: "f 从上限跳落", explanation: "摩擦力已切换到 μkN；时间被展开，画面将在短暂位移后定格", className: "is-release" };
+  if (d.regime === "limit") return { label: "临界静止", nature: "F外 = fs,max", explanation: "物块仍未移动，静摩擦刚好达到可提供的上限", className: "is-limit" };
+  if (d.regime === "sliding") return { label: "滑动摩擦", nature: "接触面相对滑动", explanation: "起滑后摩擦力取 μkN；本页只播放短暂起滑片段，不研究持续加速", className: "is-sliding" };
+  return { label: "静摩擦", nature: "F外 ≤ fs,max", explanation: "物块未移动，静摩擦按平衡需要取值，不等于固定的 μsN", className: "" };
 }
 
 function resetMotion(keepForce = true) {
-  state.velocity = 0;
-  state.position = 0;
-  state.time = 0;
-  state.sliding = false;
-  state.running = false;
-  state.ramping = false;
-  state.history = [{ t: 0, v: 0 }];
+  if (releaseTimer) { clearTimeout(releaseTimer); releaseTimer = null; }
+  state.velocity = 0; state.position = 0; state.time = 0; state.phase = "static"; state.sliding = false; state.running = false; state.ramping = false; state.replayTime = 0; state.history = [{ t: 0, v: 0 }];
   if (!keepForce) state.appliedForce = 0;
 }
-
+function finishRelease() {
+  if (state.phase !== "release") return;
+  state.phase = "sliding"; state.sliding = true; state.running = false; state.ramping = false; state.position = .18; state.velocity = 0; state.replayTime = .8; state.time = .8; releaseTimer = null; render();
+}
+function beginRelease(force) {
+  if (releaseTimer) clearTimeout(releaseTimer);
+  state.appliedForce = clamp(force, 0, 30); state.targetForce = state.appliedForce; state.phase = "release"; state.sliding = true; state.running = true; state.ramping = false; state.replayTime = 0; state.position = 0; state.velocity = 0; state.time = 0;
+  releaseTimer = setTimeout(finishRelease, 900);
+}
 function advance(dt) {
-  const duration = clamp(Number(dt) || 0, 0, 2);
+  const duration = clamp(dt || 0, 0, 2);
   if (!duration) return calculate();
-  const before = calculate();
-  if (!state.sliding && state.appliedForce > before.maxStatic + EPSILON) state.sliding = true;
-  const derived = calculate();
-  if (state.sliding) {
-    if (derived.acceleration < 0 && state.velocity > 0 && state.velocity + derived.acceleration * duration <= 0) {
-      const stoppingTime = -state.velocity / derived.acceleration;
-      state.position += state.velocity * stoppingTime + 0.5 * derived.acceleration * stoppingTime * stoppingTime;
-      state.velocity = 0;
-      state.sliding = false;
-    } else {
-      state.position += state.velocity * duration + 0.5 * derived.acceleration * duration * duration;
-      state.velocity = Math.max(0, state.velocity + derived.acceleration * duration);
-      if (state.velocity <= EPSILON && state.appliedForce <= derived.maxStatic + EPSILON) {
-        state.velocity = 0;
-        state.sliding = false;
-      }
-    }
+  if (state.phase === "release") {
+    state.replayTime += duration;
+    const progress = clamp(state.replayTime / .8, 0, 1);
+    state.position = .18 * progress * progress; state.velocity = progress < 1 ? .22 : 0; state.time = state.replayTime;
+    if (progress >= .98) finishRelease();
   }
-  state.time += duration;
-  const last = state.history[state.history.length - 1];
-  if (!last || state.time - last.t >= 0.045) state.history.push({ t: state.time, v: state.velocity });
-  if (state.history.length > 320) state.history.shift();
   return calculate();
 }
 
-function setCanvasSize(canvas, context) {
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const width = Math.max(320, Math.round(rect.width));
-  const height = Math.max(180, Math.round(rect.height));
-  if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-  }
-  context.setTransform(dpr, 0, 0, dpr, 0, 0);
-  return { width, height };
+function resize(canvas, context) {
+  const rect = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2), width = Math.max(320, Math.round(rect.width)), height = Math.max(180, Math.round(rect.height));
+  if (canvas.width !== width * dpr || canvas.height !== height * dpr) { canvas.width = width * dpr; canvas.height = height * dpr; }
+  context.setTransform(dpr, 0, 0, dpr, 0, 0); return { width, height };
 }
+function line(x1, y1, x2, y2, color, width = 1, dash = []) { ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore(); }
+function arrow(context, x1, y1, x2, y2, color, text, width = 3) { const angle = Math.atan2(y2 - y1, x2 - x1), size = 10; context.save(); context.strokeStyle = color; context.fillStyle = color; context.lineWidth = width; context.lineCap = "round"; context.beginPath(); context.moveTo(x1, y1); context.lineTo(x2, y2); context.stroke(); context.beginPath(); context.moveTo(x2, y2); context.lineTo(x2 - size * Math.cos(angle - Math.PI / 6), y2 - size * Math.sin(angle - Math.PI / 6)); context.lineTo(x2 - size * Math.cos(angle + Math.PI / 6), y2 - size * Math.sin(angle + Math.PI / 6)); context.closePath(); context.fill(); if (text) { context.font = "700 11px ui-monospace, monospace"; context.textAlign = x2 >= x1 ? "left" : "right"; context.fillText(text, x2 + (x2 >= x1 ? 7 : -7), y2 - 8); } context.restore(); }
+function roundedRect(context, x, y, w, h, r, fill, stroke) { context.beginPath(); context.roundRect(x, y, w, h, r); context.fillStyle = fill; context.fill(); if (stroke) { context.strokeStyle = stroke; context.stroke(); } }
+function spring(context, x1, x2, y, color) { context.save(); context.strokeStyle = color; context.lineWidth = 2; context.beginPath(); context.moveTo(x1, y); const turns = 9, span = Math.max(18, x2 - x1); for (let i = 0; i <= turns * 2; i += 1) context.lineTo(x1 + span * i / (turns * 2), y + (i === 0 || i === turns * 2 ? 0 : (i % 2 ? -7 : 7))); context.stroke(); context.restore(); }
+function text(value, x, y, color = C.muted, size = 10, align = "left") { ctx.save(); ctx.fillStyle = color; ctx.font = `${size}px system-ui, sans-serif`; ctx.textAlign = align; ctx.fillText(value, x, y); ctx.restore(); }
 
-function arrow(context, x1, y1, x2, y2, color, label, lineWidth = 3) {
-  const angle = Math.atan2(y2 - y1, x2 - x1);
-  context.save();
-  context.strokeStyle = color;
-  context.fillStyle = color;
-  context.lineWidth = lineWidth;
-  context.lineCap = "round";
-  context.beginPath(); context.moveTo(x1, y1); context.lineTo(x2, y2); context.stroke();
-  context.beginPath(); context.moveTo(x2, y2); context.lineTo(x2 - 11 * Math.cos(angle - Math.PI / 6), y2 - 11 * Math.sin(angle - Math.PI / 6)); context.lineTo(x2 - 11 * Math.cos(angle + Math.PI / 6), y2 - 11 * Math.sin(angle + Math.PI / 6)); context.closePath(); context.fill();
-  context.font = "700 12px ui-monospace, monospace";
-  context.textAlign = x2 >= x1 ? "left" : "right";
-  context.fillText(label, x2 + (x2 >= x1 ? 8 : -8), y2 - 8);
-  context.restore();
+function drawGauge(width, d) {
+  const x = Math.max(38, width * .34), y = 24, w = Math.min(330, width * .42), h = 28, max = Math.max(8, d.maxStatic * 1.15), progress = clamp(state.appliedForce / max, 0, 1), limit = clamp(d.maxStatic / max, 0, 1);
+  text("外力与摩擦力 · 同一比例尺", x, y - 8, C.muted, 10); roundedRect(ctx, x, y, w, h, 14, "#17201b", "rgba(255,255,255,.13)"); ctx.save(); ctx.beginPath(); ctx.roundRect(x + 4, y + 7, (w - 8) * progress, h - 14, 8); ctx.fillStyle = state.phase === "release" || d.sliding ? C.red : d.regime === "limit" ? C.amber : C.cyan; ctx.fill(); ctx.restore(); line(x + 4 + (w - 8) * limit, y - 4, x + 4 + (w - 8) * limit, y + h + 6, C.amber, 2, [3, 3]); text("fs,max", x + 4 + (w - 8) * limit, y + h + 18, C.amber, 10, "center"); text(`F外 ${format(state.appliedForce, 1)} N`, x + 8 + (w - 8) * progress, y + 19, C.text, 10); text("← 静止区", x, y + h + 34, C.cyan, 9); text("起滑区 →", x + w, y + h + 34, C.red, 9, "right");
 }
-
-function drawHandle(point, color, label, active = false) {
-  if (!point) return;
-  ctx.save();
-  ctx.fillStyle = active ? "#eef3ef" : color;
-  ctx.strokeStyle = active ? color : `${color}88`;
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(point.x, point.y, active ? 9 : 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = `${color}55`;
-  ctx.beginPath(); ctx.arc(point.x, point.y, 14, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = active ? "#eef3ef" : color;
-  ctx.font = "700 10px ui-monospace, monospace";
-  ctx.textAlign = "center";
-  ctx.fillText(label, point.x, point.y + 28);
-  ctx.restore();
+function drawContact(width, height, d) {
+  if (!state.showContact) return;
+  const x = Math.max(16, width * .045), y = height - 105, w = width - x * 2, h = 78, sliding = d.sliding || state.phase === "release";
+  roundedRect(ctx, x, y, w, h, 8, "rgba(14,19,17,.96)", "rgba(255,255,255,.14)"); text("接触微区 · 放大模型", x + 12, y + 17, C.muted, 9); const mid = y + 43, offset = sliding ? clamp(state.position * 70, 0, 18) : 0; line(x + 15, mid - 11, x + w - 15, mid - 11, C.cyan, 2); line(x + 15, mid + 13, x + w - 15, mid + 13, C.amber, 2);
+  for (let px = x + 22; px < x + w - 18; px += 28) { ctx.save(); ctx.strokeStyle = sliding && px < x + 170 ? C.red : "rgba(242,184,75,.7)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px + offset, mid - 11); ctx.lineTo(px + 8 + offset, mid - 21); ctx.lineTo(px + 16 + offset, mid - 11); ctx.stroke(); ctx.restore(); }
+  for (let px = x + 24; px < x + w - 18; px += 34) { ctx.save(); ctx.strokeStyle = "rgba(104,201,216,.78)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px - offset, mid + 13); ctx.lineTo(px + 8 - offset, mid + 23); ctx.lineTo(px + 16 - offset, mid + 13); ctx.stroke(); ctx.restore(); }
+  text(sliding ? "凸起相对掠过 · 接触点断开并重建" : state.phase === "static" && d.regime === "limit" ? "接触点被拉伸到极限 · 尚未滑动" : "凸起咬合 · 没有相对滑动", x + 12, y + h - 10, sliding ? C.red : state.phase === "static" && d.regime === "limit" ? C.amber : C.text, 10);
 }
-
-function drawContactInset(width, derived) {
-  if (!state.showContact || width < 590) return;
-  const x = 22, y = 22, w = 188, h = 88;
-  ctx.save();
-  ctx.fillStyle = "rgba(18,22,20,.92)"; ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 1; ctx.fillRect(x, y, w, h); ctx.strokeRect(x, y, w, h);
-  ctx.fillStyle = "#9ca69f"; ctx.font = "700 9px ui-monospace, monospace"; ctx.fillText("CONTACT MICROVIEW", x + 10, y + 15);
-  const offset = derived.sliding ? (state.time * 34) % 12 : 0;
-  ctx.strokeStyle = derived.sliding ? "#ff7a68" : "#64c7d9"; ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (let px = x + 10; px <= x + w - 10; px += 12) { ctx.lineTo(px, y + 43 + ((px / 12) % 2 ? 7 : 0)); }
-  ctx.stroke();
-  ctx.strokeStyle = "#f2b84b"; ctx.beginPath();
-  for (let px = x + 10 - offset; px <= x + w; px += 12) { ctx.lineTo(px, y + 68 - ((px / 12) % 2 ? 7 : 0)); }
-  ctx.stroke();
-  ctx.fillStyle = "#d8ded9"; ctx.font = "10px system-ui, sans-serif"; ctx.fillText(derived.sliding ? "凸起相对掠过：发生滑动" : "凸起咬合：无相对滑动", x + 10, y + 82);
-  ctx.restore();
+function drawDynamometer(blockX, blockY, blockW, blockH, width, d) {
+  const bodyW = clamp(width * .2, 126, 210), bodyH = 36;
+  const bodyX = Math.min(width - bodyW - 42, blockX + blockW + Math.max(28, width * .04));
+  const bodyY = blockY + blockH * .28, midY = bodyY + bodyH / 2;
+  const maxDragForce = Math.max(16, Math.min(30, state.targetForce + 6));
+  const forceScale = clamp((width - bodyX - bodyW - 28) / maxDragForce, 3.5, 8);
+  const forceOriginX = bodyX + bodyW + 18;
+  const ringX = forceOriginX + state.appliedForce * forceScale;
+  const deviceColor = state.phase === "release" ? C.red : C.amber;
+  spring(ctx, blockX + blockW, bodyX, midY, deviceColor);
+  line(bodyX + bodyW, midY, ringX - 8, midY, "rgba(227,233,228,.8)", 2);
+  roundedRect(ctx, bodyX, bodyY, bodyW, bodyH, 16, "#e3e9e4", state.phase === "release" ? C.red : "#95a49a");
+  roundedRect(ctx, bodyX + 15, bodyY + 10, bodyW - 34, 16, 8, "#31413a", "#65766d");
+  const needleX = bodyX + 15 + (bodyW - 34) * clamp(state.appliedForce / Math.max(1, d.maxStatic * 1.15), 0, 1);
+  line(needleX, bodyY + 9, needleX, bodyY + 27, state.phase === "release" ? C.red : C.green, 2);
+  ctx.save(); ctx.fillStyle = "#1b2821"; ctx.beginPath(); ctx.arc(ringX, midY, 8, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = state.dragging ? C.text : C.green; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+  text("测力计", bodyX + bodyW / 2, bodyY - 9, C.text, 10, "center"); text("拖动拉环", ringX, midY + 25, state.dragging ? C.text : C.green, 9, "center");
+  geometry.forceBaseX = forceOriginX; geometry.forceOriginX = forceOriginX; geometry.forceScale = forceScale; geometry.handle = { x: ringX, y: midY }; geometry.forceHandle = geometry.handle;
 }
 
 function drawScene() {
-  const { width, height } = setCanvasSize(refs.canvas, ctx);
-  const d = calculate();
-  const centerY = height * 0.52;
-  const trackLeft = Math.max(30, width * 0.07);
-  const trackRight = width - Math.max(30, width * 0.07);
-  const blockW = clamp(width * 0.18, 112, 170);
-  const blockH = clamp(height * 0.19, 62, 86);
-  const travel = Math.max(0, trackRight - trackLeft - blockW);
-  const blockX = trackLeft + ((state.position * 45) % Math.max(1, travel));
-  const blockY = centerY - blockH;
-  const forceY = blockY + blockH * .48;
-  const horizontalScale = Math.min(8, width / 110);
-  sceneGeometry.block = { x: blockX, y: blockY, width: blockW, height: blockH };
-  sceneGeometry.forceBaseX = blockX + blockW + 22;
-  sceneGeometry.forceScale = horizontalScale;
-  sceneGeometry.forceHandle = { x: sceneGeometry.forceBaseX + state.appliedForce * horizontalScale, y: forceY };
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "#0c0f0e"; ctx.fillRect(0, 0, width, height);
-  for (let i = 0; i < 9; i += 1) { ctx.strokeStyle = `rgba(105,209,142,${0.025 + i * 0.006})`; ctx.beginPath(); ctx.moveTo(0, centerY + 42 + i * 10); ctx.lineTo(width, centerY + 42 + i * 10); ctx.stroke(); }
-  ctx.strokeStyle = "#717a73"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(trackLeft, centerY); ctx.lineTo(trackRight, centerY); ctx.stroke();
-  ctx.strokeStyle = "rgba(242,184,75,.32)"; ctx.lineWidth = 1;
-  for (let x = trackLeft; x < trackRight; x += 13) { ctx.beginPath(); ctx.moveTo(x, centerY); ctx.lineTo(x + 6, centerY + 7); ctx.stroke(); }
-  if (state.showTrail && state.position > 0.01) {
-    ctx.strokeStyle = "rgba(105,209,142,.55)"; ctx.lineWidth = 2; ctx.setLineDash([3, 7]); ctx.beginPath(); ctx.moveTo(trackLeft, centerY + 29); ctx.lineTo(blockX + blockW / 2, centerY + 29); ctx.stroke(); ctx.setLineDash([]);
-  }
-  ctx.fillStyle = d.sliding ? "#33231f" : "#172a2d"; ctx.strokeStyle = d.sliding ? "#ff7a68" : "#64c7d9"; ctx.lineWidth = 2; ctx.fillRect(blockX, blockY, blockW, blockH); ctx.strokeRect(blockX, blockY, blockW, blockH);
-  ctx.fillStyle = "#eef3ef"; ctx.font = `700 ${clamp(width * .018, 13, 18)}px system-ui, sans-serif`; ctx.textAlign = "center"; ctx.fillText(`${format(state.mass, 1)} kg`, blockX + blockW / 2, blockY + blockH / 2 + 6);
-  const verticalLength = Math.min(76, height * .19);
-  if (state.showForces) {
-    arrow(ctx, blockX + blockW, forceY, sceneGeometry.forceHandle.x, forceY, "#69d18e", `F外 ${format(state.appliedForce,1)} N`);
-    drawHandle(sceneGeometry.forceHandle, "#69d18e", "拖动 F外", state.dragging);
-    if (d.friction > .01) arrow(ctx, blockX, blockY + blockH * .62, blockX - 22 - d.friction * horizontalScale, blockY + blockH * .62, d.sliding ? "#ff7a68" : "#64c7d9", `f ${format(d.friction,1)} N`);
-    arrow(ctx, blockX + blockW * .42, blockY, blockX + blockW * .42, blockY - verticalLength, "#64c7d9", "N");
-    arrow(ctx, blockX + blockW * .58, blockY + blockH, blockX + blockW * .58, blockY + blockH + verticalLength, "#b58ce5", "mg");
-  }
-  if (state.showNet && Math.abs(d.netForce) > .02) arrow(ctx, blockX + blockW / 2, blockY - 15, blockX + blockW / 2 + clamp(d.netForce * horizontalScale, -120, 120), blockY - 15, "#f2b84b", `F合 ${format(d.netForce,1)} N`, 4);
-  const info = regimeInfo(d);
-  ctx.textAlign = "left"; ctx.fillStyle = d.sliding ? "#ff7a68" : d.regime === "limit" ? "#f2b84b" : "#64c7d9"; ctx.font = "700 13px system-ui, sans-serif"; ctx.fillText(info.label, trackLeft, height - 48);
-  ctx.fillStyle = "#9ca69f"; ctx.font = "11px system-ui, sans-serif"; ctx.fillText(`x = ${format(state.position,2)} m   v = ${format(state.velocity,2)} m/s`, trackLeft, height - 29);
-  drawContactInset(width, d);
+  const { width, height } = resize(refs.canvas, ctx), d = calculate(), centerY = height * .49, trackLeft = Math.max(26, width * .055), trackRight = width - Math.max(26, width * .055), blockW = clamp(width * .15, 100, 148), blockH = clamp(height * .2, 62, 84), blockOffset = clamp(width * .1, 34, 72), travel = Math.max(0, trackRight - trackLeft - blockW - 170 - blockOffset), blockX = trackLeft + blockOffset + clamp(state.position * 52, 0, travel), blockY = centerY - blockH;
+  geometry.block = { x: blockX, y: blockY, width: blockW, height: blockH }; ctx.clearRect(0, 0, width, height); ctx.fillStyle = C.bg; ctx.fillRect(0, 0, width, height); for (let i = 0; i < 8; i += 1) line(0, centerY + 48 + i * 11, width, centerY + 48 + i * 11, `rgba(105,209,142,${.02 + i * .006})`); drawGauge(width, d);
+  const surfaceY = centerY + 8; ctx.fillStyle = "#b18a51"; ctx.fillRect(trackLeft, surfaceY, trackRight - trackLeft, 10); ctx.fillStyle = "#e3c37f"; ctx.fillRect(trackLeft, surfaceY, trackRight - trackLeft, 4); for (let x = trackLeft; x < trackRight; x += 14) line(x, surfaceY + 9, x + 7, surfaceY + 16, "rgba(54,42,24,.5)", 1);
+  if (state.showTrail && state.position > .01) line(trackLeft, surfaceY + 27, blockX + blockW / 2, surfaceY + 27, "rgba(117,212,145,.7)", 2, [3, 7]);
+  const activeColor = state.phase === "release" || d.sliding ? C.red : d.regime === "limit" ? C.amber : C.cyan; ctx.save(); ctx.shadowColor = activeColor; ctx.shadowBlur = state.phase === "release" || d.regime === "limit" ? 18 : 0; roundedRect(ctx, blockX, blockY, blockW, blockH, 5, state.phase === "release" || d.sliding ? "#35221f" : "#193036", activeColor); ctx.restore(); text(`${format(state.mass, 1)} kg`, blockX + blockW / 2, blockY + blockH / 2 + 5, C.text, 15, "center"); drawDynamometer(blockX, blockY, blockW, blockH, width, d);
+  const forceY = blockY + blockH * .5, scale = geometry.forceScale; if (state.showForces) { const pullLen = Math.max(24, state.appliedForce * scale); arrow(ctx, blockX + blockW + 10, forceY - 48, blockX + blockW + 10 + pullLen, forceY - 48, C.green, `F外 ${format(state.appliedForce, 1)} N`); if (d.friction > .01) { const frictionLen = Math.max(24, d.friction * scale), frictionY = blockY + blockH * .66; arrow(ctx, blockX - 10, frictionY, blockX - 10 - frictionLen, frictionY, d.sliding ? C.red : C.cyan); text(`f ${format(d.friction, 1)} N`, blockX - 10 - frictionLen * .5, frictionY - 10, d.sliding ? C.red : C.cyan, 10, "center"); } arrow(ctx, blockX + blockW * .4, blockY, blockX + blockW * .4, blockY - 54, C.cyan, "N"); arrow(ctx, blockX + blockW * .6, blockY + blockH, blockX + blockW * .6, blockY + blockH + 54, C.violet, "mg"); }
+  if (state.showNet && state.phase === "release") arrow(ctx, blockX + blockW / 2, blockY - 19, blockX + blockW / 2 + 42, blockY - 19, C.amber, "起滑", 3);
+  const info = regimeInfo(d); text(info.label, trackLeft, height - 119, activeColor, 13); text(state.phase === "release" ? "时间展开：只播放起滑位移，随后自动定格" : `物块位移 ${format(state.position, 2)} m · v = ${format(state.velocity, 2)} m/s`, trackLeft, height - 101, C.muted, 10);
+  const stages = [{ text: "静止", color: C.cyan }, { text: "临界", color: C.amber }, { text: "起滑后", color: C.red }], stage = state.phase === "release" || d.sliding ? 2 : d.regime === "limit" ? 1 : 0, sx = width - 224, sy = height - 119; stages.forEach((s, i) => { ctx.save(); ctx.fillStyle = i === stage ? s.color : "rgba(255,255,255,.18)"; ctx.beginPath(); ctx.arc(sx + i * 86, sy, i === stage ? 5 : 3, 0, Math.PI * 2); ctx.fill(); if (i < stages.length - 1) line(sx + i * 86 + 8, sy, sx + (i + 1) * 86 - 8, sy, i < stage ? s.color : "rgba(255,255,255,.16)", 1); ctx.restore(); text(s.text, sx + i * 86, sy + 17, i === stage ? s.color : C.muted, 9, "center"); }); drawContact(width, height, d);
 }
 
-function drawAxes(context, width, height, labels, xMax, yMax, yMin = 0) {
-  const pad = { left: 44, right: 15, top: 20, bottom: 34 };
-  const plotW = width - pad.left - pad.right, plotH = height - pad.top - pad.bottom;
-  context.strokeStyle = "rgba(216,222,217,.16)"; context.fillStyle = "#7f8a83"; context.lineWidth = 1; context.font = "9px ui-monospace, monospace";
-  for (let i = 0; i <= 4; i += 1) {
-    const x = pad.left + plotW * i / 4, y = pad.top + plotH * i / 4;
-    context.beginPath(); context.moveTo(x, pad.top); context.lineTo(x, pad.top + plotH); context.stroke();
-    context.beginPath(); context.moveTo(pad.left, y); context.lineTo(pad.left + plotW, y); context.stroke();
-    context.textAlign = "center"; context.fillText(format(xMax * i / 4, 1), x, height - 12);
-    context.textAlign = "right"; context.fillText(format(yMax - (yMax - yMin) * i / 4, 1), pad.left - 7, y + 3);
-  }
-  context.fillStyle = "#aab3ad"; context.textAlign = "left"; context.fillText(labels.y, pad.left, 11); context.textAlign = "right"; context.fillText(labels.x, width - 6, height - 12);
-  return { x: value => pad.left + value / xMax * plotW, y: value => pad.top + (yMax - value) / (yMax - yMin) * plotH, pad, plotW, plotH };
-}
+function chartAxes(context, width, height, xMax, yMax) { const p = { l: 42, r: 14, t: 18, b: 30 }, w = width - p.l - p.r, h = height - p.t - p.b; context.strokeStyle = "rgba(216,222,217,.14)"; context.fillStyle = "#7f8a83"; context.font = "9px ui-monospace, monospace"; for (let i = 0; i <= 4; i += 1) { const x = p.l + w * i / 4, y = p.t + h * i / 4; context.beginPath(); context.moveTo(x, p.t); context.lineTo(x, p.t + h); context.stroke(); context.beginPath(); context.moveTo(p.l, y); context.lineTo(p.l + w, y); context.stroke(); context.textAlign = "center"; context.fillText(format(xMax * i / 4, 1), x, height - 9); context.textAlign = "right"; context.fillText(format(yMax * (4 - i) / 4, 1), p.l - 6, y + 3); } return { x: v => p.l + v / xMax * w, y: v => p.t + (yMax - v) / yMax * h }; }
+function drawResponseChart() { const { width, height } = resize(refs.responseChart, responseCtx), d = calculate(), xMax = Math.max(16, state.targetForce * 1.1, d.maxStatic * 1.45), yMax = Math.max(8, d.maxStatic * 1.25); responseCtx.clearRect(0, 0, width, height); responseCtx.fillStyle = "#111512"; responseCtx.fillRect(0, 0, width, height); const m = chartAxes(responseCtx, width, height, xMax, yMax); responseCtx.lineWidth = 2.5; responseCtx.strokeStyle = C.cyan; responseCtx.beginPath(); responseCtx.moveTo(m.x(0), m.y(0)); responseCtx.lineTo(m.x(d.maxStatic), m.y(d.maxStatic)); responseCtx.stroke(); responseCtx.strokeStyle = C.red; responseCtx.beginPath(); responseCtx.moveTo(m.x(d.maxStatic), m.y(d.kinetic)); responseCtx.lineTo(m.x(xMax), m.y(d.kinetic)); responseCtx.stroke(); responseCtx.strokeStyle = "rgba(255,120,110,.7)"; responseCtx.setLineDash([4, 4]); responseCtx.beginPath(); responseCtx.moveTo(m.x(d.maxStatic), m.y(d.maxStatic)); responseCtx.lineTo(m.x(d.maxStatic), m.y(d.kinetic)); responseCtx.stroke(); responseCtx.setLineDash([]); responseCtx.fillStyle = state.phase === "release" || d.sliding ? C.red : d.regime === "limit" ? C.amber : C.green; responseCtx.beginPath(); responseCtx.arc(m.x(state.appliedForce), m.y(d.friction), 5, 0, Math.PI * 2); responseCtx.fill(); }
+function drawEventChart() { const { width, height } = resize(refs.secondaryChart, secondaryCtx), d = calculate(), max = Math.max(1, d.maxStatic * 1.16), p = { l: 35, r: 22, t: 22, b: 38 }, w = width - p.l - p.r, h = height - p.t - p.b; secondaryCtx.clearRect(0, 0, width, height); secondaryCtx.fillStyle = "#111512"; secondaryCtx.fillRect(0, 0, width, height); secondaryCtx.strokeStyle = "rgba(216,222,217,.14)"; for (let i = 0; i <= 4; i += 1) { const y = p.t + h * i / 4; secondaryCtx.beginPath(); secondaryCtx.moveTo(p.l, y); secondaryCtx.lineTo(p.l + w, y); secondaryCtx.stroke(); } secondaryCtx.fillStyle = C.muted; secondaryCtx.font = "9px ui-monospace, monospace"; secondaryCtx.textAlign = "right"; for (let i = 0; i <= 4; i += 1) secondaryCtx.fillText(format(max * (4 - i) / 4, 1), p.l - 6, p.t + h * i / 4 + 3); secondaryCtx.textAlign = "left"; secondaryCtx.fillText("摩擦力 f / N", p.l, 13); const bars = [{ x: p.l + w * .2, value: d.maxStatic, color: C.amber, title: "临界前" }, { x: p.l + w * .5, value: d.maxStatic, color: C.amber, title: "临界" }, { x: p.l + w * .8, value: d.kinetic, color: C.red, title: "起滑后" }]; bars.forEach((b, i) => { const top = p.t + h * (max - b.value) / max; secondaryCtx.fillStyle = `${b.color}cc`; secondaryCtx.fillRect(b.x - 24, top, 48, p.t + h - top); secondaryCtx.fillStyle = b.color; secondaryCtx.font = "700 10px ui-monospace, monospace"; secondaryCtx.textAlign = "center"; secondaryCtx.fillText(`${format(b.value, 2)} N`, b.x, top - 8); secondaryCtx.fillStyle = C.text; secondaryCtx.font = "10px system-ui, sans-serif"; secondaryCtx.fillText(b.title, b.x, height - 14); if (i === 1) { secondaryCtx.strokeStyle = C.red; secondaryCtx.setLineDash([3, 3]); secondaryCtx.beginPath(); secondaryCtx.moveTo(b.x + 31, top); secondaryCtx.lineTo(b.x + 31, p.t + h * (max - d.kinetic) / max); secondaryCtx.stroke(); secondaryCtx.setLineDash([]); } }); secondaryCtx.fillStyle = C.red; secondaryCtx.font = "700 10px system-ui, sans-serif"; secondaryCtx.textAlign = "center"; secondaryCtx.fillText(`跳落 ${format(d.maxStatic - d.kinetic, 2)} N`, p.l + w * .65, p.t + h * .55); }
 
-function drawResponseChart() {
-  const { width, height } = setCanvasSize(refs.responseChart, responseCtx);
-  const d = calculate();
-  const xMax = Math.max(16, state.targetForce * 1.1, d.maxStatic * 1.45);
-  const yMax = Math.max(8, d.maxStatic * 1.25);
-  responseCtx.clearRect(0, 0, width, height); responseCtx.fillStyle = "#111512"; responseCtx.fillRect(0, 0, width, height);
-  const map = drawAxes(responseCtx, width, height, { x: "F外 / N", y: "f / N" }, xMax, yMax);
-  responseCtx.strokeStyle = "#64c7d9"; responseCtx.lineWidth = 2.5; responseCtx.beginPath(); responseCtx.moveTo(map.x(0), map.y(0)); responseCtx.lineTo(map.x(d.maxStatic), map.y(d.maxStatic)); responseCtx.stroke();
-  responseCtx.fillStyle = "#f2b84b"; responseCtx.beginPath(); responseCtx.arc(map.x(d.maxStatic), map.y(d.maxStatic), 4, 0, Math.PI * 2); responseCtx.fill();
-  responseCtx.strokeStyle = "rgba(255,122,104,.7)"; responseCtx.setLineDash([4, 4]); responseCtx.beginPath(); responseCtx.moveTo(map.x(d.maxStatic), map.y(d.maxStatic)); responseCtx.lineTo(map.x(d.maxStatic), map.y(d.kinetic)); responseCtx.stroke(); responseCtx.setLineDash([]);
-  responseCtx.strokeStyle = "#ff7a68"; responseCtx.lineWidth = 2.5; responseCtx.beginPath(); responseCtx.moveTo(map.x(d.maxStatic), map.y(d.kinetic)); responseCtx.lineTo(map.x(xMax), map.y(d.kinetic)); responseCtx.stroke();
-  state.samples.forEach(sample => { responseCtx.fillStyle = sample.sliding ? "#ff7a68" : "#69d18e"; responseCtx.beginPath(); responseCtx.arc(map.x(sample.force), map.y(sample.friction), 3, 0, Math.PI * 2); responseCtx.fill(); });
-  responseCtx.fillStyle = d.sliding ? "#ff7a68" : d.regime === "limit" ? "#f2b84b" : "#69d18e"; responseCtx.beginPath(); responseCtx.arc(map.x(state.appliedForce), map.y(d.friction), 5, 0, Math.PI * 2); responseCtx.fill();
-}
+function rangeProgress(input) { const p = (Number(input.value) - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100; input.style.setProperty("--range-progress", `${p}%`); }
+function syncUI() { const d = calculate(), info = regimeInfo(d), mode = modes[state.mode], task = guide[state.guideStep]; refs.massValue.textContent = `${format(state.mass)} kg`; refs.staticMuValue.textContent = format(state.muS); refs.kineticMuValue.textContent = format(state.muK); refs.forceValue.textContent = `${format(state.targetForce, 1)} N`; refs.rampRateValue.textContent = `${format(state.rampRate, 1)} N/s`; refs.timeValue.textContent = state.phase === "release" ? `慢放 ${format(state.replayTime, 1)} s` : state.phase === "sliding" ? "已定格" : d.regime === "limit" ? "临界" : "静止"; refs.appliedMetric.textContent = `${format(state.appliedForce)} N`; refs.frictionMetric.textContent = `${format(d.friction)} N`; refs.maxStaticMetric.textContent = `${format(d.maxStatic)} N`; refs.accelerationMetric.textContent = state.phase === "release" ? "慢放" : "0.00 m/s²"; refs.stateNature.textContent = info.nature; refs.stateExplanation.textContent = info.explanation; refs.stateBadge.textContent = info.label; refs.stateBadge.className = `state-badge ${info.className}`.trim(); refs.modeTitle.textContent = mode.title; refs.modeGoal.textContent = mode.goal; refs.stageHint.textContent = mode.hint; refs.responseStatus.textContent = `临界 ${format(d.maxStatic)} N · 跳落 ${format(d.maxStatic - d.kinetic)} N`; refs.sampleStatus.textContent = state.samples.length ? `${state.samples.length} 个记录点` : "拖动装置看变化"; refs.secondaryKicker.textContent = "EVENT REPLAY"; refs.secondaryTitle.textContent = "起滑事件回放"; refs.stepIndex.textContent = `0${state.guideStep + 1}`; refs.stepTitle.textContent = task.title; refs.stepPrompt.textContent = task.prompt; refs.formulaReadout.textContent = d.sliding ? `f滑 = μkN = ${format(d.friction)} N` : d.regime === "limit" ? `f静,max = μsN = ${format(d.maxStatic)} N` : `f静 = F外 = ${format(d.friction)} N`; refs.scanButton.textContent = state.ramping ? "加力中…" : "▶ 慢慢加力"; refs.breakButton.disabled = !(state.mode === "threshold" || state.mode === "slide") || state.phase === "release"; refs.sceneTabs.forEach(b => b.classList.toggle("is-active", b.dataset.mode === state.mode)); refs.routeSteps.forEach((b, i) => b.classList.toggle("is-active", i === state.guideStep)); [refs.massInput, refs.staticMuInput, refs.kineticMuInput, refs.forceInput, refs.rampRateInput].forEach(rangeProgress); }
+function render() { drawScene(); drawResponseChart(); drawEventChart(); syncUI(); }
 
-function drawSecondaryChart() {
-  const { width, height } = setCanvasSize(refs.secondaryChart, secondaryCtx);
-  const d = calculate();
-  secondaryCtx.clearRect(0, 0, width, height); secondaryCtx.fillStyle = "#111512"; secondaryCtx.fillRect(0, 0, width, height);
-  if (state.mode === "slide") {
-    const xMax = Math.max(5, state.time, state.history[state.history.length - 1]?.t || 0);
-    const yMax = Math.max(2, ...state.history.map(point => point.v * 1.2));
-    const map = drawAxes(secondaryCtx, width, height, { x: "t / s", y: "v / (m/s)" }, xMax, yMax);
-    secondaryCtx.strokeStyle = "#69d18e"; secondaryCtx.lineWidth = 2.5; secondaryCtx.beginPath();
-    state.history.forEach((point, index) => { const x = map.x(point.t), y = map.y(point.v); if (index) secondaryCtx.lineTo(x, y); else secondaryCtx.moveTo(x, y); }); secondaryCtx.stroke();
-    return;
-  }
-  const xMax = Math.max(16, state.targetForce * 1.1, d.maxStatic * 1.45);
-  const yMax = Math.max(3, (xMax - d.kinetic) / state.mass * 1.12);
-  const map = drawAxes(secondaryCtx, width, height, { x: "F外 / N", y: "a / (m/s²)" }, xMax, yMax);
-  secondaryCtx.strokeStyle = "#64c7d9"; secondaryCtx.lineWidth = 2.5; secondaryCtx.beginPath(); secondaryCtx.moveTo(map.x(0), map.y(0)); secondaryCtx.lineTo(map.x(d.maxStatic), map.y(0)); secondaryCtx.stroke();
-  secondaryCtx.strokeStyle = "#f2b84b"; secondaryCtx.setLineDash([4, 4]); secondaryCtx.beginPath(); secondaryCtx.moveTo(map.x(d.maxStatic), map.y(0)); secondaryCtx.lineTo(map.x(d.maxStatic), map.y((d.maxStatic - d.kinetic) / state.mass)); secondaryCtx.stroke(); secondaryCtx.setLineDash([]);
-  secondaryCtx.strokeStyle = "#ff7a68"; secondaryCtx.lineWidth = 2.5; secondaryCtx.beginPath(); secondaryCtx.moveTo(map.x(d.maxStatic), map.y((d.maxStatic - d.kinetic) / state.mass)); secondaryCtx.lineTo(map.x(xMax), map.y((xMax - d.kinetic) / state.mass)); secondaryCtx.stroke();
-  secondaryCtx.fillStyle = d.sliding ? "#ff7a68" : "#69d18e"; secondaryCtx.beginPath(); secondaryCtx.arc(map.x(state.appliedForce), map.y(Math.max(0, d.acceleration)), 5, 0, Math.PI * 2); secondaryCtx.fill();
-}
-
-function setRangeProgress(input) {
-  const value = (Number(input.value) - Number(input.min)) / (Number(input.max) - Number(input.min)) * 100;
-  input.style.setProperty("--range-progress", `${value}%`);
-}
-
-function syncUI() {
-  const d = calculate(), info = regimeInfo(d), mode = modes[state.mode], task = guide[state.guideStep];
-  refs.massValue.textContent = `${format(state.mass)} kg`; refs.staticMuValue.textContent = format(state.muS); refs.kineticMuValue.textContent = format(state.muK); refs.forceValue.textContent = `${format(state.targetForce, 1)} N`; refs.rampRateValue.textContent = `${format(state.rampRate, 1)} N/s`; refs.timeValue.textContent = `t = ${format(state.time)} s`;
-  refs.appliedMetric.textContent = `${format(state.appliedForce)} N`; refs.frictionMetric.textContent = `${format(d.friction)} N`; refs.maxStaticMetric.textContent = `${format(d.maxStatic)} N`; refs.accelerationMetric.textContent = `${format(d.acceleration)} m/s²`;
-  refs.stateNature.textContent = info.nature; refs.stateExplanation.textContent = info.explanation; refs.stateBadge.textContent = info.label; refs.stateBadge.className = `state-badge ${info.className}`.trim();
-  refs.modeTitle.textContent = mode.title; refs.modeGoal.textContent = mode.goal; refs.stageHint.textContent = mode.hint;
-  refs.responseStatus.textContent = `临界值 ${format(d.maxStatic)} N`; refs.sampleStatus.textContent = `${state.samples.length} 个记录点`;
-  refs.secondaryKicker.textContent = state.mode === "slide" ? "MOTION HISTORY" : "ACCELERATION RESPONSE"; refs.secondaryTitle.textContent = state.mode === "slide" ? "速度 v – 时间 t" : "加速度 a – 外力 F外";
-  refs.stepIndex.textContent = `0${state.guideStep + 1}`; refs.stepTitle.textContent = task.title; refs.stepPrompt.textContent = task.prompt;
-  if (d.regime === "sliding") refs.formulaReadout.textContent = `f滑 = μkN = ${format(d.friction)} N，F合 = ${format(d.netForce)} N`;
-  else if (d.regime === "limit") refs.formulaReadout.textContent = `f静,max = μsN = ${format(d.maxStatic)} N`;
-  else refs.formulaReadout.textContent = `f静 = F外 = ${format(d.friction)} N`;
-  refs.scanButton.textContent = state.running ? (state.ramping ? "扫描中…" : "运动中…") : "▶ 从零扫描"; refs.scanButton.setAttribute("aria-pressed", String(state.running));
-  refs.sceneTabs.forEach(button => button.classList.toggle("is-active", button.dataset.mode === state.mode)); refs.routeSteps.forEach((button, index) => button.classList.toggle("is-active", index === state.guideStep));
-  [refs.massInput, refs.staticMuInput, refs.kineticMuInput, refs.forceInput, refs.rampRateInput].forEach(setRangeProgress);
-}
-
-function render() { drawScene(); drawResponseChart(); drawSecondaryChart(); syncUI(); }
-
-function setParameters(patch) {
-  if (patch.mass !== undefined) state.mass = clamp(Number(patch.mass), .5, 5);
-  if (patch.muS !== undefined) state.muS = clamp(Number(patch.muS), .1, 1);
-  if (patch.muK !== undefined) state.muK = clamp(Number(patch.muK), .05, state.muS);
-  if (patch.targetForce !== undefined) state.targetForce = clamp(Number(patch.targetForce), 0, 30);
-  if (patch.appliedForce !== undefined) state.appliedForce = clamp(Number(patch.appliedForce), 0, 30);
-  if (patch.rampRate !== undefined) state.rampRate = clamp(Number(patch.rampRate), 1, 10);
-  if (patch.velocity !== undefined) state.velocity = Math.max(0, Number(patch.velocity));
-  if (patch.sliding !== undefined) state.sliding = Boolean(patch.sliding);
-  if (patch.position !== undefined) state.position = Math.max(0, Number(patch.position));
-  if (patch.guideStep !== undefined) state.guideStep = clamp(Math.round(Number(patch.guideStep)), 0, guide.length - 1);
-  [["showForces", refs.showForcesToggle], ["showNet", refs.showNetToggle], ["showContact", refs.showContactToggle], ["showTrail", refs.showTrailToggle]].forEach(([key, input]) => {
-    if (patch[key] !== undefined) state[key] = Boolean(patch[key]);
-    input.checked = state[key];
-  });
-  if (!state.running && patch.targetForce !== undefined && patch.appliedForce === undefined) state.appliedForce = state.targetForce;
-  if (!state.sliding && state.appliedForce > calculate().maxStatic + EPSILON) state.sliding = true;
-  refs.massInput.value = state.mass; refs.staticMuInput.value = state.muS; refs.kineticMuInput.value = state.muK; refs.forceInput.value = state.targetForce; refs.rampRateInput.value = state.rampRate;
-  render();
-}
-
-function applyMode(mode) {
-  state.mode = mode;
-  resetMotion();
-  const baseline = calculate();
-  if (mode === "adaptive") { state.targetForce = Math.max(14, baseline.maxStatic + 3); state.appliedForce = Math.min(4, baseline.maxStatic * .45); }
-  if (mode === "threshold") { state.targetForce = baseline.maxStatic; state.appliedForce = baseline.maxStatic; }
-  if (mode === "slide") { state.targetForce = Math.min(30, baseline.maxStatic + 4); state.appliedForce = state.targetForce; state.sliding = true; }
-  if (mode === "compare") { state.targetForce = Math.min(30, baseline.maxStatic + 2); state.appliedForce = 0; }
-  refs.forceInput.value = state.targetForce;
-  render();
-}
-
-function startScan() { resetMotion(false); state.running = true; state.ramping = true; render(); }
+function setParameters(patch) { const structural = patch.mass !== undefined || patch.muS !== undefined || patch.muK !== undefined; if (patch.mass !== undefined) state.mass = clamp(patch.mass, .5, 5); if (patch.muS !== undefined) state.muS = clamp(patch.muS, .1, 1); if (patch.muK !== undefined) state.muK = clamp(patch.muK, .05, state.muS); if (patch.targetForce !== undefined) state.targetForce = clamp(patch.targetForce, 0, 30); if (patch.appliedForce !== undefined) state.appliedForce = clamp(patch.appliedForce, 0, 30); if (patch.rampRate !== undefined) state.rampRate = clamp(patch.rampRate, 1, 10); if (patch.guideStep !== undefined) state.guideStep = clamp(Math.round(patch.guideStep), 0, guide.length - 1); if (patch.phase !== undefined) { state.phase = patch.phase; state.sliding = patch.phase === "release" || patch.phase === "sliding"; } if (patch.sliding !== undefined) { state.sliding = Boolean(patch.sliding); state.phase = state.sliding ? "sliding" : "static"; } if (patch.position !== undefined) state.position = Math.max(0, Number(patch.position)); if (structural && state.phase !== "static") { state.phase = "static"; state.sliding = false; state.position = 0; state.velocity = 0; } if (!state.running && patch.targetForce !== undefined && patch.appliedForce === undefined) state.appliedForce = state.targetForce; if (state.phase === "static" && state.appliedForce > calculate({ ...state, phase: "static" }).maxStatic + EPSILON) beginRelease(state.appliedForce); refs.massInput.value = state.mass; refs.staticMuInput.value = state.muS; refs.kineticMuInput.value = state.muK; refs.forceInput.value = state.targetForce; refs.rampRateInput.value = state.rampRate; render(); }
+function applyMode(mode) { state.mode = mode; resetMotion(); const d = calculate(); if (mode === "adaptive") state.appliedForce = Math.min(4, d.maxStatic * .45); if (mode === "threshold") state.appliedForce = state.targetForce = d.maxStatic; if (mode === "slide") beginRelease(Math.min(30, d.maxStatic + .1)); if (mode === "compare") state.appliedForce = 0; refs.forceInput.value = state.targetForce; render(); }
+function startScan() { resetMotion(false); state.targetForce = calculate().maxStatic; state.running = true; state.ramping = true; render(); }
 function recordSample() { const d = calculate(); state.samples.push({ force: state.appliedForce, friction: d.friction, acceleration: d.acceleration, sliding: d.sliding }); if (state.samples.length > 40) state.samples.shift(); render(); }
 
-refs.massInput.addEventListener("input", () => setParameters({ mass: refs.massInput.value }));
-refs.staticMuInput.addEventListener("input", () => setParameters({ muS: refs.staticMuInput.value, muK: Math.min(state.muK, Number(refs.staticMuInput.value)) }));
-refs.kineticMuInput.addEventListener("input", () => setParameters({ muK: refs.kineticMuInput.value }));
-refs.forceInput.addEventListener("input", () => setParameters({ targetForce: refs.forceInput.value }));
-refs.rampRateInput.addEventListener("input", () => setParameters({ rampRate: refs.rampRateInput.value }));
-refs.sceneTabs.forEach(button => button.addEventListener("click", () => applyMode(button.dataset.mode)));
+refs.massInput.addEventListener("input", () => setParameters({ mass: refs.massInput.value })); refs.staticMuInput.addEventListener("input", () => setParameters({ muS: refs.staticMuInput.value, muK: Math.min(state.muK, Number(refs.staticMuInput.value)) })); refs.kineticMuInput.addEventListener("input", () => setParameters({ muK: refs.kineticMuInput.value })); refs.forceInput.addEventListener("input", () => setParameters({ targetForce: refs.forceInput.value })); refs.rampRateInput.addEventListener("input", () => setParameters({ rampRate: refs.rampRateInput.value })); refs.sceneTabs.forEach(b => b.addEventListener("click", () => applyMode(b.dataset.mode))); refs.routeSteps.forEach((b, i) => b.addEventListener("click", () => setParameters({ guideStep: i })));
 let forceDragging = false;
-function setForceFromPointer(event) {
-  const rect = refs.canvas.getBoundingClientRect();
-  const localX = event.clientX - rect.left;
-  const force = clamp((localX - sceneGeometry.forceBaseX) / sceneGeometry.forceScale, 0, 30);
-  state.running = false;
-  state.ramping = false;
-  setParameters({ targetForce: force, appliedForce: force });
-}
-refs.canvas.addEventListener("pointerdown", event => {
-  const rect = refs.canvas.getBoundingClientRect();
-  const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-  const handle = sceneGeometry.forceHandle;
-  if (!state.showForces || !handle || Math.hypot(point.x - handle.x, point.y - handle.y) > 30) return;
-  forceDragging = true;
-  state.dragging = true;
-  refs.canvas.classList.add("is-dragging");
-  refs.canvas.setPointerCapture?.(event.pointerId);
-});
-refs.canvas.addEventListener("pointermove", event => {
-  const rect = refs.canvas.getBoundingClientRect();
-  const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-  const handle = sceneGeometry.forceHandle;
-  if (!forceDragging) {
-    refs.canvas.style.cursor = state.showForces && handle && Math.hypot(point.x - handle.x, point.y - handle.y) <= 30 ? "grab" : "default";
-    return;
-  }
-  refs.canvas.style.cursor = "grabbing";
-  setForceFromPointer(event);
-});
-refs.canvas.addEventListener("pointerup", event => {
-  forceDragging = false;
-  state.dragging = false;
-  refs.canvas.classList.remove("is-dragging");
-  refs.canvas.style.cursor = "default";
-  if (refs.canvas.hasPointerCapture?.(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId);
-  render();
-});
-refs.canvas.addEventListener("pointercancel", () => { forceDragging = false; state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; render(); });
-refs.routeSteps.forEach((button, index) => button.addEventListener("click", () => { state.guideStep = index; render(); }));
-refs.scanButton.addEventListener("click", startScan);
-refs.pauseButton.addEventListener("click", () => { state.running = false; state.ramping = false; render(); });
-refs.restartButton.addEventListener("click", startScan);
-refs.thresholdButton.addEventListener("click", () => { resetMotion(); const d = calculate(); state.targetForce = d.maxStatic; state.appliedForce = d.maxStatic; state.mode = "threshold"; refs.forceInput.value = state.targetForce; render(); });
-refs.recordButton.addEventListener("click", recordSample);
-refs.clearDataButton.addEventListener("click", () => { state.samples = []; state.history = [{ t: state.time, v: state.velocity }]; render(); });
-refs.resetButton.addEventListener("click", () => { Object.assign(state, { mass:2, muS:.5, muK:.3, targetForce:14, appliedForce:0, rampRate:3, mode:"adaptive", guideStep:0, samples:[] }); resetMotion(); refs.massInput.value=2; refs.staticMuInput.value=.5; refs.kineticMuInput.value=.3; refs.forceInput.value=14; refs.rampRateInput.value=3; render(); });
-[[refs.showForcesToggle,"showForces"],[refs.showNetToggle,"showNet"],[refs.showContactToggle,"showContact"],[refs.showTrailToggle,"showTrail"]].forEach(([input,key]) => input.addEventListener("change", () => { state[key] = input.checked; render(); }));
-refs.guideButton.addEventListener("click", () => refs.guideDialog.showModal());
-refs.stepButton.addEventListener("click", () => { state.guideStep = (state.guideStep + 1) % guide.length; render(); });
-refs.focusButton.addEventListener("click", () => { const active = document.body.classList.toggle("focus-mode"); refs.focusButton.setAttribute("aria-pressed", String(active)); });
-refs.fullscreenButton.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
-window.addEventListener("resize", render);
-
-let previousFrame = performance.now();
-function frame(now) {
-  const dt = Math.min(.05, Math.max(0, (now - previousFrame) / 1000));
-  previousFrame = now;
-  if (state.running) {
-    if (state.ramping) {
-      const oldForce = state.appliedForce;
-      state.appliedForce = Math.min(state.targetForce, state.appliedForce + state.rampRate * dt);
-      const threshold = calculate({ ...state, appliedForce: oldForce, sliding: false, velocity: 0 }).maxStatic;
-      if (!state.sliding && oldForce <= threshold && state.appliedForce > threshold) state.sliding = true;
-      if (state.appliedForce >= state.targetForce - EPSILON) state.ramping = false;
-    }
-    advance(dt);
-    render();
-  }
-  requestAnimationFrame(frame);
-}
-
-window.frictionLab = {
-  calculate: source => calculate({ ...state, ...source }),
-  getState: () => ({ ...state, history: state.history.map(point => ({ ...point })), samples: state.samples.map(point => ({ ...point })) }),
-  getInteractionGeometry: () => JSON.parse(JSON.stringify(sceneGeometry)),
-  setState: patch => setParameters(patch),
-  setMode: applyMode,
-  resetMotion,
-  recordSample,
-  step: advance
-};
-
-render();
-requestAnimationFrame(frame);
+function pointerForce(event) { const rect = refs.canvas.getBoundingClientRect(), localX = event.clientX - rect.left, force = clamp((localX - geometry.forceOriginX) / geometry.forceScale, 0, 30), maxStatic = calculate({ ...state, phase: "static" }).maxStatic; state.running = false; state.ramping = false; state.targetForce = force; if (state.phase === "release") return; if (force > maxStatic + EPSILON) beginRelease(force); else { state.appliedForce = force; state.phase = "static"; state.sliding = false; } render(); }
+refs.canvas.addEventListener("pointerdown", event => { const rect = refs.canvas.getBoundingClientRect(), p = { x: event.clientX - rect.left, y: event.clientY - rect.top }, h = geometry.handle; if (!h || Math.hypot(p.x - h.x, p.y - h.y) > 32 || state.phase === "release") return; forceDragging = true; state.dragging = true; refs.canvas.classList.add("is-dragging"); refs.canvas.setPointerCapture?.(event.pointerId); });
+refs.canvas.addEventListener("pointermove", event => { const rect = refs.canvas.getBoundingClientRect(), p = { x: event.clientX - rect.left, y: event.clientY - rect.top }, h = geometry.handle; if (!forceDragging) { refs.canvas.style.cursor = h && Math.hypot(p.x - h.x, p.y - h.y) <= 32 ? "grab" : "default"; return; } refs.canvas.style.cursor = "grabbing"; pointerForce(event); });
+refs.canvas.addEventListener("pointerup", event => { forceDragging = false; state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; if (refs.canvas.hasPointerCapture?.(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId); render(); }); refs.canvas.addEventListener("pointercancel", () => { forceDragging = false; state.dragging = false; refs.canvas.classList.remove("is-dragging"); render(); });
+refs.scanButton.addEventListener("click", startScan); refs.pauseButton.addEventListener("click", () => { state.running = false; state.ramping = false; render(); }); refs.restartButton.addEventListener("click", startScan); refs.thresholdButton.addEventListener("click", () => { state.mode = "threshold"; resetMotion(); const d = calculate(); state.targetForce = state.appliedForce = d.maxStatic; refs.forceInput.value = state.targetForce; render(); }); refs.breakButton.addEventListener("click", () => { state.mode = "slide"; const d = calculate({ ...state, phase: "static" }); beginRelease(Math.min(30, d.maxStatic + .1)); render(); }); refs.recordButton.addEventListener("click", recordSample); refs.clearDataButton.addEventListener("click", () => { state.samples = []; render(); }); refs.resetButton.addEventListener("click", () => { Object.assign(state, { mass: 2, muS: .5, muK: .3, targetForce: 14, appliedForce: 0, rampRate: 3, mode: "adaptive", guideStep: 0, samples: [] }); resetMotion(); refs.massInput.value = 2; refs.staticMuInput.value = .5; refs.kineticMuInput.value = .3; refs.forceInput.value = 14; refs.rampRateInput.value = 3; render(); }); [[refs.showForcesToggle, "showForces"], [refs.showNetToggle, "showNet"], [refs.showContactToggle, "showContact"], [refs.showTrailToggle, "showTrail"]].forEach(([input, key]) => input.addEventListener("change", () => { state[key] = input.checked; render(); })); refs.guideButton.addEventListener("click", () => refs.guideDialog.showModal()); refs.stepButton.addEventListener("click", () => { state.guideStep = (state.guideStep + 1) % guide.length; render(); }); refs.focusButton.addEventListener("click", () => { const active = document.body.classList.toggle("focus-mode"); refs.focusButton.setAttribute("aria-pressed", String(active)); }); refs.fullscreenButton.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()); window.addEventListener("resize", render);
+let previousFrame = performance.now(); function frame(now) { const dt = Math.min(.05, Math.max(0, (now - previousFrame) / 1000)); previousFrame = now; if (state.running && state.ramping) { state.appliedForce = Math.min(state.targetForce, state.appliedForce + state.rampRate * dt); if (state.appliedForce >= state.targetForce - EPSILON) { state.appliedForce = state.targetForce; state.ramping = false; state.running = false; state.phase = "static"; } } if (state.running && !state.ramping) advance(dt); if (state.running || state.phase === "release") render(); requestAnimationFrame(frame); }
+window.frictionLab = { calculate: source => calculate({ ...state, ...source }), getState: () => ({ ...state, history: state.history.map(p => ({ ...p })), samples: state.samples.map(p => ({ ...p })) }), getInteractionGeometry: () => JSON.parse(JSON.stringify(geometry)), setState: patch => setParameters(patch), setMode: applyMode, resetMotion, recordSample, step: advance };
+render(); requestAnimationFrame(frame);

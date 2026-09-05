@@ -300,6 +300,20 @@ async function verifyLab(browser, lab, viewport) {
       await page.mouse.move(box.x + Math.min(box.width - 6, handle.x + forceScale * 25), box.y + handle.y);
       await page.mouse.up();
       assert((await page.evaluate(() => window.frictionLab.getState().targetForce)) > 20, `${lab.id}/${viewport.name}: direct force drag did not update state`);
+      await page.evaluate(() => window.frictionLab.setMode("threshold"));
+      const thresholdState = await page.evaluate(() => {
+        const state = window.frictionLab.getState();
+        const derived = window.frictionLab.calculate();
+        return { appliedForce: state.appliedForce, position: state.position, velocity: state.velocity, friction: derived.friction, maxStatic: derived.maxStatic, regime: derived.regime };
+      });
+      assert(thresholdState.regime === "limit" && closeTo(thresholdState.friction, thresholdState.maxStatic, 1e-9) && closeTo(thresholdState.velocity, 0, 1e-9), `${lab.id}/${viewport.name}: threshold state is not visibly stable`);
+      await page.locator("#breakButton").click();
+      const brokenState = await page.evaluate(() => {
+        const state = window.frictionLab.getState();
+        const derived = window.frictionLab.calculate();
+        return { appliedForce: state.appliedForce, position: state.position, velocity: state.velocity, friction: derived.friction, kinetic: derived.kinetic, regime: derived.regime, sliding: derived.sliding };
+      });
+      assert(brokenState.regime === "sliding" && brokenState.sliding && closeTo(brokenState.position, 0, 1e-9) && closeTo(brokenState.velocity, 0, 1e-9) && closeTo(brokenState.friction, brokenState.kinetic, 1e-9), `${lab.id}/${viewport.name}: threshold break did not freeze the visual transition`);
     }
 
     if (lab.id === "newton-laws") {
