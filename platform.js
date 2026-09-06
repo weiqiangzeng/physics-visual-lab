@@ -1249,6 +1249,26 @@
   const moduleStorageKey = "physics-visual-lab-module-v1";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isHome = currentPage === "index.html";
+  const showcaseConfig = window.physicsShowcaseConfig || {
+    showcaseMode: false,
+    featuredExperiments: [],
+    showAllExperiments: true,
+  };
+  const showAllExperiments = isHome && (
+    showcaseConfig.showAllExperiments === true ||
+    new URLSearchParams(window.location.search).get("showAll") === "1"
+  );
+  const showcaseMode = isHome && showcaseConfig.showcaseMode === true &&
+    !showAllExperiments;
+  const featuredExperimentSet = new Set(
+    Array.isArray(showcaseConfig.featuredExperiments)
+      ? showcaseConfig.featuredExperiments
+      : [],
+  );
+  if (isHome) {
+    document.body.classList.toggle("showcase-home", showcaseMode);
+    document.body.classList.toggle("full-directory-home", !showcaseMode);
+  }
   const courseModules = [
     {
       id: "kinematics",
@@ -1806,6 +1826,20 @@
     );
     if (!tabs.length) return;
 
+    if (showcaseMode) {
+      const featuredOrder = new Map(
+        [...featuredExperimentSet].map((lesson, index) => [lesson, index]),
+      );
+      const experimentGrid = document.querySelector(".experiment-grid");
+      lessonCards
+        .filter((card) => featuredExperimentSet.has(card.dataset.lessonCard))
+        .sort((left, right) =>
+          featuredOrder.get(left.dataset.lessonCard) -
+          featuredOrder.get(right.dataset.lessonCard)
+        )
+        .forEach((card) => experimentGrid?.append(card));
+    }
+
     const escapeHtml = (value) =>
       String(value || "").replace(/[&<>\"']/g, (character) => ({
         "&": "&amp;",
@@ -1825,7 +1859,7 @@
         .filter((module) => (module.chapterIds || []).includes(model.chapterId))
         .map((module) => module.id);
     const modelCards = [];
-    if (modelCatalog && !modelCatalog.dataset.rendered) {
+    if (modelCatalog && !modelCatalog.dataset.rendered && !showcaseMode) {
       const plannedModels = (curriculum.models || []).filter((model) =>
         !model.lab
       );
@@ -1873,7 +1907,25 @@
     } else if (modelCatalog) {
       modelCards.push(...modelCatalog.querySelectorAll("[data-model-card]"));
     }
-    const cards = [...lessonCards, ...modelCards];
+    lessonCards.forEach((card) => {
+      const isFeatured = featuredExperimentSet.has(card.dataset.lessonCard);
+      card.classList.toggle("showcase-featured", showcaseMode && isFeatured);
+      if (showcaseMode) card.hidden = !isFeatured;
+    });
+    const visibleLessonCards = showcaseMode
+      ? lessonCards.filter((card) =>
+        featuredExperimentSet.has(card.dataset.lessonCard))
+      : lessonCards;
+    const cards = [...visibleLessonCards, ...modelCards];
+
+    if (showcaseMode) {
+      if (title) title.textContent = "精选实验";
+      if (description) {
+        description.textContent =
+          "推免展示版：用三个代表性实验呈现平台的建模、交互与证据链。";
+      }
+      if (empty) empty.hidden = true;
+    }
 
     tabs.forEach((tab) => {
       const module = courseModules.find((item) =>
@@ -1916,7 +1968,7 @@
     tabs.forEach((tab) =>
       tab.addEventListener("click", () => selectModule(tab.dataset.module))
     );
-    selectModule(readModule());
+    if (!showcaseMode) selectModule(readModule());
   }
 
   const audience = readAudience();
@@ -2111,12 +2163,30 @@
     if (fill) fill.style.width = `${(completed / lessons.length) * 100}%`;
 
     const cards = Array.from(document.querySelectorAll("[data-lesson-card]"));
+    const visibleLessonCards = showcaseMode
+      ? cards.filter((card) =>
+        featuredExperimentSet.has(card.dataset.lessonCard))
+      : cards;
+    const showcaseDirectoryNote = document.getElementById(
+      "showcaseDirectoryNote",
+    );
+    const heroSubtitle = document.getElementById("homeHeroSubtitle");
+    const fullDirectoryOnly = document.querySelectorAll(
+      ".showcase-full-directory-only",
+    );
+    if (showcaseDirectoryNote) showcaseDirectoryNote.hidden = !showcaseMode;
+    if (heroSubtitle && !showcaseMode) {
+      heroSubtitle.textContent = `模型目录 · ${lessons.length} 个交互实验`;
+    }
+    fullDirectoryOnly.forEach((element) => {
+      element.hidden = showcaseMode;
+    });
     const recentLink = document.getElementById("recentLessonLink");
     const recentNote = document.getElementById("recentLessonNote");
     const recentCard = cards.find((card) =>
       card.dataset.lessonCard === progress.lastVisited
     );
-    if (recentLink && recentNote && recentCard) {
+    if (recentLink && recentNote && recentCard && !showcaseMode) {
       const title = recentCard.querySelector("h3")?.textContent?.trim() ||
         progress.lastVisited;
       recentLink.href = `./${progress.lastVisited}`;
@@ -2137,6 +2207,8 @@
     renderCourseNavigation();
     const catalogCards = Array.from(
       document.querySelectorAll("[data-lesson-card], [data-model-card]"),
+    ).filter((card) =>
+      !showcaseMode || featuredExperimentSet.has(card.dataset.lessonCard)
     );
     const searchInput = document.getElementById("experimentSearch");
     const subjectFilter = document.getElementById("subjectFilter");
@@ -2156,7 +2228,7 @@
           card.textContent.toLocaleLowerCase().includes(query);
         const matchesSubject = subject === "all" ||
           Boolean(card.querySelector(`.subject-tag.${subject}`));
-        const matchesModule = isSearching ||
+        const matchesModule = showcaseMode || isSearching ||
           (card.dataset.modules || "").split(/\s+/).includes(activeModule);
         const visible = matchesQuery && matchesSubject && matchesModule;
         card.hidden = !visible;
@@ -2183,7 +2255,7 @@
         catalogDescription.textContent =
           `跨 ${courseModules.length} 个模型模块查找实验。`;
       }
-      if (catalogTitle && !isSearching) {
+      if (catalogTitle && !isSearching && !showcaseMode) {
         const active = courseModules.find((module) =>
           module.id === activeModule
         ) || courseModules[0];

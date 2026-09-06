@@ -23,14 +23,18 @@
     };
   }
 
+  function sourcePositions(state) {
+    return [{ x: -state.separationM / 2, y: 0 }, { x: state.separationM / 2, y: 0 }];
+  }
+
   function sources(input = {}) {
     const state = normalize(input);
-    return [{ x: -state.separationM / 2, y: 0 }, { x: state.separationM / 2, y: 0 }];
+    return sourcePositions(state);
   }
 
   function sourceState(index, x, y, timeS, input = {}) {
     const state = normalize(input);
-    const source = sources(state)[index];
+    const source = sourcePositions(state)[index];
     const radiusM = Math.max(.05, Math.hypot(x - source.x, y - source.y));
     const frequencyHz = index ? state.frequency2Hz : state.frequency1Hz;
     const phaseOffset = index ? state.sourcePhaseDeg * Math.PI / 180 : 0;
@@ -46,19 +50,54 @@
     return { x, y, timeS, one, two, displacement: one.displacement + two.displacement };
   }
 
+  function intensityAt(x, y, input = {}) {
+    const state = normalize(input);
+    const source = sourcePositions(state);
+    const radius1M = Math.max(.05, Math.hypot(x - source[0].x, y - source[0].y));
+    const radius2M = Math.max(.05, Math.hypot(x - source[1].x, y - source[1].y));
+    const geometric1 = state.attenuation ? 1 / Math.sqrt(radius1M) : 1;
+    const geometric2 = state.attenuation ? 1 / Math.sqrt(radius2M) : 1;
+    const amplitude1 = state.amplitude * geometric1;
+    const amplitude2 = state.amplitude * geometric2;
+    const intensity1 = amplitude1 ** 2;
+    const intensity2 = amplitude2 ** 2;
+    const frequencyDifferenceHz = state.frequency2Hz - state.frequency1Hz;
+    const pathDifferenceM = radius2M - radius1M;
+    const pathPhaseRad = 2 * Math.PI * pathDifferenceM / state.wavelengthM;
+    const sourcePhaseRad = state.sourcePhaseDeg * Math.PI / 180;
+    const phaseDifferenceAtWindowStartRad = pathPhaseRad + sourcePhaseRad;
+    const averagePhaseRad = phaseDifferenceAtWindowStartRad - Math.PI * frequencyDifferenceHz * state.averagingTimeS;
+    const coherence = sinc(Math.PI * frequencyDifferenceHz * state.averagingTimeS);
+    const averagedIntensity = intensity1 + intensity2 + 2 * Math.sqrt(intensity1 * intensity2) * coherence * Math.cos(averagePhaseRad);
+    const coherentIntensity = intensity1 + intensity2 + 2 * Math.sqrt(intensity1 * intensity2) * Math.cos(phaseDifferenceAtWindowStartRad);
+    return {
+      x,
+      y,
+      radius1M,
+      radius2M,
+      pathDifferenceM,
+      pathDifferenceWaves: pathDifferenceM / state.wavelengthM,
+      pathPhaseRad,
+      sourcePhaseRad,
+      phaseDifferenceAtWindowStartRad,
+      averagePhaseRad,
+      coherence,
+      amplitude1,
+      amplitude2,
+      intensity1,
+      intensity2,
+      coherentIntensity,
+      averagedIntensity: Math.max(0, averagedIntensity),
+      maxIntensity: (amplitude1 + amplitude2) ** 2,
+    };
+  }
+
   function probe(input = {}) {
     const state = normalize(input);
     const value = fieldAt(state.probeXM, state.probeYM, state.timeS, state);
-    const pathDifferenceM = value.two.radiusM - value.one.radiusM;
-    const pathPhaseRad = 2 * Math.PI * pathDifferenceM / state.wavelengthM;
-    const sourcePhaseRad = state.sourcePhaseDeg * Math.PI / 180;
-    const phaseDifferenceNowRad = pathPhaseRad + sourcePhaseRad - 2 * Math.PI * (state.frequency2Hz - state.frequency1Hz) * state.timeS;
-    const coherence = sinc(Math.PI * (state.frequency2Hz - state.frequency1Hz) * state.averagingTimeS);
-    const intensity1 = value.one.localAmplitude ** 2;
-    const intensity2 = value.two.localAmplitude ** 2;
-    const averagedIntensity = intensity1 + intensity2 + 2 * Math.sqrt(intensity1 * intensity2) * coherence * Math.cos(pathPhaseRad + sourcePhaseRad - Math.PI * (state.frequency2Hz - state.frequency1Hz) * state.averagingTimeS);
-    const coherentIntensity = intensity1 + intensity2 + 2 * Math.sqrt(intensity1 * intensity2) * Math.cos(pathPhaseRad + sourcePhaseRad);
-    return { ...state, ...value, pathDifferenceM, pathDifferenceWaves: pathDifferenceM / state.wavelengthM, pathPhaseRad, sourcePhaseRad, phaseDifferenceNowRad, coherence, intensity1, intensity2, coherentIntensity, averagedIntensity: Math.max(0, averagedIntensity) };
+    const intensity = intensityAt(state.probeXM, state.probeYM, state);
+    const phaseDifferenceNowRad = intensity.phaseDifferenceAtWindowStartRad - 2 * Math.PI * (state.frequency2Hz - state.frequency1Hz) * state.timeS;
+    return { ...state, ...value, ...intensity, phaseDifferenceNowRad };
   }
 
   function timeSeries(input = {}, durationS = 4, count = 241) {
@@ -77,5 +116,5 @@
     });
   }
 
-  return { clamp, sinc, normalize, sources, sourceState, fieldAt, probe, timeSeries, profile };
+  return { clamp, sinc, normalize, sources, sourceState, fieldAt, intensityAt, probe, timeSeries, profile };
 });

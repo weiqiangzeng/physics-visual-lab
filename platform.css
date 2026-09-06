@@ -1377,6 +1377,73 @@ summary:focus-visible {
 .platform-home .simple-catalog > .volume-empty { grid-row: 4; }
 .platform-home .simple-catalog > .experiment-grid { grid-row: 5; }
 
+.platform-home .showcase-directory-note {
+  grid-column: 2;
+  grid-row: 3;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 13px 15px;
+  border: 1px solid rgba(100, 199, 217, 0.2);
+  border-radius: 5px;
+  background: rgba(100, 199, 217, 0.06);
+}
+
+.platform-home .showcase-directory-note[hidden] {
+  display: none;
+}
+
+.platform-home .showcase-full-directory-only[hidden] {
+  display: none !important;
+}
+
+.platform-home .showcase-directory-note > span {
+  color: #69d18e;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.platform-home .showcase-directory-note p {
+  margin: 0;
+  color: #aab3ad;
+  font-size: 0.82rem;
+}
+
+.platform-home .showcase-directory-note a {
+  color: #64c7d9;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.platform-home.showcase-home .simple-catalog > .experiment-grid {
+  grid-row: 4;
+}
+
+.platform-home.showcase-home .simple-catalog .experiment-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.platform-home.showcase-home .experiment-card:not(.showcase-featured) {
+  display: none;
+}
+
+.platform-home.showcase-home [data-lesson-card="wave-interference.html"] {
+  order: 1;
+}
+
+.platform-home.showcase-home [data-lesson-card="free-fall-measurement.html"] {
+  order: 2;
+}
+
+.platform-home.showcase-home [data-lesson-card="electromagnetic-induction.html"] {
+  order: 3;
+}
+
 .platform-home .simple-catalog > .module-tabs {
   position: sticky;
   top: 82px;
@@ -1716,6 +1783,10 @@ summary:focus-visible {
   .platform-home .model-catalog {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .platform-home.showcase-home .simple-catalog .experiment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -1819,6 +1890,15 @@ summary:focus-visible {
     margin-top: 14px;
   }
 
+  .platform-home .showcase-directory-note {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .platform-home .showcase-directory-note a {
+    margin-top: 4px;
+  }
+
   .platform-home .recent-lesson {
     align-items: flex-start;
     flex-direction: column;
@@ -1826,6 +1906,10 @@ summary:focus-visible {
 
   .platform-home .simple-catalog .experiment-grid,
   .platform-home .model-catalog {
+    grid-template-columns: 1fr;
+  }
+
+  .platform-home.showcase-home .simple-catalog .experiment-grid {
     grid-template-columns: 1fr;
   }
 

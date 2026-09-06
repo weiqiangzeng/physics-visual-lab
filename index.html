@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>高中物理可视化实验</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
-    <link rel="stylesheet" href="./platform.css?v=catalog-workbench-1" />
+    <link rel="stylesheet" href="./platform.css?v=showcase-1" />
   </head>
-  <body class="platform-home">
+  <body class="platform-home showcase-home">
     <main class="app">
       <section class="stage">
         <header class="platform-hero compact-home-hero">
           <div class="hero-copy">
             <span class="platform-kicker">PHYSICS VISUAL LAB</span>
             <h1>物理模型实验室</h1>
-            <p>模型目录 · 65 个交互实验</p>
+            <p id="homeHeroSubtitle">面向高中物理教学的交互式可视化实验平台</p>
           </div>
           <div class="home-utility-links" aria-label="网站工具">
             <a href="./teacher-resources.html" aria-label="打开教师课堂资源" title="教师课堂资源"><span aria-hidden="true">▤</span><strong>教师课堂资源</strong><small>10 套方案与 30 个预设</small></a>
@@ -27,9 +27,9 @@
           <div class="section-heading">
             <div>
               <span class="platform-kicker">实验目录</span>
-              <h2 id="courseTitle">运动学与力学基础</h2>
+              <h2 id="courseTitle">精选实验</h2>
               <p id="moduleDescription"
-                class="module-description">用坐标、时间、图像和误差理解运动描述。</p>
+                class="module-description">推免展示版：用三个代表性实验呈现平台的建模、交互与证据链。</p>
             </div>
             <div class="progress-summary" aria-label="实验完成进度">
               <strong id="progressCount">0 / 65</strong>
@@ -39,7 +39,7 @@
             </div>
           </div>
 
-          <div class="catalog-tools" aria-label="实验目录工具">
+          <div class="catalog-tools showcase-full-directory-only" aria-label="实验目录工具">
             <label class="catalog-search">
               <span>搜索实验</span>
               <input id="experimentSearch" type="search"
@@ -59,14 +59,20 @@
               class="catalog-result"><strong id="experimentResultCount">4 个目录条目</strong><span>当前目录</span></div>
           </div>
 
-          <div class="recent-lesson" aria-label="最近访问实验">
+          <div class="showcase-directory-note" id="showcaseDirectoryNote" hidden>
+            <span>精选展示</span>
+            <p>当前突出 3 个代表性实验；完整目录仍保留 65 个实验。</p>
+            <a href="./index.html?showAll=1" id="showAllExperimentsLink">浏览完整实验目录<span aria-hidden="true">→</span></a>
+          </div>
+
+          <div class="recent-lesson showcase-full-directory-only" aria-label="最近访问实验">
             <div><span class="platform-kicker">最近访问</span><p id="recentLessonNote">打开任意实验后，这里会保留最近入口。</p></div>
             <a id="recentLessonLink" class="recent-lesson-link"
               href="./index.html"
               hidden>继续实验<span aria-hidden="true">→</span></a>
           </div>
 
-          <div class="module-tabs" role="tablist" aria-label="物理模型目录">
+          <div class="module-tabs showcase-full-directory-only" role="tablist" aria-label="物理模型目录">
             <button type="button" role="tab" data-module="kinematics"
               aria-selected="true">一 运动学与力学基础</button>
             <button type="button" role="tab" data-module="forces"
@@ -762,7 +768,7 @@
             </article>
           </div>
 
-          <section class="model-library" aria-labelledby="modelLibraryTitle">
+          <section class="model-library showcase-full-directory-only" aria-labelledby="modelLibraryTitle">
             <div class="model-library-heading">
               <div>
                 <span class="platform-kicker">模型内容</span>
@@ -775,10 +781,11 @@
         </section>
       </section>
     </main>
+    <script src="./showcase-config.js?v=showcase-1"></script>
     <script src="./curriculum-data.js?v=curriculum"></script>
     <script src="./platform-protocol.js?v=protocol-v1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>
-    <script src="./platform.js?v=workspace-68"></script>
+    <script src="./platform.js?v=showcase-1"></script>
   </body>
 </html>
