@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#101412" />
     <title>自由落体测重力实验室</title>
     <link rel="stylesheet" href="./lab-workbench.css?v=flagship-3" />
-    <link rel="stylesheet" href="./free-fall-measurement.css?v=flagship-1" />
+    <link rel="stylesheet" href="./free-fall-measurement.css?v=phase2" />
   </head>
   <body class="flagship-lab free-fall-measurement-lab">
     <header class="lab-topbar">
@@ -59,9 +59,9 @@
         <nav class="mobile-scene-tabs" aria-label="实验场景"><button class="scene-tab mobile-scene-tab is-active" data-mode="gates"><span>01</span><strong>采集</strong></button><button class="scene-tab mobile-scene-tab" data-mode="strobe"><span>02</span><strong>逐差</strong></button><button class="scene-tab mobile-scene-tab" data-mode="fit"><span>03</span><strong>拟合</strong></button><button class="scene-tab mobile-scene-tab" data-mode="uncertainty"><span>04</span><strong>重复</strong></button></nav>
         <header class="stage-head"><div class="stage-title"><span class="stage-breadcrumb">运动学 / <b id="modeTitle">光电门采集</b></span><h2 id="modeGoal">读取每个门的位移和累计时间，先判断原始数据是否可信</h2></div><div class="stage-status"><span id="stateBadge" class="state-badge">g测=9.800 m/s²</span><span class="drag-hint">上下拖动释放器改变高度</span></div></header>
         <section class="instrument-stage"><canvas id="fallCanvas" width="900" height="470" aria-label="可拖动释放高度的自由落体测量装置"></canvas><aside class="live-readouts"><div class="readout-head"><span>MEASUREMENT RESULT</span><i></i></div><dl>
-          <div><dt>测量结果</dt><dd id="estimateMetric">9.800 m/s²</dd></div><div><dt>设定真值</dt><dd id="truthMetric">9.800 m/s²</dd></div><div><dt>绝对误差</dt><dd id="errorMetric">+0.000 m/s²</dd></div><div><dt>相对误差</dt><dd id="relativeMetric">+0.000%</dd></div><div><dt>落地时间</dt><dd id="impactMetric">0.700 s</dd></div><div><dt id="qualityLabel">拟合优度 R²</dt><dd id="qualityMetric">1.000000</dd></div>
+          <div><dt>估计值（由数据求得）</dt><dd id="estimateMetric">9.800 m/s²</dd></div><div><dt>模拟参考真值</dt><dd id="truthMetric">9.800 m/s²</dd></div><div><dt>绝对误差</dt><dd id="errorMetric">+0.000 m/s²</dd></div><div><dt>相对误差</dt><dd id="relativeMetric">+0.000%</dd></div><div><dt>落地时间（理论）</dt><dd id="impactMetric">0.700 s</dd></div><div><dt id="qualityLabel">拟合优度 R²</dt><dd id="qualityMetric">1.000000</dd></div>
         </dl><div class="law-check"><span>当前判断</span><strong id="natureText">随机误差处于可分辨范围</strong><small id="explanationText">拟合斜率与逐差结果应在不确定度内相容</small></div></aside></section>
-        <section class="analysis-grid"><article class="chart-panel"><header><div><span id="dataKicker">RAW DATA / FIT</span><h3 id="dataTitle">位移—时间平方</h3></div><strong id="dataStatus">k=4.900 m/s²</strong></header><canvas id="dataChart" width="620" height="230" aria-label="位移时间平方拟合或重复测量分布"></canvas></article><article class="chart-panel"><header><div><span id="evidenceKicker">RESIDUALS</span><h3 id="evidenceTitle">拟合残差</h3></div><strong id="evidenceStatus">RMS 0.50 mm</strong></header><canvas id="evidenceChart" width="620" height="230" aria-label="拟合残差逐差结果或收敛图"></canvas></article></section>
+        <section class="analysis-grid"><article class="chart-panel"><header><div><span id="dataKicker">RAW MEASUREMENT</span><h3 id="dataTitle">原始位移—时间</h3></div><strong id="dataStatus">N=7</strong></header><canvas id="dataChart" width="620" height="230" aria-label="原始位移时间数据、拟合或重复测量分布"></canvas></article><article class="chart-panel"><header><div><span id="evidenceKicker">TIMING RECORD</span><h3 id="evidenceTitle">累计时间与相邻时间间隔</h3></div><strong id="evidenceStatus">t总=0.6999s</strong></header><canvas id="evidenceChart" width="620" height="230" aria-label="累计时间、拟合残差、逐差结果或收敛图"></canvas></article></section>
         <footer class="observation-bar"><span class="step-index" id="stepIndex">01</span><div><strong id="stepTitle">先检查原始量</strong><p id="stepPrompt">位移从哪里起算，计时器记录的是累计时间还是相邻时间？</p></div><div class="formula-state"><span>当前关系</span><strong id="formulaReadout">s=½gt²</strong></div></footer>
       </section>
     </main>
@@ -72,6 +72,6 @@
       <li><b>不确定度</b><span>重复测量的标准差描述单次结果离散，标准误 σ/√N 描述均值的不确定度，两者不能混用。</span></li>
       <li><b>模型边界</b><span>当前随机模型只含计时量化和位置读数噪声；真实实验还需检查空气阻力、释放初速度、装置竖直度和系统延迟。</span></li>
     </ol><button class="primary-command" value="close">开始实验</button></form></dialog>
-    <script src="./free-fall-measurement-model.js?v=flagship-1"></script><script src="./free-fall-measurement.js?v=flagship-1"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-68"></script>
+    <script src="./free-fall-measurement-model.js?v=flagship-1"></script><script src="./free-fall-measurement.js?v=phase2"></script><script src="./url-state.js?v=protocol-v1"></script><script src="./learning-records.js?v=protocol-v1"></script><script src="./platform.js?v=workspace-68"></script>
   </body>
 </html>

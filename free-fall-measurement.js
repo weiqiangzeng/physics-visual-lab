@@ -186,11 +186,12 @@
     }
 
     const rows = state.mode === "strobe"
-      ? solution.strobe.data.slice(0, 7).map((point) => [`${point.index}T`, `${fmt(point.measuredDistanceM, 4)} m`])
-      : solution.gate.data.slice(0, 7).map((point) => [`G${point.index}  ${fmt(point.measuredTimeS, 4)}s`, `${fmt(point.measuredDistanceM, 4)}m`]);
-    text(ctx, state.mode === "strobe" ? "等时频闪位置" : "原始观测 s / t", panelX, 34, C.text, 10, "left", 700);
+      ? solution.strobe.data.map((point) => [`${point.index}T`, `${fmt(point.measuredDistanceM, 4)} m`])
+      : solution.gate.data.map((point) => [`G${point.index}  ${fmt(point.measuredTimeS, 4)} s`, `${fmt(point.measuredDistanceM, 4)} m`]);
+    text(ctx, state.mode === "strobe" ? "等时频闪位置（测量值）" : "光电门原始观测（测量值）", panelX, 34, C.text, 10, "left", 700);
+    if (state.mode !== "strobe") text(ctx, "紫色虚线 = 理想参考", panelX, 48, C.violet, 8);
     rows.forEach((row, index) => {
-      const y = 58 + index * 25;
+      const y = (state.mode === "strobe" ? 58 : 64) + index * 23;
       line(ctx, panelX, y + 8, viewport.width - 18, y + 8, "rgba(223,229,223,.08)");
       text(ctx, row[0], panelX, y, C.muted, 8);
       text(ctx, row[1], viewport.width - 20, y, index % 2 ? C.violet : C.cyan, 9, "right", 700);
@@ -227,6 +228,59 @@
     });
     text(dctx, "s/m", 7, 13, C.cyan);
     text(dctx, "t²/s²", viewport.width - 8, viewport.height - 6, C.muted, 8, "right");
+  }
+
+  function drawTimingChart(solution) {
+    const viewport = size(R.evidence, ectx);
+    background(ectx, viewport.width, viewport.height);
+    const data = solution.gate.data;
+    const intervals = data.map((point, index) => index === 0 ? point.measuredTimeS : point.measuredTimeS - data[index - 1].measuredTimeS);
+    const ymax = Math.max(...intervals, .001) * 1.2;
+    const a = axes(ectx, viewport, 1, intervals.length, 0, ymax);
+    intervals.forEach((value, index) => {
+      const x = a.x(index + 1);
+      line(ectx, x, a.y(0), x, a.y(value), C.cyan, 7);
+      ectx.fillStyle = C.cyan;
+      ectx.beginPath();
+      ectx.arc(x, a.y(value), 4, 0, Math.PI * 2);
+      ectx.fill();
+      text(ectx, fmt(value, 4), x, a.y(value) - 9, C.text, 7, "center");
+    });
+    text(ectx, "Δt/s（第1项为 t₁）", 7, 13, C.cyan);
+    text(ectx, "门序号", viewport.width - 8, viewport.height - 6, C.muted, 8, "right");
+  }
+
+  function drawRawDataChart(solution) {
+    const viewport = size(R.data, dctx);
+    background(dctx, viewport.width, viewport.height);
+    const points = solution.gate.data;
+    const xmax = Math.max(...points.map((point) => point.measuredTimeS)) * 1.08;
+    const ymax = Math.max(
+      ...points.map((point) => point.measuredDistanceM),
+      ...points.map((point) => point.trueDistanceM),
+    ) * 1.08;
+    const a = axes(dctx, viewport, 0, xmax, 0, ymax);
+    if (state.showIdeal) {
+      const ideal = points.map((point) => ({ x: a.x(point.trueTimeS), y: a.y(point.trueDistanceM) }));
+      dctx.save();
+      dctx.strokeStyle = C.violet;
+      dctx.lineWidth = 1.5;
+      dctx.setLineDash([5, 4]);
+      dctx.beginPath();
+      ideal.forEach((point, index) => index ? dctx.lineTo(point.x, point.y) : dctx.moveTo(point.x, point.y));
+      dctx.stroke();
+      dctx.restore();
+    }
+    points.forEach((point) => {
+      dctx.fillStyle = C.cyan;
+      dctx.beginPath();
+      dctx.arc(a.x(point.measuredTimeS), a.y(point.measuredDistanceM), 4, 0, Math.PI * 2);
+      dctx.fill();
+    });
+    text(dctx, "● 测量值", viewport.width - 120, 15, C.cyan, 8, "left");
+    text(dctx, "- - 理想参考", viewport.width - 8, 15, C.violet, 8, "right");
+    text(dctx, "s/m", 7, 13, C.cyan);
+    text(dctx, "t/s", viewport.width - 8, viewport.height - 6, C.muted, 8, "right");
   }
 
   function drawStrobeChart(solution) {
@@ -341,6 +395,9 @@
     } else if (state.mode === "uncertainty") {
       drawHistogram(solution);
       drawConvergence(solution);
+    } else if (state.mode === "gates") {
+      drawRawDataChart(solution);
+      drawTimingChart(solution);
     } else {
       drawFitChart(solution);
       drawResidualChart(solution);
@@ -373,6 +430,9 @@
     } else if (state.mode === "strobe") {
       R.qualityLabel.textContent = "理想二阶差";
       R.quality.textContent = `${fmt(solution.strobe.idealSecondDifferenceM * 1000, 3)} mm`;
+    } else if (state.mode === "gates") {
+      R.qualityLabel.textContent = "原始采样点";
+      R.quality.textContent = `${solution.gate.data.length} 个`;
     } else {
       R.qualityLabel.textContent = "拟合优度 R²";
       R.quality.textContent = fmt(solution.gate.fit.rSquared, 6);
@@ -381,7 +441,9 @@
     R.nature.textContent = relativeMagnitude < .002 ? "结果与设定值高度相容" : relativeMagnitude < .01 ? "随机误差仍在可控范围" : "测量精度不足，需要改进装置";
     R.explanation.textContent = state.mode === "uncertainty"
       ? `σ=${fmt(solution.uncertainty.standardDeviation, 4)}，SE=${fmt(solution.uncertainty.standardError, 4)} m/s²`
-      : state.mode === "strobe" ? "多组 Δ²s/T² 的平均值给出 g" : "斜率给出 g/2，残差用于检查线性模型";
+      : state.mode === "strobe" ? "多组 Δ²s/T² 的平均值给出 g"
+        : state.mode === "gates" ? "青色点是光电门测量值，紫色虚线是同一批数据的理想参考"
+          : "同一批光电门数据改用 t² 作横轴，拟合斜率给出 g=2k";
     R.badge.textContent = `g测=${fmt(result.estimate, 3)} m/s²`;
     R.modeTitle.textContent = MODES[state.mode][0];
     R.modeGoal.textContent = MODES[state.mode][1];
@@ -398,6 +460,9 @@
     } else if (state.mode === "uncertainty") {
       R.dataKicker.textContent = "REPEATED ESTIMATES"; R.dataTitle.textContent = "重复测量分布"; R.dataStatus.textContent = `N=${state.repeats}`;
       R.evidenceKicker.textContent = "CONVERGENCE"; R.evidenceTitle.textContent = "累计均值收敛"; R.evidenceStatus.textContent = `SE=${fmt(solution.uncertainty.standardError, 4)}`;
+    } else if (state.mode === "gates") {
+      R.dataKicker.textContent = "RAW MEASUREMENT"; R.dataTitle.textContent = "原始位移—时间"; R.dataStatus.textContent = `N=${solution.gate.data.length}`;
+      R.evidenceKicker.textContent = "TIMING RECORD"; R.evidenceTitle.textContent = "累计时间与相邻时间间隔"; R.evidenceStatus.textContent = `t总=${fmt(solution.gate.data[solution.gate.data.length - 1].measuredTimeS, 4)}s`;
     } else {
       R.dataKicker.textContent = "RAW DATA / FIT"; R.dataTitle.textContent = "位移—时间平方"; R.dataStatus.textContent = `k=${fmt(solution.gate.fit.slope, 4)}m/s²`;
       R.evidenceKicker.textContent = "RESIDUALS"; R.evidenceTitle.textContent = "拟合残差"; R.evidenceStatus.textContent = `RMS=${fmt(solution.gate.fit.rmsResidual * 1000, 3)}mm`;
