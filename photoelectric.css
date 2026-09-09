@@ -1,4 +1,7 @@
 .photoelectric-lab { --photo-photon:#b58ce5; --photo-electron:#64c7d9; --photo-energy:#f2b84b; --photo-threshold:#ff7468; --photo-current:#79d992; }
+.photoelectric-lab .showcase-first-action { color:var(--lab-text); border-left:2px solid var(--photo-photon); padding-left:8px; }
+.photoelectric-lab .showcase-first-action::before { content:"先操作"; margin-right:7px; color:var(--photo-photon); font-weight:800; }
+.photoelectric-lab.has-core-interaction .showcase-first-action::before { content:""; margin-right:0; }
 .photoelectric-lab .brand-mark { font-size:10px; }
 .photoelectric-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .photoelectric-lab .instrument-stage { background:#090d0f; }

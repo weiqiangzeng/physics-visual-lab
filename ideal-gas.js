@@ -18,6 +18,8 @@
   const stateContext = refs.stateChart.getContext("2d");
   const statisticContext = refs.statisticChart.getContext("2d");
   const COLORS = { pressure: "#64c7d9", volume: "#b58ce5", temperature: "#ff7468", particle: "#79d992", energy: "#f2b84b", text: "#a6b0a9", muted: "#717b75" };
+  const showcaseHint = (message) => message;
+  const markCoreInteraction = () => document.body.classList.add("has-core-interaction");
   const modes = {
     microscopic: { title: "微观压强", goal: "大量分子撞击器壁形成稳定的宏观压强", hint: "拖动活塞改变体积，观察碰撞频率和压强", badge: "热平衡", badgeClass: "balanced", key: "◎ 300 K 基准" },
     isothermal: { title: "等温压缩", goal: "温度不变时，体积减半使压强加倍", hint: "拖动过程进度，检查整条等温线上的 pV", badge: "T 保持不变", badgeClass: "compressing", key: "◎ 压缩一半" },
@@ -145,14 +147,16 @@
     refs.amountInput.value = state.amount; refs.volumeInput.value = state.baseVolume; refs.temperatureInput.value = state.baseTemperature; refs.processInput.value = state.progress; refs.processInput.disabled = state.mode === "microscopic";
     refs.amountValue.textContent = `${fmt(state.amount, 2)} mol`; refs.volumeValue.textContent = `${fmt(state.baseVolume, 1)} L`; refs.temperatureValue.textContent = `${fmt(state.baseTemperature, 0)} K`; refs.processLabel.textContent = state.mode === "microscopic" ? "分子运动" : "过程进度"; refs.processValue.textContent = state.mode === "microscopic" ? `${state.running ? "运行中" : "已暂停"} · ${fmt(state.elapsed, 1)} s` : `${state.running ? "自动演示" : "手动定位"} · ${fmt(state.progress * 100, 0)}%`;
     refs.pressureMetric.textContent = `${fmt(current.pressureKPa, 3)} kPa`; refs.volumeMetric.textContent = `${fmt(current.volumeLiters, 3)} L`; refs.temperatureMetric.textContent = `${fmt(current.temperature, 0)} K`; refs.amountMetric.textContent = `${fmt(current.amount, 3)} mol`; refs.speedMetric.textContent = `${fmt(current.rmsSpeed, 1)} m/s`; refs.kineticMetric.textContent = `${fmt(current.meanKineticEnergyZJ, 3)} zJ`;
-    refs.gasNature.textContent = status.nature; refs.gasExplanation.textContent = status.explanation; refs.modeTitle.textContent = mode.title; refs.modeGoal.textContent = mode.goal; refs.stageHint.textContent = mode.hint; refs.stateBadge.textContent = mode.badge; refs.stateBadge.className = `state-badge is-${mode.badgeClass}`;
+    refs.gasNature.textContent = status.nature; refs.gasExplanation.textContent = status.explanation; refs.modeTitle.textContent = mode.title; refs.modeGoal.textContent = mode.goal; refs.stageHint.textContent = showcaseHint(mode.hint); refs.stateBadge.textContent = mode.badge; refs.stateBadge.className = `state-badge is-${mode.badgeClass}`;
     refs.stateChartTitle.textContent = "p-V 状态图"; refs.stateChartStatus.textContent = state.mode === "microscopic" ? `当前等温线 T=${fmt(current.temperature, 0)} K` : `${mode.title} · ${(state.progress * 100).toFixed(0)}%`; refs.statisticKicker.textContent = status.kicker; refs.statisticTitle.textContent = status.title; refs.statisticStatus.textContent = status.chart; refs.formulaReadout.textContent = status.formula;
     refs.stepIndex.textContent = String(state.guideStep + 1).padStart(2, "0"); refs.stepTitle.textContent = guide[state.guideStep].title; refs.stepPrompt.textContent = guide[state.guideStep].prompt; refs.routeSteps.forEach((button, index) => button.classList.toggle("is-active", index === state.guideStep)); refs.sceneTabs.forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode)); refs.speciesButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.species === state.species)); refs.rateButtons.forEach((button) => button.classList.toggle("is-active", Number(button.dataset.rate) === state.playbackRate));
     refs.playButton.textContent = state.running ? "▶ 运行中" : "▶ 运行"; refs.playButton.setAttribute("aria-pressed", String(state.running)); refs.keyButton.textContent = mode.key;
     [refs.amountInput, refs.volumeInput, refs.temperatureInput, refs.processInput].forEach(rangeProgress); drawGasScene(); drawCharts(current);
   }
-  function setMode(modeName) { if (!modes[modeName]) return; state.mode = modeName; state.progress = 0; state.running = modeName === "microscopic"; collisionFlashes = []; renderUi(); }
+  function setMode(modeName) { if (!modes[modeName]) return; document.body.classList.remove("has-core-interaction"); state.mode = modeName; state.progress = 0; state.running = modeName === "microscopic"; collisionFlashes = []; renderUi(); }
   function reset() { Object.assign(state, { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, showVelocity: true, showTrails: true, showCollisions: true, showPressure: true, showSample: true }); [refs.showVelocityToggle, refs.showTrailsToggle, refs.showCollisionsToggle, refs.showPressureToggle, refs.showSampleToggle].forEach((input) => { input.checked = true; }); rebuildParticles(); renderUi(); }
+  refs.resetButton.addEventListener("click", () => document.body.classList.remove("has-core-interaction"));
+  refs.canvas.addEventListener("pointerdown", () => markCoreInteraction(), true);
   function setState(next = {}) {
     if (!next || typeof next !== "object") return;
     const previousAmount = state.amount;

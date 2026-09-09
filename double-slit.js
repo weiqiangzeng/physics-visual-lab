@@ -587,6 +587,7 @@
   }
 
   function setMode(mode) {
+    document.body.classList.remove("has-core-interaction");
     state.mode = mode;
     if (mode !== "photon") { state.photonsRunning = false; state.activePhotons = []; }
     if (mode === "spacing") state.cursorRatio = 0;
@@ -650,6 +651,8 @@
   refs.fullscreenButton.addEventListener("click", () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); });
 
   refs.canvas.tabIndex = 0;
+  refs.canvas.addEventListener("pointerdown", () => document.body.classList.add("has-core-interaction"), true);
+  refs.resetButton.addEventListener("click", () => document.body.classList.remove("has-core-interaction"));
   refs.canvas.addEventListener("pointerdown", (event) => {
     if (!apparatus.screen || state.mode === "photon") return;
     event.preventDefault();

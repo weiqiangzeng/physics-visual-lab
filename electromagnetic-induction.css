@@ -1,4 +1,7 @@
 .induction-lab { --induction-flux:#b58ce5; --induction-emf:#f2b84b; --induction-current:#64c7d9; --induction-field:#ff7a68; }
+.induction-lab .showcase-first-action { color:var(--lab-text); border-left:2px solid var(--induction-current); padding-left:8px; }
+.induction-lab .showcase-first-action::before { content:"先操作"; margin-right:7px; color:var(--induction-current); font-weight:800; }
+.induction-lab.has-core-interaction .showcase-first-action::before { content:""; margin-right:0; }
 .induction-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .induction-lab .instrument-stage { background:#0c0f0e; }
 .induction-lab #inductionCanvas.is-dragging{cursor:grabbing}

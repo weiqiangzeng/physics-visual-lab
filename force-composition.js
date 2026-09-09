@@ -84,6 +84,8 @@
     violet: "#b991e8", green: "#76d6a0", red: "#ff7f72",
   };
   const clamp = M.clamp;
+  const showcaseHint = (message) => message;
+  const markCoreInteraction = () => document.body.classList.add("has-core-interaction");
   const fmt = (value, digits = 2) => Number.isFinite(value) ? Number(value).toFixed(digits) : "—";
   const rad = (degrees) => degrees * M.DEG;
 
@@ -630,22 +632,22 @@
     R.modeGoal.textContent = MODES[state.mode][1];
     if (state.mode === "compose" && state.composeControl === "angle") {
       R.interactionHint.textContent = "固定 F₁、F₂，只拖动夹角";
-      R.stageHint.textContent = "拖动 θ 端点只改变夹角";
+      R.stageHint.textContent = showcaseHint("拖动 θ 端点，只改变夹角");
     } else if (state.mode === "compose" && state.composeControl === "magnitude") {
       R.interactionHint.textContent = "固定夹角，只拖动 F₁、F₂ 大小";
-      R.stageHint.textContent = "拖动 F₁/F₂ 端点只改变大小";
+      R.stageHint.textContent = showcaseHint("拖动 F₁/F₂ 端点，只改变大小");
     } else if (state.mode === "compose") {
       R.interactionHint.textContent = "画布可自由拖动 F₁、F₂";
-      R.stageHint.textContent = "拖动 F₁、F₂ 同时改变大小和方向";
+      R.stageHint.textContent = showcaseHint("拖动 F₁、F₂，同时改变大小和方向");
     } else if (state.mode === "multi") {
       R.interactionHint.textContent = "画布可拖动 F₁、F₂、F₃";
-      R.stageHint.textContent = "三个力共用固定比例尺";
+      R.stageHint.textContent = showcaseHint("拖动 F₁、F₂、F₃，观察合力变化");
     } else if (state.mode === "apparatus") {
       R.interactionHint.textContent = "画布可拖动两支测力计";
-      R.stageHint.textContent = "拖动两支测力计端点";
+      R.stageHint.textContent = showcaseHint("拖动两支测力计端点");
     } else {
       R.interactionHint.textContent = "R大小、φ、θ₁、θ₂ 独立可调";
-      R.stageHint.textContent = "拖动 R大小不会改变合力方向";
+      R.stageHint.textContent = showcaseHint("拖动 R 大小，不会改变合力方向");
     }
     R.tabs.forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
     R.route.forEach((button, index) => button.classList.toggle("is-active", index === state.guideStep));
@@ -702,6 +704,7 @@
 
   function setMode(mode) {
     if (!MODES[mode]) return;
+    document.body.classList.remove("has-core-interaction");
     state.mode = mode;
     if (mode === "boundary" && Math.abs(M.directionSeparation(state.direction1Deg, state.direction2Deg)) > 8) {
       Object.assign(state, PRESETS.collinear);
@@ -709,6 +712,7 @@
     render();
   }
   function reset() {
+    document.body.classList.remove("has-core-interaction");
     Object.assign(state, DEFAULT_STATE);
     [[R.components, "showComponents"], [R.parallelogram, "showParallelogram"], [R.values, "showValues"], [R.uncertainty, "showUncertainty"]]
       .forEach(([element, key]) => { element.checked = state[key]; });
@@ -776,6 +780,7 @@
   R.main.addEventListener("pointerdown", (event) => {
     const role = hitTest(pointerPoint(event));
     if (!role) return;
+    markCoreInteraction();
     state.dragRole = role;
     state.dragging = true;
     R.main.classList.add("is-dragging");

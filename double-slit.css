@@ -1,4 +1,7 @@
 .double-slit-lab { --lab-green: #64c7d9; --lab-amber: #f4c44e; }
+.double-slit-lab .showcase-first-action { color:var(--lab-text); border-left:2px solid var(--lab-green); padding-left:8px; }
+.double-slit-lab .showcase-first-action::before { content:"先操作"; margin-right:7px; color:var(--lab-green); font-weight:800; }
+.double-slit-lab.has-core-interaction .showcase-first-action::before { content:""; margin-right:0; }
 
 .double-slit-lab .controls { scrollbar-color: rgba(100,199,217,.32) transparent; }
 .double-slit-lab .stage { grid-template-rows: auto minmax(280px,1fr) minmax(180px,.54fr) auto; }

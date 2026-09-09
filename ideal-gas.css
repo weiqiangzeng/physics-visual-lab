@@ -1,4 +1,7 @@
 .ideal-gas-lab { --gas-pressure:#64c7d9; --gas-volume:#b58ce5; --gas-temperature:#ff7468; --gas-particle:#79d992; --gas-energy:#f2b84b; }
+.ideal-gas-lab .showcase-first-action { color:var(--lab-text); border-left:2px solid var(--gas-pressure); padding-left:8px; }
+.ideal-gas-lab .showcase-first-action::before { content:"先操作"; margin-right:7px; color:var(--gas-pressure); font-weight:800; }
+.ideal-gas-lab.has-core-interaction .showcase-first-action::before { content:""; margin-right:0; }
 .ideal-gas-lab .brand-mark { font-size:10px; }
 .ideal-gas-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .ideal-gas-lab .instrument-stage { background:#0b0f0e; }
