@@ -58,6 +58,7 @@
     forceResolutionValue: $("forceResolutionValue"), angleResolutionValue: $("angleResolutionValue"),
     noiseValue: $("noiseValue"), seedValue: $("seedValue"),
     force1Metric: $("force1Metric"), force2Metric: $("force2Metric"), force3Metric: $("force3Metric"),
+    includedAngleMetric: $("includedAngleMetric"), scalarSumMetric: $("scalarSumMetric"),
     resultantMetric: $("resultantMetric"), angleMetric: $("angleMetric"),
     closureMetric: $("closureMetric"), conditionMetric: $("conditionMetric"),
     modeTitle: $("modeTitle"), modeGoal: $("modeGoal"), interactionHint: $("interactionModeHint"),
@@ -388,12 +389,12 @@
       return;
     }
     if (state.mode === "multi") {
-      const points = Array.from({ length: 341 }, (_, index) => {
-        const direction = -170 + index;
+      const points = Array.from({ length: 361 }, (_, index) => {
+        const direction = -180 + index;
         return { direction, value: M.composeMany({ ...state, direction3Deg: direction }).resultantN };
       });
       const ymax = state.force1N + state.force2N + state.force3N || 1;
-      const axis = axes(rctx, viewport, -170, 170, 0, ymax * 1.08);
+      const axis = axes(rctx, viewport, -180, 180, 0, ymax * 1.08);
       rctx.strokeStyle = C.green;
       rctx.lineWidth = 2;
       rctx.beginPath();
@@ -516,7 +517,7 @@
     const point = pointerPoint(event);
     const dx = point.x - geometry.origin.x;
     const dy = geometry.origin.y - point.y;
-    const angle = clamp(Math.atan2(dy, dx) / M.DEG, -170, 170);
+    const angle = clamp(Math.atan2(dy, dx) / M.DEG, -180, 180);
     const magnitude = clamp(Math.hypot(dx, dy) / geometry.scale, 0, 20);
     if (state.dragRole === "force1") {
       state.force1N = state.composeControl === "magnitude"
@@ -575,6 +576,8 @@
     const f3 = solution.kind === "multi" ? state.force3N : NaN;
     const resultN = solution.kind === "decompose" ? state.targetForceN : solution.kind === "apparatus" ? q.measuredResultantN : q.resultantN;
     const angle = solution.kind === "decompose" ? state.targetDirectionDeg : solution.kind === "apparatus" ? q.measuredResultantDirectionDeg : q.resultantDirectionDeg;
+    const includedAngle = Math.abs(M.directionSeparation(state.direction1Deg, state.direction2Deg));
+    const scalarSum = f1 + f2;
     const closure = solution.kind === "decompose" || solution.kind === "apparatus"
       ? q.closureResidualN
       : Math.hypot(q.componentResidualX, q.componentResidualY);
@@ -583,6 +586,8 @@
     R.force1Metric.textContent = `${fmt(f1, 2)} N`;
     R.force2Metric.textContent = `${fmt(f2, 2)} N`;
     R.force3Metric.textContent = `${fmt(f3, 2)} N`;
+    R.includedAngleMetric.textContent = `${fmt(includedAngle, 2)}°`;
+    R.scalarSumMetric.textContent = `${fmt(scalarSum, 2)} N`;
     R.resultantMetric.textContent = `${fmt(resultN, 2)} N`;
     R.angleMetric.textContent = `${fmt(angle, 2)}°`;
     R.closureMetric.textContent = `${fmt(closure, 3)} N`;
@@ -599,9 +604,12 @@
       R.nature.textContent = "当前分解几何处于病态区";
       R.explanation.textContent = `条件数 ${fmt(condition, 1)}：微小测角误差会被显著放大`;
     } else if (state.mode === "compose" && state.composeControl === "angle") {
-      R.badge.textContent = "变量已锁定";
-      R.nature.textContent = "F₁、F₂ 大小保持不变";
-      R.explanation.textContent = "画布只改变夹角，合力变化可直接归因于 cosθ";
+      const scalarGap = scalarSum - resultN;
+      R.badge.textContent = `θ ${fmt(includedAngle, 1)}° · R ${fmt(resultN, 2)} N`;
+      R.nature.textContent = includedAngle < .05 ? "仅同向时，合力等于标量和" : "合力不是标量相加";
+      R.explanation.textContent = includedAngle < .05
+        ? `R = F₁+F₂ = ${fmt(scalarSum, 2)} N`
+        : `R=${fmt(resultN, 2)} N，小于 F₁+F₂=${fmt(scalarSum, 2)} N，差 ${fmt(scalarGap, 2)} N`;
     } else if (state.mode === "compose" && state.composeControl === "magnitude") {
       R.badge.textContent = "变量已锁定";
       R.nature.textContent = "θ 保持不变，分力大小独立变化";
@@ -629,10 +637,14 @@
     labRoot.dataset.mode = state.mode;
     labRoot.dataset.composeControl = state.composeControl;
     R.modeTitle.textContent = MODES[state.mode][0];
-    R.modeGoal.textContent = MODES[state.mode][1];
+    R.modeGoal.textContent = state.mode === "compose" && state.composeControl === "angle"
+      ? `固定 F₁=${fmt(state.force1N, 1)} N、F₂=${fmt(state.force2N, 1)} N，只改变夹角 θ`
+      : MODES[state.mode][1];
     if (state.mode === "compose" && state.composeControl === "angle") {
       R.interactionHint.textContent = "固定 F₁、F₂，只拖动夹角";
-      R.stageHint.textContent = showcaseHint("拖动 θ 端点，只改变夹角");
+      R.stageHint.textContent = document.body.classList.contains("has-core-interaction")
+        ? "继续拖动 θ，对照曲线与分量账本"
+        : showcaseHint("拖动青色 θ 手柄");
     } else if (state.mode === "compose" && state.composeControl === "magnitude") {
       R.interactionHint.textContent = "固定夹角，只拖动 F₁、F₂ 大小";
       R.stageHint.textContent = showcaseHint("拖动 F₁/F₂ 端点，只改变大小");
@@ -657,8 +669,15 @@
       button.setAttribute("aria-pressed", String(active));
     });
     R.stepIndex.textContent = String(state.guideStep + 1).padStart(2, "0");
-    R.stepTitle.textContent = STEPS[state.guideStep][0];
-    R.stepPrompt.textContent = STEPS[state.guideStep][1];
+    if (state.mode === "compose" && state.composeControl === "angle") {
+      R.stepTitle.textContent = document.body.classList.contains("has-core-interaction") ? "三处证据同步" : "只改变夹角 θ";
+      R.stepPrompt.textContent = document.body.classList.contains("has-core-interaction")
+        ? `矢量图、R–θ 曲线和分量账本共同给出 R=${fmt(resultN, 2)} N。`
+        : "拖动青色 θ 手柄；确认 F₁、F₂ 读数保持不变。";
+    } else {
+      R.stepTitle.textContent = STEPS[state.guideStep][0];
+      R.stepPrompt.textContent = STEPS[state.guideStep][1];
+    }
     R.formula.textContent = state.mode === "compose"
       ? "R²=F₁²+F₂²+2F₁F₂cosθ"
       : state.mode === "multi"
@@ -670,10 +689,14 @@
     if (state.mode === "compose" || state.mode === "apparatus") {
       R.dataKicker.textContent = "ANGLE RESPONSE";
       R.dataTitle.textContent = "固定分力时，合力随夹角变化";
-      R.dataStatus.textContent = `R=${fmt(resultN, 2)}N`;
+      R.dataStatus.textContent = state.mode === "compose"
+        ? `θ=${fmt(includedAngle, 1)}° · R=${fmt(resultN, 2)}N`
+        : `R=${fmt(resultN, 2)}N`;
       R.evidenceKicker.textContent = "COMPONENT LEDGER";
       R.evidenceTitle.textContent = "x / y 分量账本";
-      R.evidenceStatus.textContent = `残差 ${fmt(closure, 3)}N`;
+      R.evidenceStatus.textContent = state.mode === "compose"
+        ? `Rx=${fmt(q.resultant.x, 2)}N · Ry=${fmt(q.resultant.y, 2)}N`
+        : `残差 ${fmt(closure, 3)}N`;
     } else if (state.mode === "multi") {
       R.dataKicker.textContent = "THIRD FORCE RESPONSE";
       R.dataTitle.textContent = "F₃ 方向改变时的合力";
@@ -741,10 +764,10 @@
     const previous = state[key];
     state[key] = +element.value;
     if (state.mode === "compose" && state.composeControl === "magnitude" && key === "direction1Deg") {
-      state.direction2Deg = clamp(state.direction2Deg + state.direction1Deg - previous, -170, 170);
+      state.direction2Deg = clamp(state.direction2Deg + state.direction1Deg - previous, -180, 180);
     }
     if (state.mode === "compose" && state.composeControl === "magnitude" && key === "direction2Deg") {
-      state.direction1Deg = clamp(state.direction1Deg + state.direction2Deg - previous, -170, 170);
+      state.direction1Deg = clamp(state.direction1Deg + state.direction2Deg - previous, -180, 180);
     }
     render();
   }));

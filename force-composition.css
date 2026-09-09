@@ -2,6 +2,11 @@
 .force-composition-lab .showcase-first-action { color:var(--lab-text); border-left:2px solid var(--force-cyan); padding-left:8px; }
 .force-composition-lab .showcase-first-action::before { content:"先操作"; margin-right:7px; color:var(--force-cyan); font-weight:800; }
 .force-composition-lab.has-core-interaction .showcase-first-action::before { content:""; margin-right:0; }
+.force-composition-lab .core-path-readout { display:none; }
+.force-composition-lab[data-mode="compose"] .core-path-readout { display:flex; }
+.force-composition-lab .core-conclusion { border-left:2px solid var(--force-amber); padding-left:9px; }
+.force-composition-lab .core-conclusion strong { color:var(--force-amber); }
+.force-composition-lab .core-conclusion small { color:var(--lab-text); }
 .force-composition-lab .stage { grid-template-rows: auto minmax(280px, 1fr) minmax(180px, .54fr) auto; }
 .force-composition-lab .instrument-stage { position: relative; grid-template-columns: minmax(0, 1fr) 220px; background: #070b0c; }
 .force-composition-lab canvas { display: block; width: 100%; height: 100%; background: #070b0c; }
