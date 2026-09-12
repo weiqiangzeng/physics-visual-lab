@@ -30,6 +30,7 @@
 .electric-field-lab .state-badge.is-positive { color:var(--field-positive); border-color:rgba(255,116,104,.5); background:rgba(255,116,104,.08); }
 .electric-field-lab .state-badge.is-negative { color:var(--field-negative); border-color:rgba(115,146,255,.5); background:rgba(115,146,255,.08); }
 .electric-field-lab .state-badge.is-special { color:var(--field-force); border-color:rgba(242,184,75,.5); background:rgba(242,184,75,.08); }
+.electric-field-lab .state-badge.is-critical { color:#ff9a7f; border-color:rgba(255,116,104,.62); background:rgba(255,116,104,.1); }
 .electric-field-lab .state-badge.is-zero { color:var(--lab-muted); }
 .electric-field-lab .mobile-scene-tabs { display:none; }
 @media(max-width:1120px){.electric-field-lab .mobile-scene-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:-10px -10px 10px;border-bottom:1px solid var(--lab-line);background:#121513}.electric-field-lab .mobile-scene-tab{grid-template-columns:22px minmax(0,1fr);min-height:50px;padding:8px;border-left:0;border-bottom:2px solid transparent}.electric-field-lab .mobile-scene-tab.is-active{border-bottom-color:var(--lab-green)}}
