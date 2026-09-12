@@ -114,10 +114,27 @@
     showPotentialMap: true
   };
 
-  const canvasContext = refs.canvas.getContext("2d");
   const profileContext = refs.profileChart.getContext("2d");
   const vectorContext = refs.vectorChart.getContext("2d");
   const fieldGeometry = { probe: null, path: [], mode: null };
+  const THREE = window.THREE;
+  if (!THREE) throw new Error("Three.js is required for the electric-field terrain");
+  const threeState = {
+    renderer: null,
+    scene: null,
+    camera: null,
+    dynamic: null,
+    probe: null,
+    raycaster: new THREE.Raycaster(),
+    pointer: new THREE.Vector2(),
+    cameraMode: null,
+    lastPointer: null,
+    target: new THREE.Vector3(0, 0, 0),
+    radius: 12,
+    theta: -0.72,
+    phi: 1.02
+  };
+  const TERRAIN = { clipV: 100, verticalScale: 0.055, sampleX: 54, sampleY: 38 };
   const clamp = model.clamp;
   const signed = (value, digits = 1) => `${value > 1e-10 ? "+" : value < -1e-10 ? "−" : ""}${Math.abs(value).toFixed(digits)}`;
   const finite = (value) => Number.isFinite(value) ? value : 0;
@@ -141,6 +158,15 @@
     return state.mode === "work" ? model.workState(inputState(), state.progress) : model.pointState(inputState());
   }
 
+  function terrainHeight(value) {
+    return clamp(finite(value), -TERRAIN.clipV, TERRAIN.clipV) * TERRAIN.verticalScale;
+  }
+
+  function surfaceFieldAt(x, y) {
+    if (state.mode === "work") return model.uniformState(inputState(), { x, y });
+    return model.fieldFromSources(model.pointSources(inputState()), x, y);
+  }
+
   function resizeCanvas(canvas, context) {
     const rect = canvas.getBoundingClientRect();
     const ratio = Math.min(2, window.devicePixelRatio || 1);
@@ -152,21 +178,6 @@
     }
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     return { width: rect.width, height: rect.height };
-  }
-
-  function worldMap(width, height) {
-    const pad = { left: 28, right: 24, top: 24, bottom: 28 };
-    const innerW = width - pad.left - pad.right;
-    const innerH = height - pad.top - pad.bottom;
-    return {
-      x: (value) => pad.left + (value - WORLD.xMin) / (WORLD.xMax - WORLD.xMin) * innerW,
-      y: (value) => pad.top + (WORLD.yMax - value) / (WORLD.yMax - WORLD.yMin) * innerH,
-      wx: (pixel) => WORLD.xMin + (pixel - pad.left) / innerW * (WORLD.xMax - WORLD.xMin),
-      wy: (pixel) => WORLD.yMax - (pixel - pad.top) / innerH * (WORLD.yMax - WORLD.yMin),
-      pad,
-      innerW,
-      innerH
-    };
   }
 
   function line(context, x1, y1, x2, y2, color, width = 1, dash = []) {
@@ -191,308 +202,288 @@
     context.restore();
   }
 
-  function arrow(context, x1, y1, x2, y2, color, label, width = 2) {
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    line(context, x1, y1, x2, y2, color, width);
-    context.save();
-    context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(x2, y2);
-    context.lineTo(x2 - 8 * Math.cos(angle - Math.PI / 6), y2 - 8 * Math.sin(angle - Math.PI / 6));
-    context.lineTo(x2 - 8 * Math.cos(angle + Math.PI / 6), y2 - 8 * Math.sin(angle + Math.PI / 6));
-    context.closePath();
-    context.fill();
-    context.restore();
-    if (label) text(context, label, x2 + 7 * Math.cos(angle), y2 + 7 * Math.sin(angle) - 9, color, 9, "center", "700");
-  }
-
-  function fieldAt(x, y) {
-    if (state.mode === "work") return { ex: state.uniformField, ey: 0, magnitude: Math.abs(state.uniformField), potential: -state.uniformField * x, nearest: null, singular: false };
-    return model.fieldFromSources(model.pointSources(inputState()), x, y);
-  }
-
-  function drawGrid(context, width, height, map) {
-    context.fillStyle = COLORS.background;
-    context.fillRect(0, 0, width, height);
-    for (let x = -4; x <= 4; x += 1) line(context, map.x(x), map.pad.top, map.x(x), height - map.pad.bottom, COLORS.grid);
-    for (let y = -2; y <= 2; y += 1) line(context, map.pad.left, map.y(y), width - map.pad.right, map.y(y), COLORS.grid);
-    line(context, map.pad.left, map.y(0), width - map.pad.right, map.y(0), "rgba(198,211,203,.25)");
-    line(context, map.x(0), map.pad.top, map.x(0), height - map.pad.bottom, "rgba(198,211,203,.25)");
-    text(context, "x / m", width - map.pad.right, height - 10, COLORS.muted, 9, "right");
-    text(context, "y", map.x(0) + 8, map.pad.top + 5, COLORS.muted, 9);
-  }
-
-  function drawPotentialMap(context, width, height, map) {
-    if (!state.showPotentialMap) return;
-    const cell = Math.max(18, Math.round(width / 32));
-    for (let py = map.pad.top; py < height - map.pad.bottom; py += cell) {
-      for (let px = map.pad.left; px < width - map.pad.right; px += cell) {
-        const sample = fieldAt(map.wx(px + cell / 2), map.wy(py + cell / 2));
-        if (!Number.isFinite(sample.potential) || sample.nearest !== null && sample.nearest < .28) continue;
-        const strength = Math.min(.16, .025 + Math.abs(sample.potential) / 450);
-        context.fillStyle = sample.potential >= 0 ? `rgba(255,116,104,${strength})` : `rgba(115,146,255,${strength})`;
-        context.fillRect(px, py, Math.min(cell + 1, width - map.pad.right - px), Math.min(cell + 1, height - map.pad.bottom - py));
+  function disposeObject(object) {
+    if (!object) return;
+    object.traverse((child) => {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material) => { if (material.map) material.map.dispose(); material.dispose(); });
       }
+    });
+  }
+
+  function clearDynamicScene() {
+    while (threeState.dynamic.children.length) {
+      const child = threeState.dynamic.children.pop();
+      disposeObject(child);
     }
   }
 
-  function contourIntersection(a, b, level) {
+  function updateCamera() {
+    const { radius, theta, phi, target } = threeState;
+    threeState.camera.position.set(
+      target.x + radius * Math.sin(phi) * Math.cos(theta),
+      target.y + radius * Math.sin(phi) * Math.sin(theta),
+      target.z + radius * Math.cos(phi)
+    );
+    threeState.camera.lookAt(target);
+  }
+
+  function resizeThree() {
+    const rect = refs.canvas.getBoundingClientRect();
+    const width = Math.max(1, rect.width);
+    const height = Math.max(1, rect.height);
+    threeState.renderer.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1));
+    threeState.renderer.setSize(width, height, false);
+    threeState.camera.aspect = width / height;
+    threeState.camera.updateProjectionMatrix();
+    return { width, height };
+  }
+
+  function makeLabel(label, color) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 320; canvas.height = 80;
+    const context = canvas.getContext("2d");
+    context.font = "700 30px system-ui, sans-serif";
+    context.fillStyle = color;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(label, 160, 40);
+    const texture = new THREE.CanvasTexture(canvas);
+    if ("colorSpace" in texture && THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false }));
+    sprite.scale.set(1.5, .38, 1);
+    return sprite;
+  }
+
+  function initializeThree() {
+    threeState.renderer = new THREE.WebGLRenderer({ canvas: refs.canvas, antialias: true, alpha: false });
+    threeState.renderer.setClearColor(COLORS.background, 1);
+    if ("outputColorSpace" in threeState.renderer && THREE.SRGBColorSpace) threeState.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    threeState.scene = new THREE.Scene();
+    threeState.camera = new THREE.PerspectiveCamera(42, 1, .1, 500);
+    threeState.camera.up.set(0, 0, 1);
+    threeState.dynamic = new THREE.Group();
+    threeState.scene.add(threeState.dynamic);
+    threeState.scene.add(new THREE.HemisphereLight(0xdcebe6, 0x0b1110, 1.2));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    keyLight.position.set(-5, -4, 12);
+    threeState.scene.add(keyLight);
+    const grid = new THREE.GridHelper(12, 12, 0x314b48, 0x19302e);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.set(0, 0, -TERRAIN.clipV * TERRAIN.verticalScale - .18);
+    threeState.scene.add(grid);
+    updateCamera();
+    resizeThree();
+  }
+
+  function buildSurfaceGrid() {
+    const nx = TERRAIN.sampleX;
+    const ny = TERRAIN.sampleY;
+    const values = new Array((nx + 1) * (ny + 1));
+    for (let j = 0; j <= ny; j += 1) {
+      for (let i = 0; i <= nx; i += 1) {
+        const x = WORLD.xMin + (WORLD.xMax - WORLD.xMin) * i / nx;
+        const y = WORLD.yMin + (WORLD.yMax - WORLD.yMin) * j / ny;
+        const sample = surfaceFieldAt(x, y);
+        values[j * (nx + 1) + i] = Number.isFinite(sample.potential) ? sample.potential : NaN;
+      }
+    }
+    return { nx, ny, values };
+  }
+
+  function gridPoint(grid, i, j) {
+    return {
+      x: WORLD.xMin + (WORLD.xMax - WORLD.xMin) * i / grid.nx,
+      y: WORLD.yMin + (WORLD.yMax - WORLD.yMin) * j / grid.ny,
+      value: grid.values[j * (grid.nx + 1) + i]
+    };
+  }
+
+  function buildTerrain(grid) {
+    const { nx, ny } = grid;
+    const positions = [];
+    const colors = [];
+    const indices = [];
+    const color = new THREE.Color();
+    for (let j = 0; j <= ny; j += 1) {
+      for (let i = 0; i <= nx; i += 1) {
+        const point = gridPoint(grid, i, j);
+        const value = Number.isFinite(point.value) ? clamp(point.value, -TERRAIN.clipV, TERRAIN.clipV) : 0;
+        positions.push(point.x, point.y, terrainHeight(value));
+        const ratio = value / TERRAIN.clipV;
+        if (ratio > .03) color.setHSL(.015, .72, .29 + .18 * ratio);
+        else if (ratio < -.03) color.setHSL(.62, .72, .29 + .18 * -ratio);
+        else color.setHSL(.48, .36, .27);
+        colors.push(color.r, color.g, color.b);
+      }
+    }
+    for (let j = 0; j < ny; j += 1) {
+      for (let i = 0; i < nx; i += 1) {
+        const a = j * (nx + 1) + i;
+        const b = a + 1;
+        const d = (j + 1) * (nx + 1) + i;
+        const c = d + 1;
+        indices.push(a, b, d, b, c, d);
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .78, metalness: .04, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.visible = state.showPotentialMap;
+    return mesh;
+  }
+
+  function contourHit(a, b, level) {
     if (!Number.isFinite(a.value) || !Number.isFinite(b.value)) return null;
     const da = a.value - level;
     const db = b.value - level;
-    if (da === 0) return { x: a.x, y: a.y };
-    if (db === 0) return { x: b.x, y: b.y };
     if (da * db > 0) return null;
+    if (Math.abs(da - db) < 1e-10) return null;
     const t = da / (da - db);
     return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
   }
 
-  function drawEquipotentials(context, width, height, map) {
-    if (!state.showEquipotential) return;
-    const nx = 42;
-    const ny = 28;
-    const values = [];
-    for (let j = 0; j <= ny; j += 1) {
-      const row = [];
-      for (let i = 0; i <= nx; i += 1) {
-        const x = WORLD.xMin + (WORLD.xMax - WORLD.xMin) * i / nx;
-        const y = WORLD.yMin + (WORLD.yMax - WORLD.yMin) * j / ny;
-        const sample = fieldAt(x, y);
-        row.push(sample.nearest !== null && sample.nearest < .3 ? NaN : sample.potential);
-      }
-      values.push(row);
-    }
+  function buildEquipotentialLines(grid) {
+    const points = [];
     const levels = state.mode === "work" ? [-36, -24, -12, 0, 12, 24, 36] : [-60, -40, -24, -12, 0, 12, 24, 40, 60];
     for (const level of levels) {
-      context.save();
-      context.strokeStyle = level === 0 ? "rgba(220,229,223,.62)" : level > 0 ? "rgba(255,116,104,.46)" : "rgba(115,146,255,.5)";
-      context.lineWidth = level === 0 ? 1.35 : .85;
-      context.beginPath();
-      for (let j = 0; j < ny; j += 1) {
-        for (let i = 0; i < nx; i += 1) {
-          const x0 = WORLD.xMin + (WORLD.xMax - WORLD.xMin) * i / nx;
-          const x1 = WORLD.xMin + (WORLD.xMax - WORLD.xMin) * (i + 1) / nx;
-          const y0 = WORLD.yMin + (WORLD.yMax - WORLD.yMin) * j / ny;
-          const y1 = WORLD.yMin + (WORLD.yMax - WORLD.yMin) * (j + 1) / ny;
-          const p00 = { x: map.x(x0), y: map.y(y0), value: values[j][i] };
-          const p10 = { x: map.x(x1), y: map.y(y0), value: values[j][i + 1] };
-          const p11 = { x: map.x(x1), y: map.y(y1), value: values[j + 1][i + 1] };
-          const p01 = { x: map.x(x0), y: map.y(y1), value: values[j + 1][i] };
-          const points = [contourIntersection(p00, p10, level), contourIntersection(p10, p11, level), contourIntersection(p11, p01, level), contourIntersection(p01, p00, level)].filter(Boolean);
-          if (points.length === 2) {
-            context.moveTo(points[0].x, points[0].y);
-            context.lineTo(points[1].x, points[1].y);
-          } else if (points.length === 4) {
-            context.moveTo(points[0].x, points[0].y);
-            context.lineTo(points[1].x, points[1].y);
-            context.moveTo(points[2].x, points[2].y);
-            context.lineTo(points[3].x, points[3].y);
+      for (let j = 0; j < grid.ny; j += 1) {
+        for (let i = 0; i < grid.nx; i += 1) {
+          const p00 = gridPoint(grid, i, j);
+          const p10 = gridPoint(grid, i + 1, j);
+          const p11 = gridPoint(grid, i + 1, j + 1);
+          const p01 = gridPoint(grid, i, j + 1);
+          const hits = [contourHit(p00, p10, level), contourHit(p10, p11, level), contourHit(p11, p01, level), contourHit(p01, p00, level)].filter(Boolean);
+          if (hits.length === 2 || hits.length === 4) {
+            for (let index = 0; index < hits.length; index += 2) {
+              const a = hits[index]; const b = hits[index + 1];
+              points.push(a.x, a.y, terrainHeight(level) + .045, b.x, b.y, terrainHeight(level) + .045);
+            }
           }
         }
       }
-      context.stroke();
-      context.restore();
     }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+    const material = new THREE.LineBasicMaterial({ color: 0xf1e8cb, transparent: true, opacity: .7, depthTest: false });
+    const lines = new THREE.LineSegments(geometry, material);
+    lines.visible = state.showEquipotential;
+    return lines;
   }
 
-  function traceFieldLine(start, direction, sources) {
-    const points = [start];
-    let point = { ...start };
-    for (let index = 0; index < 190; index += 1) {
-      const sample = model.fieldFromSources(sources, point.x, point.y);
-      if (!Number.isFinite(sample.magnitude) || sample.magnitude < 1e-6) break;
-      point = { x: point.x + direction * sample.ex / sample.magnitude * .07, y: point.y + direction * sample.ey / sample.magnitude * .07 };
-      if (point.x < WORLD.xMin || point.x > WORLD.xMax || point.y < WORLD.yMin || point.y > WORLD.yMax) break;
-      if (index > 4 && sources.some((source) => Math.hypot(point.x - source.x, point.y - source.y) < .27)) {
-        points.push(point);
-        break;
+  function addArrow(group, x, y, z, ex, ey, color, length = .42) {
+    const magnitude = Math.hypot(ex, ey);
+    if (!Number.isFinite(magnitude) || magnitude < 1e-8) return;
+    const direction = new THREE.Vector3(ex / magnitude, ey / magnitude, 0);
+    const arrow = new THREE.ArrowHelper(direction, new THREE.Vector3(x, y, z), length, color, .12, .07);
+    group.add(arrow);
+  }
+
+  function addSourceMarkers(group, sources) {
+    sources.forEach((source, index) => {
+      if (Math.abs(source.qNanoC) < 1e-12) return;
+      const positive = source.qNanoC > 0;
+      const color = positive ? 0xff7468 : 0x7392ff;
+      const geometry = new THREE.SphereGeometry(.28, 24, 16);
+      const material = new THREE.MeshStandardMaterial({ color, roughness: .45, metalness: .05, emissive: color, emissiveIntensity: .1 });
+      const marker = new THREE.Mesh(geometry, material);
+      marker.scale.set(positive ? 1 : .86, positive ? 1 : .86, positive ? 1 : 1.28);
+      const local = surfaceFieldAt(source.x + (positive ? .35 : -.35), source.y);
+      const surfaceZ = terrainHeight(local.potential);
+      const markerZ = positive ? Math.max(1.0, surfaceZ + .45) : Math.max(-2.2, surfaceZ + .45);
+      marker.position.set(source.x, source.y, markerZ);
+      group.add(marker);
+      const label = makeLabel(`Q${index + 1} ${signed(source.qNanoC)} nC`, positive ? "#ff9b91" : "#9badff");
+      label.position.set(source.x, source.y, markerZ + (positive ? .55 : .62));
+      group.add(label);
+      if (!positive) {
+        const stringGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(source.x, source.y, markerZ - .35), new THREE.Vector3(source.x, source.y, terrainHeight(local.potential))]);
+        group.add(new THREE.Line(stringGeometry, new THREE.LineBasicMaterial({ color, transparent: true, opacity: .7 })));
       }
-      points.push(point);
-    }
-    return points;
+    });
   }
 
-  function drawFieldLine(context, points, map, reverse = false) {
-    if (points.length < 4) return;
-    const ordered = reverse ? [...points].reverse() : points;
-    context.save();
-    context.strokeStyle = "rgba(100,199,217,.55)";
-    context.lineWidth = 1.05;
-    context.beginPath();
-    context.moveTo(map.x(ordered[0].x), map.y(ordered[0].y));
-    for (let index = 1; index < ordered.length; index += 1) context.lineTo(map.x(ordered[index].x), map.y(ordered[index].y));
-    context.stroke();
-    context.restore();
-    const marker = Math.min(ordered.length - 2, Math.max(1, Math.floor(ordered.length * .55)));
-    const a = ordered[marker - 1];
-    const b = ordered[marker + 1];
-    arrow(context, map.x(a.x), map.y(a.y), map.x(b.x), map.y(b.y), "rgba(100,199,217,.82)", "", 1.2);
-  }
-
-  function drawFieldLines(context, width, height, map) {
-    if (!state.showFieldLines) return;
-    if (state.mode === "work") {
-      const direction = state.uniformField >= 0 ? 1 : -1;
-      for (let y = -2.4; y <= 2.4; y += .8) {
-        const x1 = direction > 0 ? WORLD.xMin + .3 : WORLD.xMax - .3;
-        const x2 = direction > 0 ? WORLD.xMax - .3 : WORLD.xMin + .3;
-        arrow(context, map.x(x1), map.y(y), map.x(x2), map.y(y), "rgba(100,199,217,.55)", "", 1);
-      }
-      return;
-    }
-    const sources = model.pointSources(inputState()).filter((source) => Math.abs(source.qNanoC) > 1e-9);
-    const positives = sources.filter((source) => source.qNanoC > 0);
-    const seeds = positives.length ? positives : sources;
-    for (const source of seeds) {
-      const outward = source.qNanoC > 0 ? 1 : -1;
-      for (let index = 0; index < 14; index += 1) {
-        const angle = Math.PI * 2 * index / 14;
-        const start = { x: source.x + .31 * Math.cos(angle), y: source.y + .31 * Math.sin(angle) };
-        drawFieldLine(context, traceFieldLine(start, outward, sources), map, outward < 0);
-      }
-    }
-  }
-
-  function drawVectorGrid(context, width, height, map) {
-    if (!state.showVectors) return;
-    for (let y = -2.3; y <= 2.3; y += .92) {
-      for (let x = -3.9; x <= 3.9; x += 1.12) {
-        const sample = fieldAt(x, y);
-        if (!Number.isFinite(sample.magnitude) || sample.magnitude < 1e-5 || sample.nearest !== null && sample.nearest < .48) continue;
-        const length = 8 + Math.min(13, Math.log10(1 + sample.magnitude) * 6);
-        const dx = sample.ex / sample.magnitude * length;
-        const dy = -sample.ey / sample.magnitude * length;
-        arrow(context, map.x(x) - dx * .45, map.y(y) - dy * .45, map.x(x) + dx * .55, map.y(y) + dy * .55, "rgba(100,199,217,.42)", "", .8);
-      }
-    }
-  }
-
-  function drawCharge(context, map, source, label) {
-    const x = map.x(source.x);
-    const y = map.y(source.y);
-    const color = source.qNanoC > 0 ? COLORS.positive : source.qNanoC < 0 ? COLORS.negative : COLORS.muted;
-    context.save();
-    context.shadowColor = color;
-    context.shadowBlur = 18;
-    if (source.qNanoC < 0) {
-      context.fillStyle = "rgba(95,126,255,.18)";
-      context.strokeStyle = color;
-      context.lineWidth = 2;
-      context.beginPath();
-      context.moveTo(x, y - 21);
-      context.bezierCurveTo(x - 17, y - 15, x - 14, y + 16, x, y + 22);
-      context.bezierCurveTo(x + 14, y + 16, x + 17, y - 15, x, y - 21);
-      context.closePath();
-      context.fill();
-      context.stroke();
-      context.beginPath();
-      context.moveTo(x, y + 22); context.lineTo(x, y + 29);
-      context.moveTo(x - 5, y + 28); context.lineTo(x + 5, y + 28);
-      context.stroke();
-    } else {
-      context.fillStyle = color;
-      context.beginPath();
-      context.arc(x, y, 19, 0, Math.PI * 2);
-      context.fill();
-      context.strokeStyle = "rgba(255,255,255,.45)";
-      context.lineWidth = 1;
-      context.stroke();
-    }
-    context.restore();
-    text(context, source.qNanoC > 0 ? "+" : source.qNanoC < 0 ? "−" : "0", x, y - 1, source.qNanoC > 0 ? "#1a120f" : COLORS.text, 18, "center", "800");
-    text(context, `${label} ${signed(source.qNanoC)} nC`, x, y + 30, color, 9, "center", "700");
-  }
-
-  function drawPath(context, map, path, color, width, dash = []) {
-    context.save();
-    context.strokeStyle = color;
-    context.lineWidth = width;
-    context.setLineDash(dash);
-    context.beginPath();
-    for (let index = 0; index <= 90; index += 1) {
-      const point = model.pathPoint(path, index / 90);
-      if (index === 0) context.moveTo(map.x(point.x), map.y(point.y));
-      else context.lineTo(map.x(point.x), map.y(point.y));
-    }
-    context.stroke();
-    context.restore();
-  }
-
-  function drawWorkScene(context, map) {
+  function addWorkScene(group) {
     const leftPositive = state.uniformField >= 0;
-    const leftX = map.x(-4.15);
-    const rightX = map.x(4.15);
-    context.save();
-    context.lineWidth = 6;
-    context.strokeStyle = leftPositive ? COLORS.positive : COLORS.negative;
-    context.beginPath(); context.moveTo(leftX, map.y(2.6)); context.lineTo(leftX, map.y(-2.6)); context.stroke();
-    context.strokeStyle = leftPositive ? COLORS.negative : COLORS.positive;
-    context.beginPath(); context.moveTo(rightX, map.y(2.6)); context.lineTo(rightX, map.y(-2.6)); context.stroke();
-    context.restore();
-    text(context, leftPositive ? "+" : "−", leftX + 10, map.y(2.45), leftPositive ? COLORS.positive : COLORS.negative, 16, "center", "800");
-    text(context, leftPositive ? "−" : "+", rightX - 10, map.y(2.45), leftPositive ? COLORS.negative : COLORS.positive, 16, "center", "800");
-    drawPath(context, map, "direct", state.path === "direct" ? COLORS.force : "rgba(242,184,75,.28)", state.path === "direct" ? 2.2 : 1.1, state.path === "direct" ? [] : [5, 5]);
-    drawPath(context, map, "curve", state.path === "curve" ? COLORS.potential : "rgba(181,140,229,.25)", state.path === "curve" ? 2.2 : 1.1, state.path === "curve" ? [] : [5, 5]);
-    const a = model.PATH_START;
-    const b = model.PATH_END;
-    text(context, "A", map.x(a.x) - 12, map.y(a.y) + 14, COLORS.text, 11, "center", "800");
-    text(context, "B", map.x(b.x) + 12, map.y(b.y) - 14, COLORS.text, 11, "center", "800");
+    [-4.15, 4.15].forEach((x, index) => {
+      const positive = index === 0 ? leftPositive : !leftPositive;
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(.12, 5.4, .3), new THREE.MeshStandardMaterial({ color: positive ? 0xff7468 : 0x7392ff, emissive: positive ? 0xff7468 : 0x7392ff, emissiveIntensity: .08 }));
+      mesh.position.set(x, 0, 0);
+      group.add(mesh);
+    });
+    ["direct", "curve"].forEach((path) => {
+      const positions = [];
+      for (let index = 0; index <= 90; index += 1) {
+        const point = model.pathPoint(path, index / 90);
+        positions.push(point.x, point.y, terrainHeight(-state.uniformField * point.x) + .12);
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      const active = state.path === path;
+      group.add(new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: path === "direct" ? 0xf2b84b : 0xb58ce5, transparent: true, opacity: active ? .95 : .28, linewidth: active ? 2 : 1 })));
+    });
   }
 
-  function drawProbe(context, map, sample) {
-    const x = map.x(sample.x);
-    const y = map.y(sample.y);
-    const color = state.testCharge > 0 ? COLORS.force : state.testCharge < 0 ? COLORS.potential : COLORS.text;
-    context.save();
-    context.fillStyle = "rgba(10,14,13,.92)";
-    context.strokeStyle = color;
-    context.lineWidth = 2.4;
-    context.beginPath();
-    context.arc(x, y, 11, 0, Math.PI * 2);
-    context.fill();
-    context.stroke();
-    context.restore();
-    context.save();
-    context.strokeStyle = state.dragging ? color : `${color}88`;
-    context.lineWidth = 2;
-    context.beginPath();
-    context.arc(x, y, state.dragging ? 17 : 15, 0, Math.PI * 2);
-    context.stroke();
-    context.restore();
-    fieldGeometry.probe = { x, y };
-    text(context, state.testCharge > 0 ? "+" : state.testCharge < 0 ? "−" : "0", x, y - 1, color, 12, "center", "800");
-    text(context, `q₀=${signed(state.testCharge)} nC`, x + 16, y + 17, color, 8, "left", "700");
+  function addProbe(group, sample) {
+    const color = state.testCharge > 0 ? 0xf2b84b : state.testCharge < 0 ? 0xb58ce5 : 0xdce5df;
+    const probe = new THREE.Mesh(new THREE.SphereGeometry(.22, 24, 16), new THREE.MeshStandardMaterial({ color, roughness: .35, metalness: .1, emissive: color, emissiveIntensity: .18 }));
+    probe.position.set(sample.x, sample.y, terrainHeight(sample.potential) + .27);
+    probe.userData.isProbe = true;
+    group.add(probe);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.32, .025, 8, 32), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: state.dragging ? .95 : .58 }));
+    ring.position.copy(probe.position);
+    group.add(ring);
+    const label = makeLabel(`q₀ ${signed(state.testCharge)} nC`, state.testCharge >= 0 ? "#ffd77d" : "#d4c2ff");
+    label.position.set(sample.x, sample.y, probe.position.z + .47);
+    group.add(label);
     if (sample.magnitude > 1e-8) {
-      const fieldLength = 42;
-      const ex = sample.ex / sample.magnitude;
-      const ey = sample.ey / sample.magnitude;
-      arrow(context, x, y, x + ex * fieldLength, y - ey * fieldLength, COLORS.field, "E", 2);
-      if (state.showForce && Math.abs(state.testCharge) > 1e-9) {
-        const sign = Math.sign(state.testCharge);
-        arrow(context, x, y, x + sign * ex * 58, y - sign * ey * 58, COLORS.force, "F", 2.4);
+      addArrow(group, sample.x, sample.y, probe.position.z, sample.ex, sample.ey, 0x64c7d9, .58);
+      if (state.showForce && Math.abs(state.testCharge) > 1e-9) addArrow(group, sample.x, sample.y, probe.position.z + .03, sample.forceXNanoN, sample.forceYNanoN, 0xf2b84b, .78);
+    }
+    threeState.probe = probe;
+  }
+
+  function addVectorGrid(group) {
+    if (!state.showVectors) return;
+    for (let y = -2.25; y <= 2.25; y += .9) {
+      for (let x = -3.75; x <= 3.75; x += 1.1) {
+        const sample = surfaceFieldAt(x, y);
+        if (!Number.isFinite(sample.magnitude) || sample.magnitude < 1e-5 || sample.nearest !== null && sample.nearest < .48) continue;
+        addArrow(group, x, y, terrainHeight(sample.potential) + .1, sample.ex, sample.ey, 0x64c7d9, .3);
       }
     }
   }
 
-  function drawScene(sample) {
-    const { width, height } = resizeCanvas(refs.canvas, canvasContext);
-    const map = worldMap(width, height);
+  function drawThreeScene(sample) {
+    if (!threeState.renderer) return;
+    const grid = buildSurfaceGrid();
+    clearDynamicScene();
+    const terrain = buildTerrain(grid);
+    threeState.dynamic.add(terrain);
+    threeState.dynamic.add(buildEquipotentialLines(grid));
+    if (state.mode === "work") addWorkScene(threeState.dynamic);
+    else {
+      addSourceMarkers(threeState.dynamic, sample.sources);
+      addVectorGrid(threeState.dynamic);
+    }
+    addProbe(threeState.dynamic, sample);
+    const { width, height } = resizeThree();
+    const projected = new THREE.Vector3(sample.x, sample.y, terrainHeight(sample.potential) + .27).project(threeState.camera);
     fieldGeometry.mode = state.mode;
+    fieldGeometry.probe = { x: (projected.x + 1) * width / 2, y: (1 - projected.y) * height / 2 };
     fieldGeometry.path = state.mode === "work" ? Array.from({ length: 91 }, (_, index) => {
       const point = model.pathPoint(state.path, index / 90);
-      return { x: map.x(point.x), y: map.y(point.y), progress: index / 90 };
+      const pointSample = surfaceFieldAt(point.x, point.y);
+      const screen = new THREE.Vector3(point.x, point.y, terrainHeight(pointSample.potential) + .2).project(threeState.camera);
+      return { x: (screen.x + 1) * width / 2, y: (1 - screen.y) * height / 2, progress: index / 90 };
     }) : [];
-    drawGrid(canvasContext, width, height, map);
-    drawPotentialMap(canvasContext, width, height, map);
-    drawEquipotentials(canvasContext, width, height, map);
-    drawFieldLines(canvasContext, width, height, map);
-    drawVectorGrid(canvasContext, width, height, map);
-    if (state.mode === "work") drawWorkScene(canvasContext, map);
-    else sample.sources.forEach((source, index) => drawCharge(canvasContext, map, source, `Q${index + 1}`));
-    drawProbe(canvasContext, map, sample);
-    const location = state.mode === "work" ? `路径 ${state.path === "direct" ? "A" : "B"} · ${(state.progress * 100).toFixed(0)}%` : `探针 (${sample.x.toFixed(2)}, ${sample.y.toFixed(2)}) m`;
-    text(canvasContext, location, map.pad.left + 4, height - 12, COLORS.green, 9, "left", "700");
-    text(canvasContext, "红球=正电荷 · 蓝气球=负电荷 · 等势线像地形等高线", width - map.pad.right, 12, COLORS.muted, 8, "right");
+    threeState.renderer.render(threeState.scene, threeState.camera);
   }
 
   function drawGraph(canvas, context, series, options) {
@@ -707,7 +698,7 @@
     renderControls(sample);
     renderReadouts(sample);
     renderLabels(sample);
-    drawScene(sample);
+    drawThreeScene(sample);
     drawCharts(sample);
   }
 
@@ -776,9 +767,18 @@
   refs.focusButton.addEventListener("click", () => { const active = document.body.classList.toggle("focus-mode"); refs.focusButton.setAttribute("aria-pressed", String(active)); });
   refs.fullscreenButton.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
 
+  function worldPointFromPointer(event) {
+    const rect = refs.canvas.getBoundingClientRect();
+    threeState.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    threeState.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    threeState.raycaster.setFromCamera(threeState.pointer, threeState.camera);
+    const point = new THREE.Vector3();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    return threeState.raycaster.ray.intersectPlane(plane, point);
+  }
+
   function pointerToState(event) {
     const rect = refs.canvas.getBoundingClientRect();
-    const map = worldMap(rect.width, rect.height);
     const px = event.clientX - rect.left;
     const py = event.clientY - rect.top;
     if (state.mode === "work") {
@@ -791,39 +791,64 @@
       setState({ progress: bestProgress, running: false });
       return;
     }
-    const x = clamp(map.wx(px), WORLD.xMin + .2, WORLD.xMax - .2);
-    const y = clamp(map.wy(py), WORLD.yMin + .2, WORLD.yMax - .2);
+    const point = worldPointFromPointer(event);
+    if (!point) return;
+    const x = clamp(point.x, WORLD.xMin + .2, WORLD.xMax - .2);
+    const y = clamp(point.y, WORLD.yMin + .2, WORLD.yMax - .2);
     const sources = model.pointSources(inputState());
     if (sources.some((source) => Math.hypot(x - source.x, y - source.y) < .42)) return;
     setState({ probeX: x, probeY: y, running: false });
   }
 
-  refs.canvas.addEventListener("pointerdown", (event) => {
+  function probeHit(event) {
+    if (!threeState.probe) return false;
     const rect = refs.canvas.getBoundingClientRect();
-    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    const target = state.mode === "work"
-      ? fieldGeometry.path.reduce((closest, candidate) => Math.hypot(candidate.x - point.x, candidate.y - point.y) < closest.distance ? { candidate, distance: Math.hypot(candidate.x - point.x, candidate.y - point.y) } : closest, { candidate: null, distance: Infinity })
-      : { candidate: fieldGeometry.probe, distance: fieldGeometry.probe ? Math.hypot(fieldGeometry.probe.x - point.x, fieldGeometry.probe.y - point.y) : Infinity };
-    if (!target.candidate || target.distance > 30) return;
-    state.dragging = true;
+    threeState.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    threeState.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    threeState.raycaster.setFromCamera(threeState.pointer, threeState.camera);
+    return threeState.raycaster.intersectObject(threeState.probe, false).length > 0;
+  }
+
+  refs.canvas.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    if (probeHit(event)) {
+      state.dragging = true;
+      threeState.cameraMode = "probe";
+    } else {
+      threeState.cameraMode = event.button === 2 || event.shiftKey ? "pan" : "orbit";
+    }
+    threeState.lastPointer = { x: event.clientX, y: event.clientY };
     refs.canvas.classList.add("is-dragging");
     refs.canvas.setPointerCapture(event.pointerId);
   });
   refs.canvas.addEventListener("pointermove", (event) => {
-    const rect = refs.canvas.getBoundingClientRect();
-    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    const target = state.mode === "work"
-      ? fieldGeometry.path.reduce((closest, candidate) => Math.hypot(candidate.x - point.x, candidate.y - point.y) < closest.distance ? { candidate, distance: Math.hypot(candidate.x - point.x, candidate.y - point.y) } : closest, { candidate: null, distance: Infinity })
-      : { candidate: fieldGeometry.probe, distance: fieldGeometry.probe ? Math.hypot(fieldGeometry.probe.x - point.x, fieldGeometry.probe.y - point.y) : Infinity };
-    if (!state.dragging) {
-      refs.canvas.style.cursor = target.candidate && target.distance <= 30 ? "grab" : "default";
+    if (!threeState.lastPointer) threeState.lastPointer = { x: event.clientX, y: event.clientY };
+    const dx = event.clientX - threeState.lastPointer.x;
+    const dy = event.clientY - threeState.lastPointer.y;
+    threeState.lastPointer = { x: event.clientX, y: event.clientY };
+    if (state.dragging && threeState.cameraMode === "probe") {
+      refs.canvas.style.cursor = "grabbing";
+      pointerToState(event);
       return;
     }
-    refs.canvas.style.cursor = "grabbing";
-    pointerToState(event);
+    if (!threeState.cameraMode || threeState.cameraMode === "probe") {
+      refs.canvas.style.cursor = probeHit(event) ? "grab" : "grab";
+      return;
+    }
+    if (threeState.cameraMode === "orbit") {
+      threeState.theta -= dx * .008;
+      threeState.phi = clamp(threeState.phi + dy * .008, .42, 1.38);
+    } else if (threeState.cameraMode === "pan") {
+      threeState.target.x -= dx * .012;
+      threeState.target.y += dy * .012;
+    }
+    updateCamera();
+    drawThreeScene(solve());
   });
-  refs.canvas.addEventListener("pointerup", (event) => { state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; refs.canvas.releasePointerCapture(event.pointerId); render(); });
-  refs.canvas.addEventListener("pointercancel", () => { state.dragging = false; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "default"; render(); });
+  refs.canvas.addEventListener("pointerup", (event) => { state.dragging = false; threeState.cameraMode = null; threeState.lastPointer = null; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "grab"; if (refs.canvas.hasPointerCapture(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId); render(); });
+  refs.canvas.addEventListener("pointercancel", (event) => { state.dragging = false; threeState.cameraMode = null; threeState.lastPointer = null; refs.canvas.classList.remove("is-dragging"); refs.canvas.style.cursor = "grab"; if (refs.canvas.hasPointerCapture(event.pointerId)) refs.canvas.releasePointerCapture(event.pointerId); render(); });
+  refs.canvas.addEventListener("wheel", (event) => { event.preventDefault(); threeState.radius = clamp(threeState.radius * Math.exp(event.deltaY * .001), 7, 24); updateCamera(); drawThreeScene(solve()); }, { passive: false });
+  refs.canvas.addEventListener("contextmenu", (event) => event.preventDefault());
   window.addEventListener("resize", render);
 
   let lastFrame = performance.now();
@@ -838,6 +863,7 @@
     requestAnimationFrame(frame);
   }
 
+  initializeThree();
   window.electricFieldLab = {
     solve: (input = {}) => input.mode === "work" ? model.workState({ ...inputState(), ...input }, input.progress ?? state.progress) : model.pointState({ ...inputState(), ...input }),
     getState: () => ({ ...state }),

@@ -1,12 +1,15 @@
 .electric-field-lab { --field-cyan:#64c7d9; --field-force:#f2b84b; --field-positive:#ff7468; --field-negative:#7392ff; --field-potential:#b58ce5; --landscape-bg:#08151a; }
 .electric-field-lab .stage { background-color:var(--landscape-bg); background-image:linear-gradient(rgba(110,220,220,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(110,220,220,.035) 1px,transparent 1px); background-size:32px 32px; }
 .electric-field-lab .instrument-stage { border-color:rgba(120,210,220,.35); box-shadow:0 0 35px rgba(30,160,180,.12); }
-.electric-field-lab #fieldCanvas { filter:saturate(1.18) contrast(1.05); }
+.electric-field-lab #fieldCanvas { filter:saturate(1.12) contrast(1.04); }
 .electric-field-lab .state-badge { color:#8de6e1; border-color:rgba(141,230,225,.48); background:rgba(141,230,225,.1); }
 .electric-field-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .electric-field-lab .instrument-stage { background:#0b0f0e; }
-.electric-field-lab #fieldCanvas { display:block; width:100%; height:100%; min-height:280px; cursor:crosshair; touch-action:none; }
+.electric-field-lab .instrument-stage { position:relative; grid-template-columns:minmax(0,1fr) 156px; }
+.electric-field-lab #fieldCanvas { display:block; width:100%; height:100%; min-height:360px; cursor:grab; touch-action:none; }
 .electric-field-lab #fieldCanvas.is-dragging { cursor:grabbing; }
+.electric-field-lab .field-3d-key { position:absolute; z-index:2; left:14px; top:12px; display:flex; flex-direction:column; gap:3px; pointer-events:none; padding:7px 9px; border:1px solid rgba(141,230,225,.22); border-radius:4px; color:#a9b8b0; background:rgba(7,14,14,.72); font-size:9px; line-height:1.35; backdrop-filter:blur(5px); }
+.electric-field-lab .field-3d-key strong { color:#8de6e1; font-family:ui-monospace,monospace; font-size:11px; }
 .electric-field-lab .live-readouts dd { font-size:13px; }
 .electric-field-lab .source1-range { background:linear-gradient(90deg,var(--field-positive) 0 var(--range-progress,88%),#4a514c var(--range-progress,88%) 100%); }
 .electric-field-lab .source2-range { background:linear-gradient(90deg,var(--field-negative) 0 var(--range-progress,13%),#4a514c var(--range-progress,13%) 100%); }
@@ -30,5 +33,5 @@
 .electric-field-lab .state-badge.is-zero { color:var(--lab-muted); }
 .electric-field-lab .mobile-scene-tabs { display:none; }
 @media(max-width:1120px){.electric-field-lab .mobile-scene-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:-10px -10px 10px;border-bottom:1px solid var(--lab-line);background:#121513}.electric-field-lab .mobile-scene-tab{grid-template-columns:22px minmax(0,1fr);min-height:50px;padding:8px;border-left:0;border-bottom:2px solid transparent}.electric-field-lab .mobile-scene-tab.is-active{border-bottom-color:var(--lab-green)}}
-@media(max-width:820px){.electric-field-lab #fieldCanvas{min-height:300px;aspect-ratio:1.35}.electric-field-lab .analysis-grid{min-height:340px}}
-@media(max-width:520px){.electric-field-lab .mobile-scene-tab{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:7px 3px}.electric-field-lab .mobile-scene-tab>span{grid-row:auto;padding:0}.electric-field-lab .mobile-scene-tab i{display:none}.electric-field-lab .mobile-scene-tab strong{font-size:10px;white-space:nowrap}.electric-field-lab .playback-row{grid-template-columns:1fr .9fr 1.45fr}}
+@media(max-width:820px){.electric-field-lab .instrument-stage{grid-template-columns:1fr}.electric-field-lab #fieldCanvas{min-height:330px;aspect-ratio:1.35}.electric-field-lab .live-readouts{display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--lab-line);border-left:0}.electric-field-lab .live-readouts dl{grid-column:1 / -1;grid-template-columns:repeat(4,1fr)}.electric-field-lab .live-readouts dl>div{padding:8px 6px}.electric-field-lab .law-check{grid-column:1 / -1;margin-top:6px}.electric-field-lab .analysis-grid{min-height:340px}.electric-field-lab .field-3d-key{left:10px;top:10px;max-width:calc(100% - 20px)}}
+@media(max-width:520px){.electric-field-lab .mobile-scene-tab{display:flex;align-items:center;justify-content:center;gap:5px;min-height:44px;padding:7px 3px}.electric-field-lab .mobile-scene-tab>span{grid-row:auto;padding:0}.electric-field-lab .mobile-scene-tab i{display:none}.electric-field-lab .mobile-scene-tab strong{font-size:10px;white-space:nowrap}.electric-field-lab .live-readouts dl{grid-template-columns:repeat(2,1fr)}.electric-field-lab .playback-row{grid-template-columns:1fr .9fr 1.45fr}}
