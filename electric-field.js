@@ -84,7 +84,7 @@
   const modes = {
     single: { title: "单电荷场", goal: "电场先存在，试探电荷只负责测量", hint: "拖动探针，比较 E、F 和 V", q1: 6, q2: -6, separation: 3, probeX: 2.4, probeY: 1.2, key: "◎ 半径 2 m" },
     superposition: { title: "电场矢量叠加", goal: "同一点的合场来自各源电荷场强的矢量和", hint: "定位中垂线，寻找 V=0 但 E≠0", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 偶极中垂线" },
-    potential: { title: "电势与等势线", goal: "电势是标量，场强由电势空间变化决定", hint: "定位同号电荷中点，比较 E 与 V", q1: 6, q2: 6, separation: 3, probeX: 0, probeY: 0, key: "◎ 同号电荷中点" },
+    potential: { title: "等势线地形", goal: "把电势画成等高线：沿同一条线移动，电势能不变", hint: "拖动试探电荷，比较 V 与 U=qV", q1: 6, q2: -6, separation: 3, probeX: -1.1, probeY: 1.2, key: "◎ 定位等势线" },
     work: { title: "静电场做功", goal: "同一对端点间电场力做功与路径无关", hint: "比较直达与绕行路径的终点功", q1: 6, q2: -6, separation: 3, probeX: -3, probeY: -1.5, key: "◎ 到达共同终点" }
   };
   const guide = [
@@ -93,13 +93,13 @@
     { title: "核对做功与能量", prompt: "两条路径形状不同，为什么终点的 W 和 ΔU 仍完全一致？" }
   ];
   const state = {
-    mode: "single",
+    mode: "potential",
     q1: 6,
     q2: -6,
     separation: 3,
     testCharge: 2,
     uniformField: 12,
-    probeX: 2.4,
+    probeX: -1.1,
     probeY: 1.2,
     path: "direct",
     progress: 0,
@@ -107,8 +107,8 @@
     playbackRate: 0.5,
     guideStep: 0,
     dragging: false,
-    showFieldLines: true,
-    showVectors: true,
+    showFieldLines: false,
+    showVectors: false,
     showEquipotential: true,
     showForce: true,
     showPotentialMap: true
@@ -373,13 +373,33 @@
     const color = source.qNanoC > 0 ? COLORS.positive : source.qNanoC < 0 ? COLORS.negative : COLORS.muted;
     context.save();
     context.shadowColor = color;
-    context.shadowBlur = 14;
-    context.fillStyle = color;
-    context.beginPath();
-    context.arc(x, y, 18, 0, Math.PI * 2);
-    context.fill();
+    context.shadowBlur = 18;
+    if (source.qNanoC < 0) {
+      context.fillStyle = "rgba(95,126,255,.18)";
+      context.strokeStyle = color;
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(x, y - 21);
+      context.bezierCurveTo(x - 17, y - 15, x - 14, y + 16, x, y + 22);
+      context.bezierCurveTo(x + 14, y + 16, x + 17, y - 15, x, y - 21);
+      context.closePath();
+      context.fill();
+      context.stroke();
+      context.beginPath();
+      context.moveTo(x, y + 22); context.lineTo(x, y + 29);
+      context.moveTo(x - 5, y + 28); context.lineTo(x + 5, y + 28);
+      context.stroke();
+    } else {
+      context.fillStyle = color;
+      context.beginPath();
+      context.arc(x, y, 19, 0, Math.PI * 2);
+      context.fill();
+      context.strokeStyle = "rgba(255,255,255,.45)";
+      context.lineWidth = 1;
+      context.stroke();
+    }
     context.restore();
-    text(context, source.qNanoC > 0 ? "+" : source.qNanoC < 0 ? "−" : "0", x, y - 1, "#0d1110", 18, "center", "800");
+    text(context, source.qNanoC > 0 ? "+" : source.qNanoC < 0 ? "−" : "0", x, y - 1, source.qNanoC > 0 ? "#1a120f" : COLORS.text, 18, "center", "800");
     text(context, `${label} ${signed(source.qNanoC)} nC`, x, y + 30, color, 9, "center", "700");
   }
 
@@ -472,7 +492,7 @@
     drawProbe(canvasContext, map, sample);
     const location = state.mode === "work" ? `路径 ${state.path === "direct" ? "A" : "B"} · ${(state.progress * 100).toFixed(0)}%` : `探针 (${sample.x.toFixed(2)}, ${sample.y.toFixed(2)}) m`;
     text(canvasContext, location, map.pad.left + 4, height - 12, COLORS.green, 9, "left", "700");
-    text(canvasContext, "红/蓝底图表示正/负电势；等势线不是运动轨迹", width - map.pad.right, 12, COLORS.muted, 8, "right");
+    text(canvasContext, "红球=正电荷 · 蓝气球=负电荷 · 等势线像地形等高线", width - map.pad.right, 12, COLORS.muted, 8, "right");
   }
 
   function drawGraph(canvas, context, series, options) {
@@ -742,8 +762,12 @@
   refs.pauseButton.addEventListener("click", () => setState({ running: false }));
   refs.keyButton.addEventListener("click", keyState);
   refs.resetButton.addEventListener("click", () => {
-    Object.assign(state, { mode: "single", q1: 6, q2: -6, separation: 3, testCharge: 2, uniformField: 12, probeX: 2.4, probeY: 1.2, path: "direct", progress: 0, running: false, playbackRate: .5, guideStep: 0, showFieldLines: true, showVectors: true, showEquipotential: true, showForce: true, showPotentialMap: true });
-    [refs.showFieldLinesToggle, refs.showVectorsToggle, refs.showEquipotentialToggle, refs.showForceToggle, refs.showPotentialMapToggle].forEach((input) => { input.checked = true; });
+    Object.assign(state, { mode: "potential", q1: 6, q2: -6, separation: 3, testCharge: 2, uniformField: 12, probeX: -1.1, probeY: 1.2, path: "direct", progress: 0, running: false, playbackRate: .5, guideStep: 0, showFieldLines: false, showVectors: false, showEquipotential: true, showForce: true, showPotentialMap: true });
+    refs.showFieldLinesToggle.checked = false;
+    refs.showVectorsToggle.checked = false;
+    refs.showEquipotentialToggle.checked = true;
+    refs.showForceToggle.checked = true;
+    refs.showPotentialMapToggle.checked = true;
     render();
   });
   [[refs.showFieldLinesToggle, "showFieldLines"], [refs.showVectorsToggle, "showVectors"], [refs.showEquipotentialToggle, "showEquipotential"], [refs.showForceToggle, "showForce"], [refs.showPotentialMapToggle, "showPotentialMap"]].forEach(([input, key]) => input.addEventListener("change", () => { state[key] = input.checked; render(); }));

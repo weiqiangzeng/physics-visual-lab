@@ -1,4 +1,8 @@
-.electric-field-lab { --field-cyan:#64c7d9; --field-force:#f2b84b; --field-positive:#ff7468; --field-negative:#7392ff; --field-potential:#b58ce5; }
+.electric-field-lab { --field-cyan:#64c7d9; --field-force:#f2b84b; --field-positive:#ff7468; --field-negative:#7392ff; --field-potential:#b58ce5; --landscape-bg:#08151a; }
+.electric-field-lab .stage { background-color:var(--landscape-bg); background-image:linear-gradient(rgba(110,220,220,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(110,220,220,.035) 1px,transparent 1px); background-size:32px 32px; }
+.electric-field-lab .instrument-stage { border-color:rgba(120,210,220,.35); box-shadow:0 0 35px rgba(30,160,180,.12); }
+.electric-field-lab #fieldCanvas { filter:saturate(1.18) contrast(1.05); }
+.electric-field-lab .state-badge { color:#8de6e1; border-color:rgba(141,230,225,.48); background:rgba(141,230,225,.1); }
 .electric-field-lab .stage { grid-template-rows:auto minmax(280px,1fr) minmax(180px,.54fr) auto; }
 .electric-field-lab .instrument-stage { background:#0b0f0e; }
 .electric-field-lab #fieldCanvas { display:block; width:100%; height:100%; min-height:280px; cursor:crosshair; touch-action:none; }
