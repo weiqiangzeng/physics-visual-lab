@@ -6,6 +6,7 @@
     <title>高中物理可视化实验</title>
     <link rel="stylesheet" href="./styles.css?v=math-controls-3" />
     <link rel="stylesheet" href="./platform.css?v=showcase-1" />
+    <link rel="stylesheet" href="./home-showcase.css?v=teacher-cases-1" />
   </head>
   <body class="platform-home showcase-home">
     <main class="app">
@@ -13,16 +14,31 @@
         <header class="platform-hero compact-home-hero">
           <div class="hero-copy">
             <span class="platform-kicker">PHYSICS VISUAL LAB</span>
-            <h1>物理模型实验室</h1>
+            <h1>可直接演示的物理案例</h1>
             <p id="homeHeroSubtitle">面向高中物理教学的交互式可视化实验平台</p>
           </div>
           <div class="home-utility-links" aria-label="网站工具">
-            <a href="./teacher-resources.html" aria-label="打开教师课堂资源" title="教师课堂资源"><span aria-hidden="true">▤</span><strong>教师课堂资源</strong><small>10 套方案与 30 个预设</small></a>
+            <a href="./teacher-resources.html" aria-label="打开完整课堂资源" title="完整课堂资源"><span aria-hidden="true">▤</span><strong>完整课堂资源</strong><small>10 套方案与 30 个预设</small></a>
             <a href="./knowledge-base.html" aria-label="打开使用知识库" title="使用知识库"><span aria-hidden="true">?</span><strong>使用知识库</strong><small>操作、现象与故障排查</small></a>
           </div>
         </header>
 
-        <section class="course-panel simple-catalog"
+        <section class="teacher-case-showcase" aria-labelledby="teacherCaseTitle">
+          <header class="teacher-case-heading">
+            <div>
+              <span class="platform-kicker">READY FOR CLASS</span>
+              <h2 id="teacherCaseTitle">先看四个可直接演示的案例</h2>
+              <p>每个案例都从一个课堂问题开始，用预设参数直接进入可观察的物理过程。</p>
+            </div>
+            <div class="teacher-case-actions">
+              <a class="teacher-case-secondary" href="./teacher-resources.html">完整课堂资源<span aria-hidden="true">→</span></a>
+              <a class="teacher-case-secondary" href="./index.html?showAll=1">实验目录<span aria-hidden="true">→</span></a>
+            </div>
+          </header>
+          <div id="teacherCaseGrid" class="teacher-case-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="course-panel simple-catalog showcase-full-directory-only"
           aria-labelledby="courseTitle">
           <div class="section-heading">
             <div>
@@ -781,8 +797,11 @@
         </section>
       </section>
     </main>
-    <script src="./showcase-config.js?v=showcase-1"></script>
+    <script src="./showcase-config.js?v=showcase-2"></script>
     <script src="./curriculum-data.js?v=curriculum"></script>
+    <script src="./teacher-packs.js?v=teacher-1"></script>
+    <script src="./teacher-tools.js?v=teacher-1"></script>
+    <script src="./home-showcase.js?v=teacher-cases-1"></script>
     <script src="./platform-protocol.js?v=protocol-v1"></script>
     <script src="./url-state.js?v=protocol-v1"></script>
     <script src="./learning-records.js?v=protocol-v1"></script>

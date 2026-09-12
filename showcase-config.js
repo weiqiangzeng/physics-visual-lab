@@ -2,9 +2,10 @@
   window.physicsShowcaseConfig = {
     showcaseMode: true,
     featuredExperiments: [
-      "wave-interference.html",
-      "free-fall-measurement.html",
+      "electric-field.html",
+      "charged-particle.html",
       "electromagnetic-induction.html",
+      "double-slit.html",
     ],
     showAllExperiments: false,
   };
