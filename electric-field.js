@@ -923,10 +923,10 @@
       button.setAttribute("aria-pressed", String(active));
     });
     refs.testChargeNote.textContent = chargeSign < 0
-      ? "已选择负试探电荷：播放时 F 与 E 反向，q₀ 将驶向正电荷"
+      ? "已选择负试探电荷：F 与 E 反向，指向正电荷一侧"
       : chargeSign > 0
-        ? "已选择正试探电荷：播放时 F 与 E 同向，q₀ 将驶向负电荷"
-        : "q₀=0 时没有电场力；请选择正或负试探电荷后播放";
+        ? "已选择正试探电荷：F 与 E 同向，指向负电荷一侧"
+        : "q₀=0 时没有电场力；请选择正或负试探电荷观察受力方向";
     refs.progressLabel.textContent = "探针坐标";
     refs.progressValue.textContent = `x = ${sample.x.toFixed(2)} m · y = ${sample.y.toFixed(2)} m`;
     if (refs.progressInput) refs.progressInput.disabled = true;
@@ -1230,7 +1230,6 @@
     renderReadouts(sample);
     renderLabels(sample);
     drawThreeScene(sample);
-    drawCharts(sample);
   }
 
   function setState(next) {
