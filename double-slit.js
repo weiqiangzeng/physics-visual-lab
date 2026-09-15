@@ -227,7 +227,9 @@
     const now = Date.now();
     const elapsed = lastAnimationAt ? clamp(now - lastAnimationAt, 0, 60) : 16;
     lastAnimationAt = now;
-    state.waveTime += elapsed * 0.001 * 2.2;
+    // Keep the probability-wave motion readable rather than strobing on screen.
+    // This is a display-time scale only; it does not alter photon emission or sampling.
+    state.waveTime += elapsed * 0.001 * 0.8;
 
     if (state.mode === "photon" && state.photonsRunning) {
       const emissionInterval = 1000 / state.photonRate;
@@ -300,17 +302,17 @@
 
     // The source is drawn as an expanding probability amplitude, not a classical ray.
     for (let band = 0; band < 6; band += 1) {
-      const radius = 12 + ((state.waveTime * 64 + band * 34) % Math.max(24, maxRadius));
+      const radius = 12 + ((state.waveTime * 38 + band * 34) % Math.max(24, maxRadius));
       const fade = clamp(1 - radius / maxRadius, 0.08, 1);
       ctx.strokeStyle = light.solid;
-      ctx.globalAlpha = 0.06 + fade * 0.16;
+      ctx.globalAlpha = 0.04 + fade * 0.11;
       ctx.lineWidth = band === 2 ? 1.6 : 1;
       ctx.setLineDash(band === 2 ? [] : [3, 5]);
       ctx.beginPath(); ctx.arc(source.x, source.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
     }
 
     // A broad fan makes the aperture, rather than a single line, the relevant object.
-    ctx.setLineDash([]); ctx.lineWidth = 1; ctx.strokeStyle = light.glow; ctx.globalAlpha = .16;
+    ctx.setLineDash([]); ctx.lineWidth = 1; ctx.strokeStyle = light.glow; ctx.globalAlpha = .11;
     for (let index = 0; index < 9; index += 1) {
       const targetY = source.y + (index - 4) * 13;
       ctx.beginPath(); ctx.moveTo(source.x + 7, source.y);
@@ -340,10 +342,10 @@
       if (photon.progress < 0.36) {
         const t = photon.progress / 0.36;
         const radius = 8 + (barrierX - source.x - 12) * t;
-        ctx.globalAlpha = .3 + .45 * (1 - t);
+        ctx.globalAlpha = .22 + .32 * (1 - t);
         ctx.strokeStyle = light.solid; ctx.lineWidth = 1.8;
         ctx.beginPath(); ctx.arc(source.x, source.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
-        ctx.globalAlpha = .16;
+        ctx.globalAlpha = .10;
         ctx.lineWidth = 6;
         ctx.beginPath(); ctx.arc(source.x, source.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
         return;
@@ -378,11 +380,11 @@
     const colors = ["#64c7d9", "#b58ce5"];
     slitPoints.forEach((point, sourceIndex) => {
       for (let band = 0; band < 7; band += 1) {
-        const radius = 16 + ((state.waveTime * 72 + band * 42 + sourceIndex * 21) % maxRadius);
+        const radius = 16 + ((state.waveTime * 44 + band * 42 + sourceIndex * 21) % maxRadius);
         const fade = clamp(1 - radius / maxRadius, 0.08, 1);
         ctx.save();
         ctx.strokeStyle = colors[sourceIndex];
-        ctx.globalAlpha = 0.08 + fade * 0.2;
+        ctx.globalAlpha = 0.05 + fade * 0.13;
         ctx.lineWidth = band === 3 ? 1.7 : 1;
         ctx.setLineDash(band === 3 ? [] : [3, 5]);
         ctx.beginPath(); ctx.arc(point.x, point.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();

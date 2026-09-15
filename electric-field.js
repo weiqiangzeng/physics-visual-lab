@@ -437,13 +437,14 @@
         const magnitude = Number.isFinite(grid.magnitudes[index]) ? grid.magnitudes[index] : 0;
         const fieldRatio = clamp(Math.log1p(magnitude / grid.fieldReference) / Math.log1p(12), 0, 1);
         const potentialRatio = value / TERRAIN.clipV;
-        // Hue gives field strength a visible continuous scale while the palette branch keeps V's sign legible.
-        const hue = potentialRatio > .03
-          ? .12 - .12 * fieldRatio
-          : potentialRatio < -.03
-            ? .48 + .16 * fieldRatio
-            : .37 + .08 * fieldRatio;
-        const saturation = potentialRatio > .03 || potentialRatio < -.03 ? .68 + .18 * fieldRatio : .42 + .28 * fieldRatio;
+        // Blend continuously from the V=0 neutral color; a wide threshold would make zero look like an area.
+        const signBlend = clamp(Math.abs(potentialRatio) * 2.4, 0, 1);
+        const neutralHue = .40;
+        const positiveHue = .14 - .08 * fieldRatio;
+        const negativeHue = .52 + .10 * fieldRatio;
+        const targetHue = potentialRatio >= 0 ? positiveHue : negativeHue;
+        const hue = neutralHue + (targetHue - neutralHue) * signBlend;
+        const saturation = .55 + .28 * fieldRatio;
         const lightness = .27 + .21 * fieldRatio;
         color.setHSL(hue, saturation, lightness);
         colors.push(color.r, color.g, color.b);
@@ -479,27 +480,30 @@
     return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
   }
 
-  function buildEquipotentialLines(grid) {
+  function contourSegments(grid, level, zOffset = .045) {
     const points = [];
-    const rawLevels = state.mode === "work" ? [-36, -24, -12, 0, 12, 24, 36] : [-60, -40, -24, -12, 0, 12, 24, 40, 60];
-    const levels = rawLevels.filter((level) => state.mode !== "potential" || Math.abs(level - state.highlightLevel) > .01);
-    for (const level of levels) {
-      for (let j = 0; j < grid.ny; j += 1) {
-        for (let i = 0; i < grid.nx; i += 1) {
-          const p00 = gridPoint(grid, i, j);
-          const p10 = gridPoint(grid, i + 1, j);
-          const p11 = gridPoint(grid, i + 1, j + 1);
-          const p01 = gridPoint(grid, i, j + 1);
-          const hits = [contourHit(p00, p10, level), contourHit(p10, p11, level), contourHit(p11, p01, level), contourHit(p01, p00, level)].filter(Boolean);
-          if (hits.length === 2 || hits.length === 4) {
-            for (let index = 0; index < hits.length; index += 2) {
-              const a = hits[index]; const b = hits[index + 1];
-              points.push(a.x, a.y, terrainHeight(level) + .045, b.x, b.y, terrainHeight(level) + .045);
-            }
+    for (let j = 0; j < grid.ny; j += 1) {
+      for (let i = 0; i < grid.nx; i += 1) {
+        const p00 = gridPoint(grid, i, j);
+        const p10 = gridPoint(grid, i + 1, j);
+        const p11 = gridPoint(grid, i + 1, j + 1);
+        const p01 = gridPoint(grid, i, j + 1);
+        const hits = [contourHit(p00, p10, level), contourHit(p10, p11, level), contourHit(p11, p01, level), contourHit(p01, p00, level)].filter(Boolean);
+        if (hits.length === 2 || hits.length === 4) {
+          for (let index = 0; index < hits.length; index += 2) {
+            const a = hits[index]; const b = hits[index + 1];
+            points.push(a.x, a.y, terrainHeight(level) + zOffset, b.x, b.y, terrainHeight(level) + zOffset);
           }
         }
       }
     }
+    return points;
+  }
+
+  function buildEquipotentialLines(grid) {
+    const rawLevels = state.mode === "work" ? [-36, -24, -12, 0, 12, 24, 36] : [-60, -40, -24, -12, 0, 12, 24, 40, 60];
+    const levels = rawLevels.filter((level) => state.mode !== "potential" || (Math.abs(level) > .01 && Math.abs(level - state.highlightLevel) > .01));
+    const points = levels.flatMap((level) => contourSegments(grid, level));
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
     const material = new THREE.LineBasicMaterial({ color: 0xf1e8cb, transparent: true, opacity: .7, depthTest: false });
@@ -508,13 +512,22 @@
     return lines;
   }
 
+  function buildZeroEquipotentialLine(grid) {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(contourSegments(grid, 0, .085), 3));
+    const material = new THREE.LineBasicMaterial({ color: 0xf6e7a8, transparent: true, opacity: .98, depthTest: false });
+    const line = new THREE.LineSegments(geometry, material);
+    line.visible = state.showEquipotential && state.mode === "potential";
+    return line;
+  }
+
   function buildHighlightLine() {
     const points = highlightPath();
     const positions = points.flatMap((point) => [point.x, point.y, terrainHeight(state.highlightLevel) + .09]);
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
     const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0xf2b84b, transparent: true, opacity: .98, depthTest: false }));
-    line.visible = state.showEquipotential && state.mode === "potential";
+    line.visible = state.showEquipotential && state.mode === "potential" && Math.abs(state.highlightLevel) > .01;
     return line;
   }
 
@@ -745,6 +758,7 @@
       const grid = buildSurfaceGrid();
       threeState.dynamic.add(buildTerrain(grid));
       threeState.dynamic.add(buildEquipotentialLines(grid));
+      threeState.dynamic.add(buildZeroEquipotentialLine(grid));
       threeState.dynamic.add(buildHighlightLine());
       addSourceMarkers(threeState.dynamic, sample.sources);
       addVectorGrid(threeState.dynamic);
@@ -979,7 +993,9 @@
       refs.stageHint.textContent = state.demoRunning
         ? state.demoPhase === "along" ? "演示：沿高亮等势线移动，观察 V 基本不变" : "演示：穿越高亮等势线，观察 V 和地形高度变化"
         : state.demoPhase === "complete" ? "结论：同一等势线对应相同电势；穿越等势线时电势改变" : config.hint;
-      refs.highlightPotentialLabel.textContent = `高亮等势线：V = ${state.highlightLevel.toFixed(2)} V`;
+      refs.highlightPotentialLabel.textContent = Math.abs(state.highlightLevel) <= .01
+        ? "零势线：V = 0.00 V"
+        : `高亮等势线：V = ${state.highlightLevel.toFixed(2)} V`;
       refs.fieldInteractionHint.textContent = state.demoRunning
         ? state.demoPhase === "along" ? "位置在改变 · 高亮线上的 V 基本不变" : "正在穿线 · V 和地形高度正在改变"
         : state.demoPhase === "complete" ? "结论已停在穿线后状态 · 可拖回高亮线复核" : "点击播放：从 V≈0 的中垂线释放 q₀；也可拖动 q₀";
