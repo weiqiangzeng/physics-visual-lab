@@ -42,7 +42,8 @@ for (const lab of manifest.labs) {
   const routeSteps = count(html, /class=["'][^"']*route-step/g);
   const sharedScripts = manifest.requiredSharedScripts.map((name) => html.includes(name));
   const requiredMarkup = manifest.requiredMarkup.map((token) => html.includes(token));
-  const modeParity = desktopModes.length >= 3
+  const minimumSceneCount = lab.minimumSceneCount ?? 3;
+  const modeParity = desktopModes.length >= minimumSceneCount
     && JSON.stringify([...new Set(desktopModes)].sort()) === JSON.stringify([...new Set(mobileModes)].sort());
 
   const dimensions = {

@@ -307,6 +307,7 @@
       "script": "electric-field.js",
       "model": "electric-field-model.js",
       "api": "electricFieldLab",
+      "minimumSceneCount": 2,
       "minimumCanvasCount": 3,
       "referencePoints": [
         "Q=6nC, r=2m -> E=13.481N/C and V=26.962V",
