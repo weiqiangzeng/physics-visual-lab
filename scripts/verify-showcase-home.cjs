@@ -25,7 +25,7 @@ const lessons = [...lessonsBlock[1].matchAll(/"([^\"]+\.html)"/g)]
 
 assert(config.showcaseMode === true, "showcase mode is not enabled");
 assert(config.showAllExperiments === false, "showAllExperiments must default to false");
-assert(featured.length === 3, `expected 3 featured experiments, found ${featured.length}`);
+assert(featured.length === 4, `expected 4 featured experiments, found ${featured.length}`);
 assert(new Set(featured).size === featured.length, "featured experiments contain duplicates");
 featured.forEach((lesson) => {
   assert(lessons.includes(lesson), `featured lesson missing from platform order: ${lesson}`);

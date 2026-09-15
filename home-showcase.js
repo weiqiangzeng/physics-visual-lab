@@ -9,7 +9,7 @@
   const featuredLessons = [
     "electric-field.html",
     "charged-particle.html",
-    "electromagnetic-induction.html",
+    "ideal-gas.html",
     "double-slit.html",
   ];
   const escapeHtml = (value) => String(value || "").replace(/[&<>"']/g, (character) => ({

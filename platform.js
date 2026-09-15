@@ -1922,7 +1922,7 @@
       if (title) title.textContent = "精选实验";
       if (description) {
         description.textContent =
-          "推免展示版：用三个代表性实验呈现平台的建模、交互与证据链。";
+          "推免展示版：用四个代表性实验呈现平台的建模、交互与证据链。";
       }
       if (empty) empty.hidden = true;
     }
