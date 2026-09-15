@@ -229,7 +229,7 @@
     lastAnimationAt = now;
     // Keep the probability-wave motion readable rather than strobing on screen.
     // This is a display-time scale only; it does not alter photon emission or sampling.
-    state.waveTime += elapsed * 0.001 * 0.8;
+    state.waveTime += elapsed * 0.001 * 0.25;
 
     if (state.mode === "photon" && state.photonsRunning) {
       const emissionInterval = 1000 / state.photonRate;
@@ -301,8 +301,8 @@
     ctx.globalCompositeOperation = "screen";
 
     // The source is drawn as an expanding probability amplitude, not a classical ray.
-    for (let band = 0; band < 6; band += 1) {
-      const radius = 12 + ((state.waveTime * 38 + band * 34) % Math.max(24, maxRadius));
+    for (let band = 0; band < 4; band += 1) {
+      const radius = 12 + ((state.waveTime * 18 + band * 48) % Math.max(24, maxRadius));
       const fade = clamp(1 - radius / maxRadius, 0.08, 1);
       ctx.strokeStyle = light.solid;
       ctx.globalAlpha = 0.04 + fade * 0.11;
@@ -379,8 +379,8 @@
     const maxRadius = screenX - barrierX + 18;
     const colors = ["#64c7d9", "#b58ce5"];
     slitPoints.forEach((point, sourceIndex) => {
-      for (let band = 0; band < 7; band += 1) {
-        const radius = 16 + ((state.waveTime * 44 + band * 42 + sourceIndex * 21) % maxRadius);
+      for (let band = 0; band < 4; band += 1) {
+        const radius = 16 + ((state.waveTime * 22 + band * 58 + sourceIndex * 29) % maxRadius);
         const fade = clamp(1 - radius / maxRadius, 0.08, 1);
         ctx.save();
         ctx.strokeStyle = colors[sourceIndex];
