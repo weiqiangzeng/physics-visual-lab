@@ -57,6 +57,7 @@
     vectorStatus: document.getElementById("vectorStatus"),
     highlightPotentialLabel: document.getElementById("highlightPotentialLabel"),
     fieldInteractionHint: document.getElementById("fieldInteractionHint"),
+    fieldColorLegend: document.querySelector(".field-color-legend"),
     motionTimeLabel: document.getElementById("motionTimeLabel"),
     stepIndex: document.getElementById("stepIndex"),
     stepTitle: document.getElementById("stepTitle"),
@@ -89,20 +90,20 @@
   };
   const WORLD = { xMin: -4.5, xMax: 4.5, yMin: -3, yMax: 3 };
   const modes = {
-    single: { title: "单电荷场", goal: "电场先存在，试探电荷只负责测量", hint: "拖动探针，比较 E、F 和 V", q1: 6, q2: -6, separation: 3, probeX: 2.4, probeY: 1.2, key: "◎ 半径 2 m" },
-    superposition: { title: "电场矢量叠加", goal: "同一点的合场来自各源电荷场强的矢量和", hint: "定位中垂线，寻找 V=0 但 E≠0", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 偶极中垂线" },
-    potential: { title: "等势线地形", goal: "沿等势线移动不做功，穿越等势线电势能改变", hint: "点击播放：从 V≈0 的中垂线释放正试探电荷，观察它驶向负电荷", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 定位高亮线" },
-    work: { title: "静电场做功", goal: "同一对端点间电场力做功与路径无关", hint: "比较直达与绕行路径的终点功", q1: 6, q2: -6, separation: 3, probeX: -3, probeY: -1.5, key: "◎ 到达共同终点" }
+    potential: { title: "二维电势地形", goal: "z=V(x,y)：电势高度与等势线共同描述偶极子", hint: "拖动试探电荷，观察 V、E 与 F 的局部变化", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 定位高亮等势线" },
+    space3d: { title: "三维偶极子电场", goal: "E(x,y,z) 在空间中如何从正电荷指向负电荷？", hint: "旋转空间视角，观察场线和矢量的方向与强弱", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 回到探针位置" }
   };
+  // 老的教师预设仍可能传入这些模式名；只把它们映射到当前两个核心视图。
+  const MODE_ALIASES = { single: "potential", superposition: "potential", work: "potential", potential: "potential", space3d: "space3d" };
   const guide = [
-    { title: "沿等势线移动", prompt: "位置改变但 V 不变，电场力是否做功？" },
-    { title: "穿越等势线", prompt: "跨过高亮线后，V、U 和电场力做功怎样变化？" },
-    { title: "反转试探电荷", prompt: "保持位置不变，为什么 V 不变而 U=q₀V 变号？" }
+    { title: "沿等势线移动", prompt: "位置改变时，为什么 V 基本保持不变？" },
+    { title: "穿越等势线", prompt: "跨过高亮线后，V 与地形高度怎样改变？" },
+    { title: "反转试探电荷", prompt: "保持位置不变，为什么 E 不变而 F 反向？" }
   ];
   const generalGuide = [
-    { title: "先定义场强", prompt: "把 q₀ 变为零，空间中的 E 和 V 是否消失？" },
-    { title: "比较标量与矢量", prompt: "为什么某一点可以 V=0 但 E 不等于零，或 E=0 但 V 不等于零？" },
-    { title: "核对做功与能量", prompt: "两条路径形状不同，为什么终点的 W 和 ΔU 仍完全一致？" }
+    { title: "旋转空间电场", prompt: "从不同视角观察 E(x,y,z) 的方向和强弱如何分布？" },
+    { title: "对照二维地形", prompt: "z=V(x,y) 的坡度如何对应电场方向？" },
+    { title: "选择试探电荷", prompt: "改变 q₀ 的正负，为什么电场不变而受力方向改变？" }
   ];
   const state = {
     mode: "potential",
@@ -204,8 +205,31 @@
   }
 
   function surfaceFieldAt(x, y) {
-    if (state.mode === "work") return model.uniformState(inputState(), { x, y });
     return model.fieldFromSources(model.pointSources(inputState()), x, y);
+  }
+
+  function spaceFieldAt(x, y, z) {
+    const sources = model.pointSources(inputState({ mode: "potential" }));
+    let ex = 0;
+    let ey = 0;
+    let ez = 0;
+    let potential = 0;
+    let nearest = Infinity;
+    for (const source of sources) {
+      if (Math.abs(source.qNanoC) < 1e-12) continue;
+      const dx = x - source.x;
+      const dy = y - source.y;
+      const dz = z;
+      const radius = Math.hypot(dx, dy, dz);
+      nearest = Math.min(nearest, radius);
+      if (radius < 1e-6) return { ex: NaN, ey: NaN, ez: NaN, potential: NaN, magnitude: Infinity, nearest: 0 };
+      const scale = model.K * source.qNanoC * 1e-9 / (radius * radius * radius);
+      ex += scale * dx;
+      ey += scale * dy;
+      ez += scale * dz;
+      potential += model.K * source.qNanoC * 1e-9 / radius;
+    }
+    return { ex, ey, ez, potential, magnitude: Math.hypot(ex, ey, ez), nearest: nearest === Infinity ? null : nearest };
   }
 
   function highlightTolerance() {
@@ -411,11 +435,16 @@
         const value = Number.isFinite(point.value) ? clamp(point.value, -TERRAIN.clipV, TERRAIN.clipV) : 0;
         positions.push(point.x, point.y, terrainHeight(value));
         const magnitude = Number.isFinite(grid.magnitudes[index]) ? grid.magnitudes[index] : 0;
-        const fieldRatio = clamp(Math.log1p(magnitude / grid.fieldReference) / Math.log1p(8), 0, 1);
+        const fieldRatio = clamp(Math.log1p(magnitude / grid.fieldReference) / Math.log1p(12), 0, 1);
         const potentialRatio = value / TERRAIN.clipV;
-        const hue = potentialRatio > .03 ? .015 : potentialRatio < -.03 ? .62 : .48;
-        const saturation = potentialRatio > .03 || potentialRatio < -.03 ? .62 + .2 * fieldRatio : .3 + .3 * fieldRatio;
-        const lightness = .19 + .3 * fieldRatio;
+        // Hue gives field strength a visible continuous scale while the palette branch keeps V's sign legible.
+        const hue = potentialRatio > .03
+          ? .12 - .12 * fieldRatio
+          : potentialRatio < -.03
+            ? .48 + .16 * fieldRatio
+            : .37 + .08 * fieldRatio;
+        const saturation = potentialRatio > .03 || potentialRatio < -.03 ? .68 + .18 * fieldRatio : .42 + .28 * fieldRatio;
+        const lightness = .27 + .21 * fieldRatio;
         color.setHSL(hue, saturation, lightness);
         colors.push(color.r, color.g, color.b);
       }
@@ -489,10 +518,10 @@
     return line;
   }
 
-  function addArrow(group, x, y, z, ex, ey, color, length = .42) {
-    const magnitude = Math.hypot(ex, ey);
+  function addArrow(group, x, y, z, ex, ey, color, length = .42, ez = 0) {
+    const magnitude = Math.hypot(ex, ey, ez);
     if (!Number.isFinite(magnitude) || magnitude < 1e-8) return;
-    const direction = new THREE.Vector3(ex / magnitude, ey / magnitude, 0);
+    const direction = new THREE.Vector3(ex / magnitude, ey / magnitude, ez / magnitude);
     const arrow = new THREE.ArrowHelper(direction, new THREE.Vector3(x, y, z), length, color, .12, .07);
     group.add(arrow);
   }
@@ -521,6 +550,110 @@
     });
   }
 
+  function traceSpaceFieldLine(start, direction, steps = 92) {
+    const points = [new THREE.Vector3(start.x, start.y, start.z)];
+    let point = { x: start.x, y: start.y, z: start.z };
+    for (let index = 0; index < steps; index += 1) {
+      const sample = spaceFieldAt(point.x, point.y, point.z);
+      if (!Number.isFinite(sample.magnitude) || sample.magnitude < 1e-7 || sample.nearest < .24) break;
+      const step = .105;
+      const next = {
+        x: point.x + direction * sample.ex / sample.magnitude * step,
+        y: point.y + direction * sample.ey / sample.magnitude * step,
+        z: point.z + direction * sample.ez / sample.magnitude * step
+      };
+      if (next.x < WORLD.xMin || next.x > WORLD.xMax || next.y < WORLD.yMin || next.y > WORLD.yMax || next.z < -3.2 || next.z > 3.2) break;
+      points.push(new THREE.Vector3(next.x, next.y, next.z));
+      point = next;
+    }
+    return points;
+  }
+
+  function buildSpaceFieldLines(group, sources) {
+    const positive = sources.find((source) => source.qNanoC > 0);
+    const negative = sources.find((source) => source.qNanoC < 0);
+    const paths = [];
+    if (positive) {
+      for (let index = 0; index < 16; index += 1) {
+        const angle = index * Math.PI * 2 / 16;
+        const radius = .42;
+        const start = { x: positive.x + radius * Math.cos(angle), y: positive.y + radius * Math.sin(angle), z: .15 * Math.sin(angle * 2) };
+        const path = traceSpaceFieldLine(start, 1);
+        if (path.length > 8) paths.push(path);
+      }
+    }
+    if (negative) {
+      for (let index = 0; index < 8; index += 1) {
+        const angle = index * Math.PI * 2 / 8 + Math.PI / 8;
+        const radius = .42;
+        const start = { x: negative.x + radius * Math.cos(angle), y: negative.y + radius * Math.sin(angle), z: .38 * Math.sin(angle) };
+        const path = traceSpaceFieldLine(start, -1);
+        if (path.length > 8) paths.push(path);
+      }
+    }
+    paths.forEach((path, index) => {
+      const geometry = new THREE.BufferGeometry().setFromPoints(path);
+      const material = new THREE.LineBasicMaterial({ color: index % 3 === 0 ? 0xf2b84b : 0x64c7d9, transparent: true, opacity: .68, depthTest: false });
+      group.add(new THREE.Line(geometry, material));
+    });
+  }
+
+  function addSpaceVectorGrid(group) {
+    if (!state.showVectors) return;
+    for (const z of [-1.55, 0, 1.55]) {
+      for (let y = -2.4; y <= 2.4; y += 1.2) {
+        for (let x = -4; x <= 4; x += 1.2) {
+          const sample = spaceFieldAt(x, y, z);
+          if (!Number.isFinite(sample.magnitude) || sample.magnitude < 1e-5 || sample.nearest < .5) continue;
+          const ratio = clamp(Math.log1p(sample.magnitude / 8) / Math.log1p(10), 0, 1);
+          const color = new THREE.Color().setHSL(.5 - .12 * ratio, .72, .48 + .12 * ratio).getHex();
+          addArrow(group, x, y, z, sample.ex, sample.ey, color, .2 + .3 * ratio, sample.ez);
+        }
+      }
+    }
+  }
+
+  function addSpaceSourceMarkers(group, sources) {
+    sources.forEach((source, index) => {
+      if (Math.abs(source.qNanoC) < 1e-12) return;
+      const positive = source.qNanoC > 0;
+      const color = positive ? 0xff7468 : 0x7392ff;
+      const marker = new THREE.Mesh(new THREE.SphereGeometry(.3, 24, 16), new THREE.MeshStandardMaterial({ color, roughness: .4, metalness: .08, emissive: color, emissiveIntensity: .16 }));
+      marker.position.set(source.x, source.y, .18);
+      group.add(marker);
+      const label = makeLabel(`Q${index + 1} ${signed(source.qNanoC)} nC`, positive ? "#ff9b91" : "#9badff");
+      label.position.set(source.x, source.y, .72);
+      group.add(label);
+    });
+  }
+
+  function addSpaceProbe(group, sample) {
+    const color = state.testCharge > 0 ? 0xf2b84b : state.testCharge < 0 ? 0xb58ce5 : 0xdce5df;
+    const probe = new THREE.Mesh(new THREE.SphereGeometry(.23, 24, 16), new THREE.MeshStandardMaterial({ color, roughness: .32, metalness: .1, emissive: color, emissiveIntensity: .2 }));
+    probe.position.set(sample.x, sample.y, .3);
+    probe.userData.isProbe = true;
+    group.add(probe);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.34, .025, 8, 32), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: state.dragging ? .95 : .6 }));
+    ring.position.copy(probe.position);
+    group.add(ring);
+    const label = makeLabel(`q₀ ${signed(state.testCharge)} nC`, state.testCharge >= 0 ? "#ffd77d" : "#d4c2ff");
+    label.position.set(sample.x, sample.y, .78);
+    group.add(label);
+    if (sample.magnitude > 1e-8) {
+      const space = spaceFieldAt(sample.x, sample.y, 0);
+      addArrow(group, sample.x, sample.y, .3, space.ex, space.ey, 0x64c7d9, .62, space.ez);
+      if (state.showForce && Math.abs(state.testCharge) > 1e-9) addArrow(group, sample.x, sample.y, .34, sample.forceXNanoN, sample.forceYNanoN, 0xf2b84b, .78, 0);
+    }
+    const velocityMagnitude = Math.hypot(state.motionVelocityX, state.motionVelocityY);
+    const directionMagnitude = velocityMagnitude > 1e-7 ? velocityMagnitude : Math.hypot(state.motionLastDirectionX, state.motionLastDirectionY);
+    if (state.motionStarted && directionMagnitude > 1e-7) {
+      const directionX = velocityMagnitude > 1e-7 ? state.motionVelocityX : state.motionLastDirectionX;
+      const directionY = velocityMagnitude > 1e-7 ? state.motionVelocityY : state.motionLastDirectionY;
+      addArrow(group, sample.x, sample.y, .48, directionX, directionY, 0x79d992, .92);
+    }
+    threeState.probe = probe;
+  }
+
   function addWorkScene(group) {
     const leftPositive = state.uniformField >= 0;
     [-4.15, 4.15].forEach((x, index) => {
@@ -543,11 +676,11 @@
   }
 
   function addMotionTrail(group) {
-    if (state.mode === "work" || state.motionTrajectory.length < 2) return;
+    if (state.motionTrajectory.length < 2) return;
     const positions = [];
     state.motionTrajectory.forEach((point) => {
-      const sample = surfaceFieldAt(point.x, point.y);
-      positions.push(point.x, point.y, terrainHeight(sample.potential) + .16);
+      const height = state.mode === "space3d" ? .16 : terrainHeight(surfaceFieldAt(point.x, point.y).potential) + .16;
+      positions.push(point.x, point.y, height);
     });
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -595,29 +728,34 @@
 
   function drawThreeScene(sample) {
     if (!threeState.renderer) return;
-    const grid = buildSurfaceGrid();
     clearDynamicScene();
-    const terrain = buildTerrain(grid);
-    threeState.dynamic.add(terrain);
-    threeState.dynamic.add(buildEquipotentialLines(grid));
-    threeState.dynamic.add(buildHighlightLine());
-    if (state.mode === "work") addWorkScene(threeState.dynamic);
-    else {
+    if (state.mode === "space3d") {
+      const spacePlane = new THREE.GridHelper(12, 12, 0x416360, 0x1d3937);
+      spacePlane.rotation.x = Math.PI / 2;
+      spacePlane.position.z = 0;
+      spacePlane.material.transparent = true;
+      spacePlane.material.opacity = .55;
+      threeState.dynamic.add(spacePlane);
+      addSpaceSourceMarkers(threeState.dynamic, sample.sources);
+      if (state.showFieldLines) buildSpaceFieldLines(threeState.dynamic, sample.sources);
+      addSpaceVectorGrid(threeState.dynamic);
+      addMotionTrail(threeState.dynamic);
+      addSpaceProbe(threeState.dynamic, sample);
+    } else {
+      const grid = buildSurfaceGrid();
+      threeState.dynamic.add(buildTerrain(grid));
+      threeState.dynamic.add(buildEquipotentialLines(grid));
+      threeState.dynamic.add(buildHighlightLine());
       addSourceMarkers(threeState.dynamic, sample.sources);
       addVectorGrid(threeState.dynamic);
+      addMotionTrail(threeState.dynamic);
+      addProbe(threeState.dynamic, sample);
     }
-    addMotionTrail(threeState.dynamic);
-    addProbe(threeState.dynamic, sample);
     const { width, height } = resizeThree();
-    const projected = new THREE.Vector3(sample.x, sample.y, terrainHeight(sample.potential) + .27).project(threeState.camera);
+    const projected = new THREE.Vector3(sample.x, sample.y, state.mode === "space3d" ? .3 : terrainHeight(sample.potential) + .27).project(threeState.camera);
     fieldGeometry.mode = state.mode;
     fieldGeometry.probe = { x: (projected.x + 1) * width / 2, y: (1 - projected.y) * height / 2 };
-    fieldGeometry.path = state.mode === "work" ? Array.from({ length: 91 }, (_, index) => {
-      const point = model.pathPoint(state.path, index / 90);
-      const pointSample = surfaceFieldAt(point.x, point.y);
-      const screen = new THREE.Vector3(point.x, point.y, terrainHeight(pointSample.potential) + .2).project(threeState.camera);
-      return { x: (screen.x + 1) * width / 2, y: (1 - screen.y) * height / 2, progress: index / 90 };
-    }) : [];
+    fieldGeometry.path = [];
     threeState.renderer.render(threeState.scene, threeState.camera);
   }
 
@@ -735,9 +873,6 @@
   }
 
   function statusFor(sample) {
-    if (state.mode === "work") {
-      return state.progress >= .999 ? { badge: "路径终点一致", className: "is-special", nature: "W = −ΔU", explanation: `路径 A、B 的总功均为 ${signed(sample.finalWorkNanoJ, 1)} nJ` } : { badge: "路径比较中", className: "is-special", nature: "静电场力是保守力", explanation: "沿途过程可以不同，端点决定总功和势能变化" };
-    }
     if (state.motionRunning) {
       return { badge: "运动中", className: "is-motion", nature: "F = q₀E 驱动", explanation: `沿电场力方向推进 · 教学动画时间 ${state.motionElapsed.toFixed(1)} s` };
     }
@@ -746,40 +881,40 @@
       return { badge: automatic ? "自动暂停" : "已暂停", className: automatic ? "is-critical" : "is-special", nature: "当前位置已保留", explanation: state.motionPauseReason };
     }
     if (state.mode === "potential" && !state.motionStarted) {
-      return { badge: "准备播放", className: "is-motion", nature: "释放后 F=q₀E 驱动", explanation: "试探电荷位于 V≈0 的中垂线；点击播放观察它驶向负电荷" };
+      return { badge: "准备观察", className: "is-motion", nature: "地形坡度给出电场方向", explanation: "拖动试探电荷，比较等势线间距、地形坡度和局部场强" };
     }
     if (state.mode === "potential") {
-      if (Math.abs(state.testCharge) < 1e-9) return { badge: "q₀=0，场仍存在", className: "is-special", nature: "V 不变，U=0", explanation: "试探电荷为零时 F=U=0；沿等势线与穿线的电势关系仍由 V 决定" };
+      if (Math.abs(state.testCharge) < 1e-9) return { badge: "q₀=0，场仍存在", className: "is-special", nature: "E 与 V 仍由源电荷决定", explanation: "试探电荷为零时 F=0；电势地形与等势线不受影响" };
       const delta = highlightDelta(sample);
       if (Math.abs(delta.deltaV) <= highlightTolerance()) {
-        return { badge: state.demoRunning ? "沿等势线演示" : "沿等势线", className: "is-special", nature: "电场力不做功", explanation: `位置改变 · ΔV≈${signed(delta.deltaV, 2)} V · ΔU≈${signed(delta.deltaU, 2)} nJ` };
+        return { badge: state.demoRunning ? "沿等势线观察" : "同一等势线", className: "is-special", nature: "V 基本不变", explanation: `位置改变 · ΔV≈${signed(delta.deltaV, 2)} V` };
       }
-      return { badge: "穿越等势线", className: "is-critical", nature: "电势能改变", explanation: `ΔV=${signed(delta.deltaV, 2)} V · Wₑ=−ΔU=${signed(delta.work, 2)} nJ` };
+      return { badge: "穿越等势线", className: "is-critical", nature: "电势正在改变", explanation: `ΔV=${signed(delta.deltaV, 2)} V · 地形高度随 V 改变` };
     }
-    if (state.mode === "superposition" && Math.abs(sample.potential) < 1e-8 && sample.magnitude > 1e-6) return { badge: "V=0，E≠0", className: "is-special", nature: "电势相消，场强未相消", explanation: "电势按标量相加；场强仍需按方向做矢量和" };
+    if (state.mode === "space3d" && Math.abs(sample.potential) < 1e-8 && sample.magnitude > 1e-6) return { badge: "空间场分布", className: "is-special", nature: "E=-∇V", explanation: "场线从正电荷出发指向负电荷；箭头长度表示场强相对大小" };
     if (sample.magnitude < 1e-8 && Math.abs(sample.potential) < 1e-8) return { badge: "场与电势均为零", className: "is-zero", nature: "源电荷贡献相消或为零", explanation: "改变源电荷后重新观察空间分布" };
     if (Math.abs(state.testCharge) < 1e-9) return { badge: "q₀=0，场仍存在", className: "is-special", nature: "E 与 q₀ 无关", explanation: "试探电荷为零时 F=U=0，但源电荷建立的 E、V 不变" };
     return { badge: sample.potential >= 0 ? "正电势区域" : "负电势区域", className: sample.potential >= 0 ? "is-positive" : "is-negative", nature: state.testCharge > 0 ? "F 与 E 同向" : "F 与 E 反向", explanation: "E 的方向按正试探电荷受力方向定义" };
   }
 
   function renderControls(sample) {
-    const workMode = state.mode === "work";
-    const twoSource = state.mode === "superposition" || state.mode === "potential";
+    const workMode = false;
+    const twoSource = true;
     refs.source1Section.hidden = workMode;
     refs.source2Section.hidden = !twoSource;
     refs.separationSection.hidden = !twoSource;
-    refs.uniformSection.hidden = !workMode;
-    refs.pathSection.hidden = !workMode;
+    if (refs.uniformSection) refs.uniformSection.hidden = !workMode;
+    if (refs.pathSection) refs.pathSection.hidden = !workMode;
     refs.source1Input.value = state.q1;
     refs.source2Input.value = state.q2;
     refs.separationInput.value = state.separation;
-    refs.uniformInput.value = state.uniformField;
+    if (refs.uniformInput) refs.uniformInput.value = state.uniformField;
     refs.testChargeInput.value = state.testCharge;
-    refs.progressInput.value = state.progress;
+    if (refs.progressInput) refs.progressInput.value = state.progress;
     refs.source1Value.textContent = `${signed(state.q1)} nC`;
     refs.source2Value.textContent = `${signed(state.q2)} nC`;
     refs.separationValue.textContent = `${state.separation.toFixed(1)} m`;
-    refs.uniformValue.textContent = `${signed(state.uniformField)} N/C`;
+    if (refs.uniformValue) refs.uniformValue.textContent = `${signed(state.uniformField)} N/C`;
     refs.testChargeValue.textContent = `${signed(state.testCharge)} nC`;
     const chargeSign = Math.sign(state.testCharge);
     refs.polarityButtons.forEach((button) => {
@@ -792,22 +927,25 @@
       : chargeSign > 0
         ? "已选择正试探电荷：播放时 F 与 E 同向，q₀ 将驶向负电荷"
         : "q₀=0 时没有电场力；请选择正或负试探电荷后播放";
-    refs.progressLabel.textContent = workMode ? "路径进度" : "探针坐标";
-    refs.progressValue.textContent = workMode ? `${(state.progress * 100).toFixed(1)}% · ${state.path === "direct" ? "路径 A" : "路径 B"}` : `x = ${sample.x.toFixed(2)} m · y = ${sample.y.toFixed(2)} m`;
-    refs.progressInput.disabled = !workMode;
+    refs.progressLabel.textContent = "探针坐标";
+    refs.progressValue.textContent = `x = ${sample.x.toFixed(2)} m · y = ${sample.y.toFixed(2)} m`;
+    if (refs.progressInput) refs.progressInput.disabled = true;
     const playing = workMode ? state.running : state.motionRunning;
     refs.playButton.disabled = false;
     refs.pauseButton.disabled = false;
     refs.playButton.setAttribute("aria-pressed", String(playing));
-    refs.playButton.textContent = playing ? "▶ 运行中" : (!workMode && state.motionStarted ? "▶ 继续" : "▶ 播放");
-    refs.motionTimeLabel.textContent = workMode
-      ? "教学动画时间：路径播放"
-      : state.motionStarted ? `教学动画时间：${state.motionElapsed.toFixed(1)} s` : "教学动画时间：未播放";
+    refs.playButton.textContent = playing ? "▶ 运行中" : (state.motionStarted ? "▶ 继续" : "▶ 播放");
+    refs.motionTimeLabel.textContent = state.motionStarted ? `教学动画时间：${state.motionElapsed.toFixed(1)} s` : "教学动画时间：未播放";
     refs.keyButton.textContent = modes[state.mode].key;
     refs.sceneTabs.forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
     refs.pathButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.path === state.path));
     refs.rateButtons.forEach((button) => button.classList.toggle("is-active", Number(button.dataset.rate) === state.playbackRate));
-    [refs.source1Input, refs.source2Input, refs.separationInput, refs.uniformInput, refs.testChargeInput, refs.progressInput].forEach(rangeProgress);
+    [[refs.showFieldLinesToggle, state.showFieldLines], [refs.showVectorsToggle, state.showVectors], [refs.showEquipotentialToggle, state.showEquipotential], [refs.showForceToggle, state.showForce], [refs.showPotentialMapToggle, state.showPotentialMap]].forEach(([input, checked]) => { if (input) input.checked = checked; });
+    if (refs.showFieldLinesToggle) refs.showFieldLinesToggle.closest("label").hidden = state.mode !== "space3d";
+    if (refs.showVectorsToggle) refs.showVectorsToggle.closest("label").hidden = state.mode !== "space3d";
+    if (refs.showEquipotentialToggle) refs.showEquipotentialToggle.closest("label").hidden = state.mode === "space3d";
+    if (refs.showPotentialMapToggle) refs.showPotentialMapToggle.closest("label").hidden = state.mode === "space3d";
+    [refs.source1Input, refs.source2Input, refs.separationInput, refs.uniformInput, refs.testChargeInput, refs.progressInput].filter(Boolean).forEach(rangeProgress);
   }
 
   function renderReadouts(sample) {
@@ -826,13 +964,7 @@
     refs.stateBadge.className = `state-badge ${status.className}`;
     refs.fieldNature.textContent = status.nature;
     refs.fieldExplanation.textContent = status.explanation;
-    if (state.mode === "work") refs.formulaReadout.textContent = `W = ${signed(sample.workNanoJ, 2)} nJ = −ΔU`;
-    else if (state.mode === "potential") {
-      const delta = highlightDelta(sample);
-      refs.formulaReadout.textContent = Math.abs(delta.deltaV) <= highlightTolerance() ? `ΔV≈0 · ΔU≈0 · Wₑ≈−ΔU≈0` : `Wₑ = −ΔU = ${signed(delta.work, 2)} nJ`;
-    }
-    else if (state.mode === "single") refs.formulaReadout.textContent = `E = k|Q|/r² = ${sample.magnitude.toFixed(3)} N/C`;
-    else refs.formulaReadout.textContent = `E = E₁ + E₂ = ${sample.magnitude.toFixed(3)} N/C`;
+    refs.formulaReadout.textContent = state.mode === "potential" ? `z = V(x,y) = ${sample.potential.toFixed(3)} V` : `E = −∇V · |E| = ${sample.magnitude.toFixed(3)} N/C`;
   }
 
   function renderLabels(sample) {
@@ -840,20 +972,21 @@
     const currentGuide = state.mode === "potential" ? guide : generalGuide;
     refs.modeTitle.textContent = config.title;
     refs.modeGoal.textContent = config.goal;
+    if (refs.fieldColorLegend) refs.fieldColorLegend.hidden = state.mode === "space3d";
     refs.stageHint.textContent = config.hint;
     if (state.mode === "potential") {
       const delta = highlightDelta(sample);
       refs.stageHint.textContent = state.demoRunning
-        ? state.demoPhase === "along" ? "演示：沿高亮等势线移动，观察 V 与 U 基本不变" : "演示：穿越高亮等势线，观察 ΔU 与 Wₑ"
-        : state.demoPhase === "complete" ? "结论：沿等势线 Wₑ≈0；穿越等势线时 ΔU≠0" : config.hint;
+        ? state.demoPhase === "along" ? "演示：沿高亮等势线移动，观察 V 基本不变" : "演示：穿越高亮等势线，观察 V 和地形高度变化"
+        : state.demoPhase === "complete" ? "结论：同一等势线对应相同电势；穿越等势线时电势改变" : config.hint;
       refs.highlightPotentialLabel.textContent = `高亮等势线：V = ${state.highlightLevel.toFixed(2)} V`;
       refs.fieldInteractionHint.textContent = state.demoRunning
-        ? state.demoPhase === "along" ? "位置在改变 · 高亮线上的 V、U 基本不变" : "正在穿线 · V、U 与 Wₑ 正在改变"
+        ? state.demoPhase === "along" ? "位置在改变 · 高亮线上的 V 基本不变" : "正在穿线 · V 和地形高度正在改变"
         : state.demoPhase === "complete" ? "结论已停在穿线后状态 · 可拖回高亮线复核" : "点击播放：从 V≈0 的中垂线释放 q₀；也可拖动 q₀";
       if (Math.abs(delta.deltaV) <= highlightTolerance()) refs.stepTitle.textContent = "沿等势线移动";
     } else {
-      refs.highlightPotentialLabel.textContent = "z = V(x,y)";
-      refs.fieldInteractionHint.textContent = "左键空白旋转 · 滚轮缩放 · Shift/右键平移 · 拖动 q₀";
+      refs.highlightPotentialLabel.textContent = "空间电场：E(x,y,z)";
+      refs.fieldInteractionHint.textContent = "旋转视角观察场线与矢量 · 拖动 q₀ 读取局部场强";
     }
     if (state.mode !== "work" && state.motionRunning) {
       refs.stageHint.textContent = "播放中：试探电荷按 F=q₀E 运动，绿色箭头表示速度方向";
@@ -862,34 +995,12 @@
       refs.stageHint.textContent = state.motionPauseReason;
       refs.fieldInteractionHint.textContent = "已停在当前位置 · 点击继续，或拖动 q₀ 后从新位置开始";
     }
-    if (state.mode === "single") {
-      refs.profileKicker.textContent = "RADIAL PROFILE";
-      refs.profileTitle.textContent = "场强 E(r)";
-      refs.profileStatus.textContent = "E ∝ 1/r²";
-      refs.vectorKicker.textContent = "POTENTIAL PROFILE";
-      refs.vectorTitle.textContent = "电势 V(r)";
-      refs.vectorStatus.textContent = "V ∝ 1/r";
-    } else if (state.mode === "work") {
-      refs.profileKicker.textContent = "PATH POTENTIAL";
-      refs.profileTitle.textContent = "两条路径上的 V(s)";
-      refs.profileStatus.textContent = `Vᴀ=${sample.start.potential.toFixed(1)} V · Vʙ=${sample.end.potential.toFixed(1)} V`;
-      refs.vectorKicker.textContent = "CONSERVATIVE WORK";
-      refs.vectorTitle.textContent = "W(s) 与 −ΔU(s)";
-      refs.vectorStatus.textContent = `终点 W=${signed(sample.finalWorkNanoJ, 1)} nJ`;
-    } else {
-      refs.profileKicker.textContent = "SCALAR PROFILE";
-      refs.profileTitle.textContent = "探针高度上的 V(x)";
-      refs.profileStatus.textContent = state.mode === "superposition" ? "电势按代数和叠加" : "等势线越密，|∇V| 越大";
-      refs.vectorKicker.textContent = "VECTOR COMPONENTS";
-      refs.vectorTitle.textContent = "场强分量 Eₓ(x)、Eᵧ(x)";
-      refs.vectorStatus.textContent = "E = −∇V";
-    }
     const routeStep = state.mode === "potential" ? (state.demoPhase === "complete" ? 1 : Math.abs(highlightDelta(sample).deltaV) <= highlightTolerance() ? 0 : 1) : state.guideStep;
     refs.stepIndex.textContent = String(routeStep + 1).padStart(2, "0");
     refs.stepTitle.textContent = state.mode === "potential" && state.demoPhase === "complete" ? "穿越等势线" : currentGuide[routeStep].title;
     refs.stepPrompt.textContent = currentGuide[routeStep].prompt;
     refs.routeSteps.forEach((button, index) => button.classList.toggle("is-active", index === routeStep));
-    refs.stepButton.textContent = state.mode === "potential" ? (state.demoRunning ? "暂停演示" : state.demoPhase === "complete" ? "重新演示" : state.demoPath.length ? "继续演示" : "分步演示") : "分步演示";
+    if (refs.stepButton) refs.stepButton.textContent = state.mode === "potential" ? (state.demoRunning ? "暂停演示" : state.demoPhase === "complete" ? "重新演示" : state.demoPath.length ? "继续演示" : "分步演示") : "查看提示";
   }
 
   function buildCrossingPath(start) {
@@ -1126,7 +1237,10 @@
     const sourceChanged = ["mode", "q1", "q2", "separation", "uniformField"].some((key) => key in next);
     const probeChanged = "probeX" in next || "probeY" in next;
     const stateChanged = sourceChanged || "testCharge" in next;
-    if ("mode" in next && modes[next.mode]) state.mode = next.mode;
+    if ("mode" in next) {
+      const normalizedMode = MODE_ALIASES[next.mode] || next.mode;
+      if (modes[normalizedMode]) state.mode = normalizedMode;
+    }
     if ("q1" in next) state.q1 = clamp(next.q1, -8, 8);
     if ("q2" in next) state.q2 = clamp(next.q2, -8, 8);
     if ("separation" in next) state.separation = clamp(next.separation, 1.2, 5);
@@ -1155,23 +1269,25 @@
   }
 
   function setMode(modeName) {
-    const config = modes[modeName];
+    const normalizedMode = MODE_ALIASES[modeName] || modeName;
+    const config = modes[normalizedMode];
     if (!config) return;
-    Object.assign(state, { mode: modeName, q1: config.q1, q2: config.q2, separation: config.separation, probeX: config.probeX, probeY: config.probeY, progress: 0, running: false, path: "direct", demoRunning: false, demoPhase: "idle", demoPath: [], demoProgress: 0 });
+    Object.assign(state, { mode: normalizedMode, q1: config.q1, q2: config.q2, separation: config.separation, probeX: config.probeX, probeY: config.probeY, progress: 0, running: false, path: "direct", demoRunning: false, demoPhase: "idle", demoPath: [], demoProgress: 0 });
+    Object.assign(state, normalizedMode === "space3d"
+      ? { showFieldLines: true, showVectors: true, showEquipotential: false, showForce: true, showPotentialMap: false }
+      : { showFieldLines: false, showVectors: false, showEquipotential: true, showForce: true, showPotentialMap: true });
     resetMotionState();
-    if (modeName === "potential") refreshHighlightAtProbe();
+    if (normalizedMode === "potential") refreshHighlightAtProbe();
     render();
   }
 
   function keyState() {
-    if (state.mode === "single") setState({ probeX: 2, probeY: 0, running: false });
-    else if (state.mode === "superposition") setState({ probeX: 0, probeY: 2, running: false });
-    else if (state.mode === "potential") setState({ probeX: state.highlightAnchorX, probeY: state.highlightAnchorY, running: false });
-    else setState({ progress: 1, running: false });
+    if (state.mode === "potential") setState({ probeX: state.highlightAnchorX, probeY: state.highlightAnchorY, running: false });
+    else setState({ probeX: 0, probeY: 2, running: false });
   }
 
-  [[refs.source1Input, "q1"], [refs.source2Input, "q2"], [refs.separationInput, "separation"], [refs.uniformInput, "uniformField"], [refs.testChargeInput, "testCharge"]].forEach(([input, key]) => input.addEventListener("input", () => setState({ [key]: input.value, running: false })));
-  refs.progressInput.addEventListener("input", () => setState({ progress: refs.progressInput.value, running: false }));
+  [[refs.source1Input, "q1"], [refs.source2Input, "q2"], [refs.separationInput, "separation"], [refs.uniformInput, "uniformField"], [refs.testChargeInput, "testCharge"]].filter(([input]) => input).forEach(([input, key]) => input.addEventListener("input", () => setState({ [key]: input.value, running: false })));
+  if (refs.progressInput) refs.progressInput.addEventListener("input", () => setState({ progress: refs.progressInput.value, running: false }));
   refs.sceneTabs.forEach((button) => button.addEventListener("click", () => setMode(button.dataset.mode)));
   refs.routeSteps.forEach((button, index) => button.addEventListener("click", () => { state.guideStep = index; render(); }));
   refs.pathButtons.forEach((button) => button.addEventListener("click", () => { state.path = button.dataset.path; state.progress = 0; state.running = false; render(); }));
@@ -1181,9 +1297,10 @@
     setState({ testCharge: Number(button.dataset.chargeSign) * magnitude, running: false });
   }));
   refs.presetButtons.forEach((button) => button.addEventListener("click", () => {
-    if (button.dataset.preset === "positive") setMode("single");
-    else if (button.dataset.preset === "dipole") setMode("superposition");
-    else if (button.dataset.preset === "like") setMode("potential");
+    if (button.dataset.preset === "dipole") setMode("potential");
+    else if (button.dataset.preset === "space") setMode("space3d");
+    else if (button.dataset.preset === "positive") setState({ testCharge: Math.max(Math.abs(state.testCharge), 2), running: false });
+    else if (button.dataset.preset === "negative") setState({ testCharge: -Math.max(Math.abs(state.testCharge), 2), running: false });
     else setState({ testCharge: state.testCharge === 0 ? -2 : -state.testCharge, running: false });
   }));
   refs.playButton.addEventListener("click", startMotion);
@@ -1201,7 +1318,7 @@
   });
   [[refs.showFieldLinesToggle, "showFieldLines"], [refs.showVectorsToggle, "showVectors"], [refs.showEquipotentialToggle, "showEquipotential"], [refs.showForceToggle, "showForce"], [refs.showPotentialMapToggle, "showPotentialMap"]].forEach(([input, key]) => input.addEventListener("change", () => { state[key] = input.checked; render(); }));
   refs.guideButton.addEventListener("click", () => refs.guideDialog.showModal());
-  refs.stepButton.addEventListener("click", toggleTeachingDemo);
+  if (refs.stepButton) refs.stepButton.addEventListener("click", toggleTeachingDemo);
   refs.focusButton.addEventListener("click", () => { const active = document.body.classList.toggle("focus-mode"); refs.focusButton.setAttribute("aria-pressed", String(active)); });
   refs.fullscreenButton.addEventListener("click", () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
 

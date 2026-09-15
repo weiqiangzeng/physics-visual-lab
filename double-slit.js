@@ -292,6 +292,35 @@
     ctx.restore();
   }
 
+  function drawIncidentProbabilityField(ctx, geometry, light) {
+    const { source, barrierX } = geometry;
+    const maxRadius = barrierX - source.x - 8;
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+
+    // The source is drawn as an expanding probability amplitude, not a classical ray.
+    for (let band = 0; band < 6; band += 1) {
+      const radius = 12 + ((state.waveTime * 64 + band * 34) % Math.max(24, maxRadius));
+      const fade = clamp(1 - radius / maxRadius, 0.08, 1);
+      ctx.strokeStyle = light.solid;
+      ctx.globalAlpha = 0.06 + fade * 0.16;
+      ctx.lineWidth = band === 2 ? 1.6 : 1;
+      ctx.setLineDash(band === 2 ? [] : [3, 5]);
+      ctx.beginPath(); ctx.arc(source.x, source.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+    }
+
+    // A broad fan makes the aperture, rather than a single line, the relevant object.
+    ctx.setLineDash([]); ctx.lineWidth = 1; ctx.strokeStyle = light.glow; ctx.globalAlpha = .16;
+    for (let index = 0; index < 9; index += 1) {
+      const targetY = source.y + (index - 4) * 13;
+      ctx.beginPath(); ctx.moveTo(source.x + 7, source.y);
+      ctx.quadraticCurveTo(source.x + maxRadius * .48, source.y + (targetY - source.y) * .35, barrierX - 8, targetY);
+      ctx.stroke();
+    }
+    if (state.showLabels) drawText(ctx, "ψ入射", source.x + 20, source.y - 28, light.solid, "left", 10, 700);
+    ctx.restore();
+  }
+
   function drawPhotonEvents(ctx, geometry, light) {
     const { source, barrierX, slitPoints, screenX, screenTop, screenBottom, centerY } = geometry;
     const screenHalf = (screenBottom - screenTop) * 0.5;
@@ -310,26 +339,35 @@
       const target = { x: screenX, y: centerY + photon.targetRatio * screenHalf };
       if (photon.progress < 0.36) {
         const t = photon.progress / 0.36;
-        const x = source.x + (barrierX - source.x) * t;
-        const pulse = 4 + Math.sin(photon.phase + t * Math.PI * 4) * 1.5;
-        ctx.fillStyle = light.solid;
-        ctx.beginPath(); ctx.arc(x, centerY, 2.4, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = light.glow; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(x, centerY, pulse, 0, Math.PI * 2); ctx.stroke();
+        const radius = 8 + (barrierX - source.x - 12) * t;
+        ctx.globalAlpha = .3 + .45 * (1 - t);
+        ctx.strokeStyle = light.solid; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.arc(source.x, source.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+        ctx.globalAlpha = .16;
+        ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.arc(source.x, source.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
         return;
       }
 
       const t = clamp((photon.progress - 0.36) / 0.64, 0, 1);
-      const origin = state.whichPath ? slitPoints[photon.slitIndex] : { x: barrierX, y: centerY };
-      const x = origin.x + (target.x - origin.x) * t;
-      const y = origin.y + (target.y - origin.y) * t;
-      const pulse = 5 + 2 * Math.sin(photon.phase + t * Math.PI * 5);
-      ctx.globalAlpha = 0.92;
-      ctx.fillStyle = state.whichPath ? "#f4c44e" : "#f0f1e8";
-      ctx.beginPath(); ctx.arc(x, y, 2.8, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = state.whichPath ? "rgba(244,196,78,.54)" : "rgba(100,199,217,.42)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(x, y, pulse, 0, Math.PI * 2); ctx.stroke();
+      const paths = state.whichPath ? [slitPoints[photon.slitIndex]] : slitPoints;
+      paths.forEach((slit, slitIndex) => {
+        const x = slit.x + (target.x - slit.x) * t;
+        const y = slit.y + (target.y - slit.y) * t;
+        const pulse = 5 + 2 * Math.sin(photon.phase + t * Math.PI * 5 + slitIndex * Math.PI / 2);
+        ctx.globalAlpha = state.whichPath ? .8 : .42;
+        ctx.strokeStyle = state.whichPath ? "#f4c44e" : (slitIndex === 0 ? "#64c7d9" : "#b58ce5");
+        ctx.lineWidth = state.whichPath ? 1.8 : 1.5;
+        ctx.beginPath(); ctx.arc(x, y, pulse, 0, Math.PI * 2); ctx.stroke();
+      });
+
+      // The two amplitudes do not represent two photons. One localized event appears only at detection.
+      if (t > .86) {
+        const detection = clamp((t - .86) / .14, 0, 1);
+        ctx.globalAlpha = detection;
+        ctx.fillStyle = state.whichPath ? "#f4c44e" : "#f0f1e8";
+        ctx.beginPath(); ctx.arc(target.x, target.y, 2.8 + detection * 1.4, 0, Math.PI * 2); ctx.fill();
+      }
     });
     ctx.restore();
   }
@@ -389,11 +427,14 @@
     for (let y = 0; y < h; y += 26) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
 
     drawLine(ctx, { x: 20, y: centerY }, { x: screenX, y: centerY }, "rgba(240,241,232,.18)", 1, [5, 5]);
-    drawBeam(ctx, source, { x: barrierX - 8, y: centerY }, light, .7);
 
     ctx.save(); ctx.translate(source.x, source.y);
     ctx.fillStyle = "#303731"; ctx.fillRect(-23, -13, 35, 26); ctx.strokeStyle = "rgba(240,241,232,.45)"; ctx.strokeRect(-23, -13, 35, 26);
     ctx.fillStyle = light.solid; ctx.beginPath(); ctx.arc(13, 0, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+
+    const photonMode = state.mode === "photon";
+    if (photonMode && state.showWaves) drawIncidentProbabilityField(ctx, { source, barrierX }, light);
+    if (!photonMode) drawBeam(ctx, source, { x: barrierX - 8, y: centerY }, light, .7);
 
     ctx.fillStyle = "#343b36"; ctx.fillRect(barrierX - 6, 14, 12, h - 28);
     slitPoints.forEach((point) => { ctx.clearRect(barrierX - 7, point.y - 7, 14, 14); ctx.fillStyle = light.glow; ctx.fillRect(barrierX - 2, point.y - 6, 4, 12); });
@@ -407,7 +448,6 @@
       });
     }
 
-    const photonMode = state.mode === "photon";
     if (photonMode && state.showWaves) {
       drawProbabilityWaveField(ctx, { barrierX, slitPoints, screenX });
     }
