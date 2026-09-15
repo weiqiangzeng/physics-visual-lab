@@ -334,12 +334,11 @@
     ctx.restore();
   }
 
-  function drawProbabilityWaveField(ctx, geometry, light) {
-    const { barrierX, slitPoints, screenX, centerY } = geometry;
+  function drawProbabilityWaveField(ctx, geometry) {
+    const { barrierX, slitPoints, screenX } = geometry;
     const maxRadius = screenX - barrierX + 18;
     const colors = ["#64c7d9", "#b58ce5"];
     slitPoints.forEach((point, sourceIndex) => {
-      const phaseOffset = sourceIndex * Math.PI;
       for (let band = 0; band < 7; band += 1) {
         const radius = 16 + ((state.waveTime * 72 + band * 42 + sourceIndex * 21) % maxRadius);
         const fade = clamp(1 - radius / maxRadius, 0.08, 1);
@@ -354,7 +353,6 @@
       if (state.showLabels) {
         drawText(ctx, `ψ${sourceIndex + 1}`, point.x + 12, point.y + (sourceIndex ? 17 : -10), colors[sourceIndex], "left", 10, 700);
       }
-      void phaseOffset;
     });
     if (state.showLabels) {
       const x = (barrierX + screenX) / 2;
@@ -411,7 +409,7 @@
 
     const photonMode = state.mode === "photon";
     if (photonMode && state.showWaves) {
-      drawProbabilityWaveField(ctx, { barrierX, slitPoints, screenX, centerY }, light);
+      drawProbabilityWaveField(ctx, { barrierX, slitPoints, screenX });
     }
     const probe = { x: screenX, y: probeY };
     if (state.showRays && !photonMode) {

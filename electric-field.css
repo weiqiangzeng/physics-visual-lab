@@ -28,6 +28,10 @@
 .electric-field-lab .motion-time { color:#8de6e1; font-family:ui-monospace,monospace; }
 .electric-field-lab .control-section[hidden],.electric-field-lab .segmented-section[hidden] { display:none; }
 .electric-field-lab .path-options,.electric-field-lab .rate-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:8px; }
+.electric-field-lab .charge-polarity { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin:8px 0 7px; }
+.electric-field-lab .charge-polarity button { min-width:0; min-height:28px; padding:0 5px; border:1px solid var(--lab-line); color:var(--lab-muted); background:#171b18; cursor:pointer; font-size:9px; }
+.electric-field-lab .charge-polarity button+button { border-left:0; }
+.electric-field-lab .charge-polarity button:hover,.electric-field-lab .charge-polarity button.is-active { color:#102017; border-color:var(--lab-green); background:var(--lab-green); }
 .electric-field-lab .field-presets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:8px; }
 .electric-field-lab .path-options button,.electric-field-lab .rate-options button,.electric-field-lab .field-presets button { min-width:0; min-height:30px; padding:0 4px; border:1px solid var(--lab-line); color:var(--lab-muted); background:#171b18; cursor:pointer; font-size:9px; }
 .electric-field-lab .path-options button+button,.electric-field-lab .rate-options button+button,.electric-field-lab .field-presets button:nth-child(even) { border-left:0; }

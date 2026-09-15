@@ -19,6 +19,7 @@
     separationValue: document.getElementById("separationValue"),
     uniformValue: document.getElementById("uniformValue"),
     testChargeValue: document.getElementById("testChargeValue"),
+    testChargeNote: document.getElementById("testChargeNote"),
     progressValue: document.getElementById("progressValue"),
     progressLabel: document.getElementById("progressLabel"),
     source1Section: document.getElementById("source1Section"),
@@ -71,6 +72,7 @@
     pathButtons: [...document.querySelectorAll("[data-path]")],
     presetButtons: [...document.querySelectorAll("[data-preset]")],
     rateButtons: [...document.querySelectorAll("[data-rate]")]
+    ,polarityButtons: [...document.querySelectorAll("[data-charge-sign]")]
   };
 
   const COLORS = {
@@ -779,6 +781,17 @@
     refs.separationValue.textContent = `${state.separation.toFixed(1)} m`;
     refs.uniformValue.textContent = `${signed(state.uniformField)} N/C`;
     refs.testChargeValue.textContent = `${signed(state.testCharge)} nC`;
+    const chargeSign = Math.sign(state.testCharge);
+    refs.polarityButtons.forEach((button) => {
+      const active = chargeSign !== 0 && Number(button.dataset.chargeSign) === chargeSign;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    refs.testChargeNote.textContent = chargeSign < 0
+      ? "已选择负试探电荷：播放时 F 与 E 反向，q₀ 将驶向正电荷"
+      : chargeSign > 0
+        ? "已选择正试探电荷：播放时 F 与 E 同向，q₀ 将驶向负电荷"
+        : "q₀=0 时没有电场力；请选择正或负试探电荷后播放";
     refs.progressLabel.textContent = workMode ? "路径进度" : "探针坐标";
     refs.progressValue.textContent = workMode ? `${(state.progress * 100).toFixed(1)}% · ${state.path === "direct" ? "路径 A" : "路径 B"}` : `x = ${sample.x.toFixed(2)} m · y = ${sample.y.toFixed(2)} m`;
     refs.progressInput.disabled = !workMode;
@@ -1163,6 +1176,10 @@
   refs.routeSteps.forEach((button, index) => button.addEventListener("click", () => { state.guideStep = index; render(); }));
   refs.pathButtons.forEach((button) => button.addEventListener("click", () => { state.path = button.dataset.path; state.progress = 0; state.running = false; render(); }));
   refs.rateButtons.forEach((button) => button.addEventListener("click", () => { state.playbackRate = Number(button.dataset.rate); render(); }));
+  refs.polarityButtons.forEach((button) => button.addEventListener("click", () => {
+    const magnitude = Math.max(Math.abs(state.testCharge), 2);
+    setState({ testCharge: Number(button.dataset.chargeSign) * magnitude, running: false });
+  }));
   refs.presetButtons.forEach((button) => button.addEventListener("click", () => {
     if (button.dataset.preset === "positive") setMode("single");
     else if (button.dataset.preset === "dipole") setMode("superposition");
