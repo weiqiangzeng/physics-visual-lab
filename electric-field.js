@@ -44,6 +44,8 @@
     potentialMetric: document.getElementById("potentialMetric"),
     forceMetric: document.getElementById("forceMetric"),
     energyMetric: document.getElementById("energyMetric"),
+    motionDirectionMetric: document.getElementById("motionDirectionMetric"),
+    energyDeltaMetric: document.getElementById("energyDeltaMetric"),
     fieldNature: document.getElementById("fieldNature"),
     fieldExplanation: document.getElementById("fieldExplanation"),
     profileKicker: document.getElementById("profileKicker"),
@@ -54,6 +56,7 @@
     vectorStatus: document.getElementById("vectorStatus"),
     highlightPotentialLabel: document.getElementById("highlightPotentialLabel"),
     fieldInteractionHint: document.getElementById("fieldInteractionHint"),
+    motionTimeLabel: document.getElementById("motionTimeLabel"),
     stepIndex: document.getElementById("stepIndex"),
     stepTitle: document.getElementById("stepTitle"),
     stepPrompt: document.getElementById("stepPrompt"),
@@ -123,6 +126,16 @@
     demoPath: [],
     demoPathIndex: 0,
     demoSegments: { along: [], cross: [] },
+    motionRunning: false,
+    motionStarted: false,
+    motionElapsed: 0,
+    motionVelocityX: 0,
+    motionVelocityY: 0,
+    motionLastDirectionX: 0,
+    motionLastDirectionY: 0,
+    motionPauseReason: "",
+    motionStartEnergyNanoJ: 0,
+    motionTrajectory: [],
     showFieldLines: false,
     showVectors: false,
     showEquipotential: true,
@@ -151,6 +164,16 @@
     phi: 1.02
   };
   const TERRAIN = { clipV: 100, verticalScale: 0.055, sampleX: 54, sampleY: 38 };
+  // 这是教学动画时间尺度，不对应真实实验计时；方向和加速度仍来自模型力矢量。
+  const MOTION = {
+    effectiveMassNanoKg: 1,
+    timeScale: 1.15,
+    maxSpeed: 2.4,
+    minSpeed: .008,
+    minForce: .001,
+    safeRadius: Math.max(model.MIN_DISTANCE + .18, .42),
+    maxTrail: 420
+  };
   const clamp = model.clamp;
   const signed = (value, digits = 1) => `${value > 1e-10 ? "+" : value < -1e-10 ? "−" : ""}${Math.abs(value).toFixed(digits)}`;
   const finite = (value) => Number.isFinite(value) ? value : 0;
@@ -507,6 +530,18 @@
     });
   }
 
+  function addMotionTrail(group) {
+    if (state.mode === "work" || state.motionTrajectory.length < 2) return;
+    const positions = [];
+    state.motionTrajectory.forEach((point) => {
+      const sample = surfaceFieldAt(point.x, point.y);
+      positions.push(point.x, point.y, terrainHeight(sample.potential) + .16);
+    });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    group.add(new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x79d992, transparent: true, opacity: .9, depthTest: false })));
+  }
+
   function addProbe(group, sample) {
     const color = state.testCharge > 0 ? 0xf2b84b : state.testCharge < 0 ? 0xb58ce5 : 0xdce5df;
     const probe = new THREE.Mesh(new THREE.SphereGeometry(.22, 24, 16), new THREE.MeshStandardMaterial({ color, roughness: .35, metalness: .1, emissive: color, emissiveIntensity: .18 }));
@@ -522,6 +557,15 @@
     if (sample.magnitude > 1e-8) {
       addArrow(group, sample.x, sample.y, probe.position.z, sample.ex, sample.ey, 0x64c7d9, .58);
       if (state.showForce && Math.abs(state.testCharge) > 1e-9) addArrow(group, sample.x, sample.y, probe.position.z + .03, sample.forceXNanoN, sample.forceYNanoN, 0xf2b84b, .78);
+    }
+    const velocityMagnitude = Math.hypot(state.motionVelocityX, state.motionVelocityY);
+    const directionMagnitude = velocityMagnitude > 1e-7
+      ? velocityMagnitude
+      : Math.hypot(state.motionLastDirectionX, state.motionLastDirectionY);
+    if (state.motionStarted && directionMagnitude > 1e-7) {
+      const directionX = velocityMagnitude > 1e-7 ? state.motionVelocityX : state.motionLastDirectionX;
+      const directionY = velocityMagnitude > 1e-7 ? state.motionVelocityY : state.motionLastDirectionY;
+      addArrow(group, sample.x, sample.y, probe.position.z + .12, directionX, directionY, 0x79d992, .92);
     }
     threeState.probe = probe;
   }
@@ -550,6 +594,7 @@
       addSourceMarkers(threeState.dynamic, sample.sources);
       addVectorGrid(threeState.dynamic);
     }
+    addMotionTrail(threeState.dynamic);
     addProbe(threeState.dynamic, sample);
     const { width, height } = resizeThree();
     const projected = new THREE.Vector3(sample.x, sample.y, terrainHeight(sample.potential) + .27).project(threeState.camera);
@@ -681,6 +726,13 @@
     if (state.mode === "work") {
       return state.progress >= .999 ? { badge: "路径终点一致", className: "is-special", nature: "W = −ΔU", explanation: `路径 A、B 的总功均为 ${signed(sample.finalWorkNanoJ, 1)} nJ` } : { badge: "路径比较中", className: "is-special", nature: "静电场力是保守力", explanation: "沿途过程可以不同，端点决定总功和势能变化" };
     }
+    if (state.motionRunning) {
+      return { badge: "运动中", className: "is-motion", nature: "F = q₀E 驱动", explanation: `沿电场力方向推进 · 教学动画时间 ${state.motionElapsed.toFixed(1)} s` };
+    }
+    if (state.motionStarted && state.motionPauseReason) {
+      const automatic = state.motionPauseReason.startsWith("自动暂停");
+      return { badge: automatic ? "自动暂停" : "已暂停", className: automatic ? "is-critical" : "is-special", nature: "当前位置已保留", explanation: state.motionPauseReason };
+    }
     if (state.mode === "potential") {
       if (Math.abs(state.testCharge) < 1e-9) return { badge: "q₀=0，场仍存在", className: "is-special", nature: "V 不变，U=0", explanation: "试探电荷为零时 F=U=0；沿等势线与穿线的电势关系仍由 V 决定" };
       const delta = highlightDelta(sample);
@@ -717,10 +769,14 @@
     refs.progressLabel.textContent = workMode ? "路径进度" : "探针坐标";
     refs.progressValue.textContent = workMode ? `${(state.progress * 100).toFixed(1)}% · ${state.path === "direct" ? "路径 A" : "路径 B"}` : `x = ${sample.x.toFixed(2)} m · y = ${sample.y.toFixed(2)} m`;
     refs.progressInput.disabled = !workMode;
-    refs.playButton.disabled = !workMode;
-    refs.pauseButton.disabled = !workMode;
-    refs.playButton.setAttribute("aria-pressed", String(state.running));
-    refs.playButton.textContent = state.running ? "▶ 运行中" : "▶ 播放";
+    const playing = workMode ? state.running : state.motionRunning;
+    refs.playButton.disabled = false;
+    refs.pauseButton.disabled = false;
+    refs.playButton.setAttribute("aria-pressed", String(playing));
+    refs.playButton.textContent = playing ? "▶ 运行中" : (!workMode && state.motionStarted ? "▶ 继续" : "▶ 播放");
+    refs.motionTimeLabel.textContent = workMode
+      ? "教学动画时间：路径播放"
+      : state.motionStarted ? `教学动画时间：${state.motionElapsed.toFixed(1)} s` : "教学动画时间：未播放";
     refs.keyButton.textContent = modes[state.mode].key;
     refs.sceneTabs.forEach((button) => button.classList.toggle("is-active", button.dataset.mode === state.mode));
     refs.pathButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.path === state.path));
@@ -735,6 +791,10 @@
     refs.potentialMetric.textContent = `${signed(finite(sample.potential), 3)} V`;
     refs.forceMetric.textContent = `${finite(sample.forceNanoN).toFixed(3)} nN`;
     refs.energyMetric.textContent = `${signed(finite(sample.energyNanoJ), 3)} nJ`;
+    const velocityMagnitude = Math.hypot(state.motionVelocityX, state.motionVelocityY);
+    const velocityAngle = velocityMagnitude > 1e-7 ? Math.atan2(state.motionVelocityY, state.motionVelocityX) * 180 / Math.PI : null;
+    refs.motionDirectionMetric.textContent = velocityAngle === null ? (state.motionStarted ? "速度≈0" : "未开始") : `${signed(velocityAngle, 1)}°`;
+    refs.energyDeltaMetric.textContent = state.motionStarted ? `${signed(finite(sample.energyNanoJ - state.motionStartEnergyNanoJ), 3)} nJ` : "未开始";
     const status = statusFor(sample);
     refs.stateBadge.textContent = status.badge;
     refs.stateBadge.className = `state-badge ${status.className}`;
@@ -768,6 +828,13 @@
     } else {
       refs.highlightPotentialLabel.textContent = "z = V(x,y)";
       refs.fieldInteractionHint.textContent = "左键空白旋转 · 滚轮缩放 · Shift/右键平移 · 拖动 q₀";
+    }
+    if (state.mode !== "work" && state.motionRunning) {
+      refs.stageHint.textContent = "播放中：试探电荷按 F=q₀E 运动，绿色箭头表示速度方向";
+      refs.fieldInteractionHint.textContent = "运动中 · 绿色轨迹与箭头表示运动 · 教学动画时间";
+    } else if (state.mode !== "work" && state.motionStarted && state.motionPauseReason) {
+      refs.stageHint.textContent = state.motionPauseReason;
+      refs.fieldInteractionHint.textContent = "已停在当前位置 · 点击继续，或拖动 q₀ 后从新位置开始";
     }
     if (state.mode === "single") {
       refs.profileKicker.textContent = "RADIAL PROFILE";
@@ -813,6 +880,119 @@
       point = next;
     }
     return points;
+  }
+
+  function resetMotionState() {
+    state.motionRunning = false;
+    state.motionStarted = false;
+    state.motionElapsed = 0;
+    state.motionVelocityX = 0;
+    state.motionVelocityY = 0;
+    state.motionLastDirectionX = 0;
+    state.motionLastDirectionY = 0;
+    state.motionPauseReason = "";
+    state.motionStartEnergyNanoJ = 0;
+    state.motionTrajectory = [{ x: state.probeX, y: state.probeY }];
+  }
+
+  function motionBoundaryReason(point, sample) {
+    if (sample.nearest !== null && sample.nearest <= MOTION.safeRadius) {
+      return `自动暂停：试探电荷已接近源电荷安全半径 ${MOTION.safeRadius.toFixed(2)} m`;
+    }
+    const atBoundary = point.x <= WORLD.xMin + .2 || point.x >= WORLD.xMax - .2 || point.y <= WORLD.yMin + .2 || point.y >= WORLD.yMax - .2;
+    return atBoundary ? "自动暂停：试探电荷已到达画布边界" : "";
+  }
+
+  function pauseMotion(reason = "手动暂停，当前位置已保留") {
+    if (state.mode === "work") {
+      state.running = false;
+      render();
+      return;
+    }
+    if (!state.motionStarted) return;
+    state.motionRunning = false;
+    state.motionPauseReason = reason;
+    render();
+  }
+
+  function startMotion() {
+    if (state.mode === "work") {
+      if (state.progress >= .999) state.progress = 0;
+      state.running = true;
+      render();
+      return;
+    }
+    if (!state.motionStarted) {
+      const sample = solve();
+      state.motionStartEnergyNanoJ = finite(sample.energyNanoJ);
+      state.motionTrajectory = [{ x: state.probeX, y: state.probeY }];
+      state.motionStarted = true;
+      state.motionElapsed = 0;
+      state.motionVelocityX = 0;
+      state.motionVelocityY = 0;
+    }
+    state.motionRunning = true;
+    state.motionPauseReason = "";
+    state.running = false;
+    state.demoRunning = false;
+    render();
+  }
+
+  function advanceMotion(delta) {
+    if (!state.motionRunning || state.mode === "work") return;
+    const current = solve();
+    const currentReason = motionBoundaryReason({ x: state.probeX, y: state.probeY }, current);
+    if (currentReason) {
+      pauseMotion(currentReason);
+      return;
+    }
+    const speed = Math.hypot(state.motionVelocityX, state.motionVelocityY);
+    if (current.forceNanoN < MOTION.minForce && speed < MOTION.minSpeed) {
+      pauseMotion("自动暂停：电场力接近零，速度方向不再确定");
+      return;
+    }
+    const teachingDelta = delta * state.playbackRate * MOTION.timeScale;
+    const accelerationX = current.forceXNanoN / MOTION.effectiveMassNanoKg;
+    const accelerationY = current.forceYNanoN / MOTION.effectiveMassNanoKg;
+    state.motionVelocityX += accelerationX * teachingDelta;
+    state.motionVelocityY += accelerationY * teachingDelta;
+    const nextSpeed = Math.hypot(state.motionVelocityX, state.motionVelocityY);
+    if (nextSpeed > MOTION.maxSpeed) {
+      state.motionVelocityX *= MOTION.maxSpeed / nextSpeed;
+      state.motionVelocityY *= MOTION.maxSpeed / nextSpeed;
+    }
+    const updatedSpeed = Math.hypot(state.motionVelocityX, state.motionVelocityY);
+    if (updatedSpeed > 1e-7) {
+      state.motionLastDirectionX = state.motionVelocityX / updatedSpeed;
+      state.motionLastDirectionY = state.motionVelocityY / updatedSpeed;
+    }
+    const next = {
+      x: state.probeX + state.motionVelocityX * teachingDelta,
+      y: state.probeY + state.motionVelocityY * teachingDelta
+    };
+    const nextSample = surfaceFieldAt(next.x, next.y);
+    const nextReason = motionBoundaryReason(next, nextSample);
+    if (nextReason && nextSample.nearest !== null && nextSample.nearest <= MOTION.safeRadius) {
+      pauseMotion(nextReason);
+      return;
+    }
+    state.probeX = clamp(next.x, WORLD.xMin + .2, WORLD.xMax - .2);
+    state.probeY = clamp(next.y, WORLD.yMin + .2, WORLD.yMax - .2);
+    state.motionElapsed += teachingDelta;
+    const lastPoint = state.motionTrajectory[state.motionTrajectory.length - 1];
+    if (!lastPoint || Math.hypot(state.probeX - lastPoint.x, state.probeY - lastPoint.y) > .012) {
+      state.motionTrajectory.push({ x: state.probeX, y: state.probeY });
+      if (state.motionTrajectory.length > MOTION.maxTrail) state.motionTrajectory.shift();
+    }
+    if (nextReason) {
+      pauseMotion(nextReason);
+      return;
+    }
+    if (updatedSpeed < MOTION.minSpeed && current.forceNanoN < MOTION.minForce) {
+      pauseMotion("自动暂停：速度接近零，当前位置已保留");
+      return;
+    }
+    render();
   }
 
   function prepareTeachingDemo() {
@@ -906,6 +1086,7 @@
       state.demoPhase = "idle";
       state.demoPath = [];
       state.demoProgress = 0;
+      resetMotionState();
     }
     if ((sourceChanged || state.mode === "potential" && !probeChanged && "mode" in next) && state.mode === "potential") refreshHighlightAtProbe();
     [["showFieldLines", refs.showFieldLinesToggle], ["showVectors", refs.showVectorsToggle], ["showEquipotential", refs.showEquipotentialToggle], ["showForce", refs.showForceToggle], ["showPotentialMap", refs.showPotentialMapToggle]].forEach(([key, input]) => {
@@ -919,6 +1100,7 @@
     const config = modes[modeName];
     if (!config) return;
     Object.assign(state, { mode: modeName, q1: config.q1, q2: config.q2, separation: config.separation, probeX: config.probeX, probeY: config.probeY, progress: 0, running: false, path: "direct", demoRunning: false, demoPhase: "idle", demoPath: [], demoProgress: 0 });
+    resetMotionState();
     if (modeName === "potential") refreshHighlightAtProbe();
     render();
   }
@@ -942,11 +1124,12 @@
     else if (button.dataset.preset === "like") setMode("potential");
     else setState({ testCharge: state.testCharge === 0 ? -2 : -state.testCharge, running: false });
   }));
-  refs.playButton.addEventListener("click", () => { if (state.mode !== "work") return; if (state.progress >= .999) state.progress = 0; setState({ running: true }); });
-  refs.pauseButton.addEventListener("click", () => setState({ running: false }));
+  refs.playButton.addEventListener("click", startMotion);
+  refs.pauseButton.addEventListener("click", () => pauseMotion());
   refs.keyButton.addEventListener("click", keyState);
   refs.resetButton.addEventListener("click", () => {
     Object.assign(state, { mode: "potential", q1: 6, q2: -6, separation: 3, testCharge: 2, uniformField: 12, probeX: -1.1, probeY: 1.2, path: "direct", progress: 0, running: false, playbackRate: .5, guideStep: 0, highlightLevel: 23.801, highlightAnchorX: -1.1, highlightAnchorY: 1.2, demoPhase: "idle", demoRunning: false, demoProgress: 0, demoPath: [], demoPathIndex: 0, showFieldLines: false, showVectors: false, showEquipotential: true, showForce: true, showPotentialMap: true });
+    resetMotionState();
     refs.showFieldLinesToggle.checked = false;
     refs.showVectorsToggle.checked = false;
     refs.showEquipotentialToggle.checked = true;
@@ -1048,7 +1231,8 @@
   function frame(now) {
     const delta = Math.min(.05, (now - lastFrame) / 1000);
     lastFrame = now;
-    if (state.demoRunning && state.mode === "potential") advanceTeachingDemo(delta);
+    if (state.motionRunning && state.mode !== "work") advanceMotion(delta);
+    else if (state.demoRunning && state.mode === "potential") advanceTeachingDemo(delta);
     else if (state.running && state.mode === "work") {
       state.progress += delta * state.playbackRate / 4;
       if (state.progress >= 1) { state.progress = 1; state.running = false; }
