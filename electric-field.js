@@ -89,7 +89,7 @@
   const modes = {
     single: { title: "单电荷场", goal: "电场先存在，试探电荷只负责测量", hint: "拖动探针，比较 E、F 和 V", q1: 6, q2: -6, separation: 3, probeX: 2.4, probeY: 1.2, key: "◎ 半径 2 m" },
     superposition: { title: "电场矢量叠加", goal: "同一点的合场来自各源电荷场强的矢量和", hint: "定位中垂线，寻找 V=0 但 E≠0", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 偶极中垂线" },
-    potential: { title: "等势线地形", goal: "沿等势线移动不做功，穿越等势线电势能改变", hint: "问题：沿高亮等势线移动，电场力做功吗？", q1: 6, q2: -6, separation: 3, probeX: -1.1, probeY: 1.2, key: "◎ 定位高亮线" },
+    potential: { title: "等势线地形", goal: "沿等势线移动不做功，穿越等势线电势能改变", hint: "点击播放：从 V≈0 的中垂线释放正试探电荷，观察它驶向负电荷", q1: 6, q2: -6, separation: 3, probeX: 0, probeY: 2, key: "◎ 定位高亮线" },
     work: { title: "静电场做功", goal: "同一对端点间电场力做功与路径无关", hint: "比较直达与绕行路径的终点功", q1: 6, q2: -6, separation: 3, probeX: -3, probeY: -1.5, key: "◎ 到达共同终点" }
   };
   const guide = [
@@ -109,17 +109,17 @@
     separation: 3,
     testCharge: 2,
     uniformField: 12,
-    probeX: -1.1,
-    probeY: 1.2,
+    probeX: 0,
+    probeY: 2,
     path: "direct",
     progress: 0,
     running: false,
-    playbackRate: 0.5,
+    playbackRate: 1,
     guideStep: 0,
     dragging: false,
-    highlightLevel: 23.801,
-    highlightAnchorX: -1.1,
-    highlightAnchorY: 1.2,
+    highlightLevel: 0,
+    highlightAnchorX: 0,
+    highlightAnchorY: 2,
     demoPhase: "idle",
     demoRunning: false,
     demoProgress: 0,
@@ -168,7 +168,7 @@
   const MOTION = {
     effectiveMassNanoKg: 1,
     timeScale: 1.15,
-    maxSpeed: 2.4,
+    maxSpeed: 1.4,
     minSpeed: .008,
     minForce: .001,
     safeRadius: Math.max(model.MIN_DISTANCE + .18, .42),
@@ -733,6 +733,9 @@
       const automatic = state.motionPauseReason.startsWith("自动暂停");
       return { badge: automatic ? "自动暂停" : "已暂停", className: automatic ? "is-critical" : "is-special", nature: "当前位置已保留", explanation: state.motionPauseReason };
     }
+    if (state.mode === "potential" && !state.motionStarted) {
+      return { badge: "准备播放", className: "is-motion", nature: "释放后 F=q₀E 驱动", explanation: "试探电荷位于 V≈0 的中垂线；点击播放观察它驶向负电荷" };
+    }
     if (state.mode === "potential") {
       if (Math.abs(state.testCharge) < 1e-9) return { badge: "q₀=0，场仍存在", className: "is-special", nature: "V 不变，U=0", explanation: "试探电荷为零时 F=U=0；沿等势线与穿线的电势关系仍由 V 决定" };
       const delta = highlightDelta(sample);
@@ -823,7 +826,7 @@
       refs.highlightPotentialLabel.textContent = `高亮等势线：V = ${state.highlightLevel.toFixed(2)} V`;
       refs.fieldInteractionHint.textContent = state.demoRunning
         ? state.demoPhase === "along" ? "位置在改变 · 高亮线上的 V、U 基本不变" : "正在穿线 · V、U 与 Wₑ 正在改变"
-        : state.demoPhase === "complete" ? "结论已停在穿线后状态 · 可拖回高亮线复核" : "拖动 q₀ 沿高亮线移动，再穿过高亮线";
+        : state.demoPhase === "complete" ? "结论已停在穿线后状态 · 可拖回高亮线复核" : "点击播放：从 V≈0 的中垂线释放 q₀；也可拖动 q₀";
       if (Math.abs(delta.deltaV) <= highlightTolerance()) refs.stepTitle.textContent = "沿等势线移动";
     } else {
       refs.highlightPotentialLabel.textContent = "z = V(x,y)";
@@ -893,6 +896,38 @@
     state.motionPauseReason = "";
     state.motionStartEnergyNanoJ = 0;
     state.motionTrajectory = [{ x: state.probeX, y: state.probeY }];
+  }
+
+  function restoreClassicMotionStart() {
+    const search = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(String(window.location.hash || "").replace(/^#/, ""));
+    if (hash.has("scene") || search.get("resume") === "1") return;
+    Object.assign(state, {
+      mode: "potential",
+      q1: 6,
+      q2: -6,
+      separation: 3,
+      testCharge: 2,
+      probeX: 0,
+      probeY: 2,
+      progress: 0,
+      running: false,
+      playbackRate: 1,
+      path: "direct",
+      demoPhase: "idle",
+      demoRunning: false,
+      demoProgress: 0,
+      demoPath: [],
+      demoPathIndex: 0,
+      showFieldLines: false,
+      showVectors: false,
+      showEquipotential: true,
+      showForce: true,
+      showPotentialMap: true
+    });
+    resetMotionState();
+    refreshHighlightAtProbe();
+    render();
   }
 
   function motionBoundaryReason(point, sample) {
@@ -1128,7 +1163,7 @@
   refs.pauseButton.addEventListener("click", () => pauseMotion());
   refs.keyButton.addEventListener("click", keyState);
   refs.resetButton.addEventListener("click", () => {
-    Object.assign(state, { mode: "potential", q1: 6, q2: -6, separation: 3, testCharge: 2, uniformField: 12, probeX: -1.1, probeY: 1.2, path: "direct", progress: 0, running: false, playbackRate: .5, guideStep: 0, highlightLevel: 23.801, highlightAnchorX: -1.1, highlightAnchorY: 1.2, demoPhase: "idle", demoRunning: false, demoProgress: 0, demoPath: [], demoPathIndex: 0, showFieldLines: false, showVectors: false, showEquipotential: true, showForce: true, showPotentialMap: true });
+    Object.assign(state, { mode: "potential", q1: 6, q2: -6, separation: 3, testCharge: 2, uniformField: 12, probeX: 0, probeY: 2, path: "direct", progress: 0, running: false, playbackRate: 1, guideStep: 0, highlightLevel: 0, highlightAnchorX: 0, highlightAnchorY: 2, demoPhase: "idle", demoRunning: false, demoProgress: 0, demoPath: [], demoPathIndex: 0, showFieldLines: false, showVectors: false, showEquipotential: true, showForce: true, showPotentialMap: true });
     resetMotionState();
     refs.showFieldLinesToggle.checked = false;
     refs.showVectorsToggle.checked = false;
@@ -1251,4 +1286,5 @@
   };
   render();
   requestAnimationFrame(frame);
+  window.setTimeout(restoreClassicMotionStart, 0);
 })();
