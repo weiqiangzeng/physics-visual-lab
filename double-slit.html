@@ -109,6 +109,7 @@
           </div>
           <label class="photon-speed" for="photonSpeedInput"><span>发射速率</span><strong id="photonSpeedValue">20 /s</strong></label>
           <input id="photonSpeedInput" class="range-input" type="range" min="5" max="80" step="5" value="20" aria-label="光子发射速率" />
+          <p id="photonModelNote" class="photon-model-note">先叠加两路概率振幅，再按 <i>P(y)</i> 产生一个落点；累计后形成条纹。</p>
         </section>
 
         <div id="macroActions" class="control-actions">
@@ -145,7 +146,7 @@
 
         <section class="analysis-grid" aria-label="数据图像">
           <article class="chart-panel">
-            <header><div><span>INTENSITY PROFILE</span><h3>屏上光强 I(y)</h3></div><strong id="profileStatus">含衍射包络</strong></header>
+            <header><div><span>INTENSITY PROFILE</span><h3 id="intensityChartTitle">屏上光强 I(y)</h3></div><strong id="profileStatus">含衍射包络</strong></header>
             <canvas id="intensityChart" width="620" height="230" aria-label="屏上光强分布图"></canvas>
           </article>
           <article class="chart-panel">

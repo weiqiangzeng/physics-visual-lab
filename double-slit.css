@@ -30,6 +30,8 @@
 .double-slit-lab .photon-speed { display:flex; align-items:center; justify-content:space-between; margin-top:12px; color:var(--lab-muted); font-size:10px; }
 .double-slit-lab .photon-speed strong { color:var(--lab-text); font-family:ui-monospace,monospace; font-size:10px; }
 .double-slit-lab .photon-controls .range-input { margin-bottom:3px; }
+.double-slit-lab .photon-model-note { margin:10px 0 0; padding:8px 9px; border:1px solid rgba(100,199,217,.2); border-radius:4px; color:var(--lab-muted); background:rgba(100,199,217,.045); font-size:10px; line-height:1.55; }
+.double-slit-lab .photon-model-note i { color:var(--lab-cyan); font-family:Georgia,serif; }
 .double-slit-lab .state-badge.is-photon { color:var(--lab-cyan); border-color:rgba(100,199,217,.45); background:rgba(100,199,217,.08); }
 .double-slit-lab .mobile-scene-tabs { display:none; }
 

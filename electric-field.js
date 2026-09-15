@@ -163,7 +163,7 @@
     theta: -0.72,
     phi: 1.02
   };
-  const TERRAIN = { clipV: 100, verticalScale: 0.055, sampleX: 54, sampleY: 38 };
+  const TERRAIN = { clipV: 100, verticalScale: 0.055, sampleX: 72, sampleY: 48 };
   // 这是教学动画时间尺度，不对应真实实验计时；方向和加速度仍来自模型力矢量。
   const MOTION = {
     effectiveMassNanoKg: 1,
@@ -371,15 +371,21 @@
     const nx = TERRAIN.sampleX;
     const ny = TERRAIN.sampleY;
     const values = new Array((nx + 1) * (ny + 1));
+    const magnitudes = new Array((nx + 1) * (ny + 1));
     for (let j = 0; j <= ny; j += 1) {
       for (let i = 0; i <= nx; i += 1) {
         const x = WORLD.xMin + (WORLD.xMax - WORLD.xMin) * i / nx;
         const y = WORLD.yMin + (WORLD.yMax - WORLD.yMin) * j / ny;
         const sample = surfaceFieldAt(x, y);
-        values[j * (nx + 1) + i] = Number.isFinite(sample.potential) ? sample.potential : NaN;
+        const index = j * (nx + 1) + i;
+        values[index] = Number.isFinite(sample.potential) ? sample.potential : NaN;
+        magnitudes[index] = Number.isFinite(sample.magnitude) ? sample.magnitude : NaN;
       }
     }
-    return { nx, ny, values };
+    const finiteMagnitudes = magnitudes.filter((value) => Number.isFinite(value) && value >= 0).sort((a, b) => a - b);
+    const referenceIndex = Math.max(0, Math.floor((finiteMagnitudes.length - 1) * .72));
+    const fieldReference = Math.max(1e-6, finiteMagnitudes[referenceIndex] || 1);
+    return { nx, ny, values, magnitudes, fieldReference };
   }
 
   function gridPoint(grid, i, j) {
@@ -399,12 +405,16 @@
     for (let j = 0; j <= ny; j += 1) {
       for (let i = 0; i <= nx; i += 1) {
         const point = gridPoint(grid, i, j);
+        const index = j * (nx + 1) + i;
         const value = Number.isFinite(point.value) ? clamp(point.value, -TERRAIN.clipV, TERRAIN.clipV) : 0;
         positions.push(point.x, point.y, terrainHeight(value));
-        const ratio = value / TERRAIN.clipV;
-        if (ratio > .03) color.setHSL(.015, .72, .29 + .18 * ratio);
-        else if (ratio < -.03) color.setHSL(.62, .72, .29 + .18 * -ratio);
-        else color.setHSL(.48, .36, .27);
+        const magnitude = Number.isFinite(grid.magnitudes[index]) ? grid.magnitudes[index] : 0;
+        const fieldRatio = clamp(Math.log1p(magnitude / grid.fieldReference) / Math.log1p(8), 0, 1);
+        const potentialRatio = value / TERRAIN.clipV;
+        const hue = potentialRatio > .03 ? .015 : potentialRatio < -.03 ? .62 : .48;
+        const saturation = potentialRatio > .03 || potentialRatio < -.03 ? .62 + .2 * fieldRatio : .3 + .3 * fieldRatio;
+        const lightness = .19 + .3 * fieldRatio;
+        color.setHSL(hue, saturation, lightness);
         colors.push(color.r, color.g, color.b);
       }
     }

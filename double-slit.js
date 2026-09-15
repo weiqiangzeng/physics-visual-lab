@@ -5,7 +5,7 @@
     spacing: { title: "条纹间距", goal: "测量相邻亮纹之间的距离" },
     path: { title: "路程差", goal: "拖动探针，用路程差判断屏上明暗" },
     compare: { title: "参数规律", goal: "每次改变一个参数，建立条纹间距关系" },
-    photon: { title: "单光子", goal: "观察离散探测事件如何累积成干涉条纹" }
+    photon: { title: "单光子", goal: "看见概率振幅叠加如何累积成干涉条纹" }
   };
 
   const GUIDE_STEPS = [
@@ -32,7 +32,8 @@
     photonRate: 20,
     photonHits: [],
     activePhotons: [],
-    lastPhotonRatio: null
+    lastPhotonRatio: null,
+    waveTime: 0
   };
 
   const refs = {
@@ -61,8 +62,10 @@
     stateBadge: document.getElementById("stateBadge"),
     stageHint: document.getElementById("stageHint"),
     profileStatus: document.getElementById("profileStatus"),
+    intensityChartTitle: document.getElementById("intensityChartTitle"),
     secondaryChartKicker: document.getElementById("secondaryChartKicker"),
     secondaryChartTitle: document.getElementById("secondaryChartTitle"),
+    photonModelNote: document.getElementById("photonModelNote"),
     modeTitle: document.getElementById("modeTitle"),
     modeGoal: document.getElementById("modeGoal"),
     stepIndex: document.getElementById("stepIndex"),
@@ -105,6 +108,7 @@
   let draggingProbe = false;
   let animationFrame = 0;
   let nextPhotonEmissionAt = 0;
+  let lastAnimationAt = 0;
 
   function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
   function sinc(value) { return Math.abs(value) < 1e-9 ? 1 : Math.sin(value) / value; }
@@ -221,6 +225,9 @@
   function animatePhotons() {
     animationFrame = 0;
     const now = Date.now();
+    const elapsed = lastAnimationAt ? clamp(now - lastAnimationAt, 0, 60) : 16;
+    lastAnimationAt = now;
+    state.waveTime += elapsed * 0.001 * 2.2;
 
     if (state.mode === "photon" && state.photonsRunning) {
       const emissionInterval = 1000 / state.photonRate;
@@ -249,6 +256,8 @@
 
     if ((state.mode === "photon" && state.photonsRunning) || state.activePhotons.length) {
       animationFrame = requestAnimationFrame(animatePhotons);
+    } else {
+      lastAnimationAt = 0;
     }
   }
 
@@ -311,19 +320,46 @@
       }
 
       const t = clamp((photon.progress - 0.36) / 0.64, 0, 1);
-      const branches = state.whichPath ? [slitPoints[photon.slitIndex]] : slitPoints;
-      branches.forEach((slit, branchIndex) => {
-        const x = slit.x + (target.x - slit.x) * t;
-        const y = slit.y + (target.y - slit.y) * t;
-        ctx.fillStyle = state.whichPath ? light.solid : branchIndex === 0 ? "#64c7d9" : "#b58ce5";
-        ctx.globalAlpha = state.whichPath ? 0.92 : 0.66;
-        ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = state.whichPath ? light.glow : branchIndex === 0 ? "rgba(100,199,217,.24)" : "rgba(181,140,229,.24)";
-        ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.arc(x, y, 7 + 3 * Math.sin(photon.phase + t * Math.PI * 5), 0, Math.PI * 2); ctx.stroke();
-      });
+      const origin = state.whichPath ? slitPoints[photon.slitIndex] : { x: barrierX, y: centerY };
+      const x = origin.x + (target.x - origin.x) * t;
+      const y = origin.y + (target.y - origin.y) * t;
+      const pulse = 5 + 2 * Math.sin(photon.phase + t * Math.PI * 5);
+      ctx.globalAlpha = 0.92;
+      ctx.fillStyle = state.whichPath ? "#f4c44e" : "#f0f1e8";
+      ctx.beginPath(); ctx.arc(x, y, 2.8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = state.whichPath ? "rgba(244,196,78,.54)" : "rgba(100,199,217,.42)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(x, y, pulse, 0, Math.PI * 2); ctx.stroke();
     });
     ctx.restore();
+  }
+
+  function drawProbabilityWaveField(ctx, geometry, light) {
+    const { barrierX, slitPoints, screenX, centerY } = geometry;
+    const maxRadius = screenX - barrierX + 18;
+    const colors = ["#64c7d9", "#b58ce5"];
+    slitPoints.forEach((point, sourceIndex) => {
+      const phaseOffset = sourceIndex * Math.PI;
+      for (let band = 0; band < 7; band += 1) {
+        const radius = 16 + ((state.waveTime * 72 + band * 42 + sourceIndex * 21) % maxRadius);
+        const fade = clamp(1 - radius / maxRadius, 0.08, 1);
+        ctx.save();
+        ctx.strokeStyle = colors[sourceIndex];
+        ctx.globalAlpha = 0.08 + fade * 0.2;
+        ctx.lineWidth = band === 3 ? 1.7 : 1;
+        ctx.setLineDash(band === 3 ? [] : [3, 5]);
+        ctx.beginPath(); ctx.arc(point.x, point.y, radius, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+        ctx.restore();
+      }
+      if (state.showLabels) {
+        drawText(ctx, `ψ${sourceIndex + 1}`, point.x + 12, point.y + (sourceIndex ? 17 : -10), colors[sourceIndex], "left", 10, 700);
+      }
+      void phaseOffset;
+    });
+    if (state.showLabels) {
+      const x = (barrierX + screenX) / 2;
+      drawText(ctx, state.whichPath ? "|ψ₁|² + |ψ₂|² → P(y)" : "ψ₁ + ψ₂ → |ψ₁ + ψ₂|² → P(y)", x, 57, state.whichPath ? "rgba(244,196,78,.76)" : "rgba(240,241,232,.72)", "center", 10, 700);
+    }
   }
 
   function drawApparatus() {
@@ -364,7 +400,7 @@
     ctx.fillStyle = "#343b36"; ctx.fillRect(barrierX - 6, 14, 12, h - 28);
     slitPoints.forEach((point) => { ctx.clearRect(barrierX - 7, point.y - 7, 14, 14); ctx.fillStyle = light.glow; ctx.fillRect(barrierX - 2, point.y - 6, 4, 12); });
 
-    if (state.showWaves) {
+    if (state.showWaves && state.mode !== "photon") {
       slitPoints.forEach((point) => {
         for (let radius = 28; radius < screenX - barrierX; radius += 34) {
           ctx.save(); ctx.strokeStyle = light.glow; ctx.globalAlpha = .28; ctx.lineWidth = 1;
@@ -374,6 +410,9 @@
     }
 
     const photonMode = state.mode === "photon";
+    if (photonMode && state.showWaves) {
+      drawProbabilityWaveField(ctx, { barrierX, slitPoints, screenX, centerY }, light);
+    }
     const probe = { x: screenX, y: probeY };
     if (state.showRays && !photonMode) {
       slitPoints.forEach((point) => drawBeam(ctx, point, probe, light, .46));
@@ -406,7 +445,7 @@
       drawText(ctx, `双缝 d=${state.slit.toFixed(2)} mm`, barrierX, 24, "rgba(240,241,232,.65)", "center");
       drawText(ctx, photonMode ? "探测屏" : "观察屏", screenX, 16, "rgba(240,241,232,.65)", "center");
       if (!photonMode) drawText(ctx, `y=${d.yMm.toFixed(2)} mm`, screenX - 20, clamp(probeY - 10, 16, h - 10), "#f0f1e8", "right");
-      if (photonMode) drawText(ctx, state.whichPath ? "单路概率" : "双路概率振幅", (barrierX + screenX) / 2, 38, state.whichPath ? "rgba(244,196,78,.72)" : "rgba(100,199,217,.72)", "center");
+      if (photonMode) drawText(ctx, state.whichPath ? "路径已标记：交叉项消失" : "路径不可区分：两路概率振幅", (barrierX + screenX) / 2, 38, state.whichPath ? "rgba(244,196,78,.72)" : "rgba(100,199,217,.72)", "center");
       drawText(ctx, `λ=${state.wavelength} nm`, 22, h - 16, light.solid);
       drawText(ctx, `L=${state.screen.toFixed(2)} m`, (barrierX + screenX) / 2, h - 16, "rgba(240,241,232,.52)", "center");
     }
@@ -509,6 +548,11 @@
       if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.stroke();
+    ctx.fillStyle = "rgba(240,241,232,.62)";
+    ctx.font = "700 8px Avenir Next, sans-serif";
+    ctx.fillText("累计落点", frame.pad.left + 6, frame.pad.top + 12);
+    ctx.fillStyle = state.whichPath ? "#f4c44e" : "#64c7d9";
+    ctx.fillText("理论 P(y)", frame.pad.left + 64, frame.pad.top + 12);
     ctx.fillStyle = "rgba(240,241,232,.44)";
     ctx.font = "8px Avenir Next, sans-serif";
     [-1, 0, 1].forEach((ratio) => ctx.fillText((ratio * d.rangeMm).toFixed(0), frame.pad.left + ((ratio + 1) / 2) * frame.width - 5, frame.pad.top + frame.height + 13));
@@ -550,15 +594,17 @@
     refs.stateBadge.classList.toggle("is-dark", !photonMode && d.fringe === "dark");
     refs.stateBadge.classList.toggle("is-transition", !photonMode && d.fringe === "transition");
     refs.stateBadge.classList.toggle("is-photon", photonMode);
-    refs.profileStatus.textContent = photonMode ? state.whichPath ? "非相干叠加" : "概率振幅叠加" : state.showEnvelope ? "含衍射包络" : "仅显示干涉项";
+    refs.profileStatus.textContent = photonMode ? state.whichPath ? "路径已标记 · 无交叉项" : "ψ₁+ψ₂ · 概率振幅叠加" : state.showEnvelope ? "含衍射包络" : "仅显示干涉项";
+    refs.intensityChartTitle.textContent = photonMode ? "理论概率 P(y)" : "屏上光强 I(y)";
     refs.modeTitle.textContent = mode.title; refs.modeGoal.textContent = mode.goal;
-    refs.stageHint.textContent = photonMode ? "离散落点按理论概率逐次产生" : "拖动屏上探针测量位置";
+    refs.stageHint.textContent = photonMode ? state.whichPath ? "测量路径：只保留单路概率，干涉项消失" : "播放波前，观察 ψ₁+ψ₂ 如何决定每个落点概率" : "拖动屏上探针测量位置";
     refs.stepIndex.textContent = guide.index; refs.stepTitle.textContent = guide.title; refs.stepPrompt.textContent = guide.prompt;
     refs.formulaLabel.textContent = photonMode ? "概率模型" : state.mode === "path" ? "当前位置" : "当前关系";
     refs.formulaReadout.textContent = photonMode ? state.whichPath ? "P(y) ∝ |ψ₁|² + |ψ₂|²" : "P(y) ∝ |ψ₁ + ψ₂|²" : state.mode === "path" ? `Δr/λ = ${d.pathWaves.toFixed(3)}, I/I₀ = ${d.intensity.toFixed(3)}` : `β ≈ ${state.wavelength} nm × ${state.screen.toFixed(2)} m / ${state.slit.toFixed(2)} mm = ${d.betaMm.toFixed(2)} mm`;
     refs.recordButton.textContent = `记录参数${state.samples.length ? ` (${state.samples.length})` : ""}`;
     refs.secondaryChartKicker.textContent = photonMode ? "DETECTION HISTOGRAM" : "FRINGE SPACING";
-    refs.secondaryChartTitle.textContent = photonMode ? "单光子落点统计" : "β – λ 关系";
+    refs.secondaryChartTitle.textContent = photonMode ? "累计落点 vs 理论 P(y)" : "β – λ 关系";
+    if (photonMode && refs.photonModelNote) refs.photonModelNote.textContent = state.whichPath ? "已标记路径：两路概率相加，交叉项消失；累计分布不再出现干涉条纹。" : "先叠加两路概率振幅，再按 P(y) 产生一个落点；累计后形成条纹。";
     refs.clearDataButton.textContent = photonMode ? "清空落点" : "清空数据";
     refs.photonSpeedInput.value = state.photonRate;
     refs.photonSpeedValue.textContent = `${state.photonRate} /s`;
@@ -642,7 +688,7 @@
   });
   refs.darkButton.addEventListener("click", () => setMode("path")); refs.recordButton.addEventListener("click", recordSample); refs.clearDataButton.addEventListener("click", () => { if (state.mode === "photon") clearPhotonData(); else state.samples = []; sync(); });
   refs.resetButton.addEventListener("click", () => {
-    Object.assign(state, { wavelength: 600, slit: .3, slitWidth: .06, screen: 1.2, cursorRatio: 0, mode: "spacing", guideStep: 0, showRays: true, showWaves: true, showEnvelope: true, showLabels: true, samples: [], whichPath: false, photonsRunning: false, photonRate: 20, photonHits: [], activePhotons: [], lastPhotonRatio: null });
+    Object.assign(state, { wavelength: 600, slit: .3, slitWidth: .06, screen: 1.2, cursorRatio: 0, mode: "spacing", guideStep: 0, showRays: true, showWaves: true, showEnvelope: true, showLabels: true, samples: [], whichPath: false, photonsRunning: false, photonRate: 20, photonHits: [], activePhotons: [], lastPhotonRatio: null, waveTime: 0 });
     nextPhotonEmissionAt = 0;
     sync();
   });
