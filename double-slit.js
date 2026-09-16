@@ -5,7 +5,7 @@
     spacing: { title: "条纹间距", goal: "测量相邻亮纹之间的距离" },
     path: { title: "路程差", goal: "拖动探针，用路程差判断屏上明暗" },
     compare: { title: "参数规律", goal: "每次改变一个参数，建立条纹间距关系" },
-    photon: { title: "单光子", goal: "看见概率振幅叠加如何累积成干涉条纹" }
+    photon: { title: "单光子拓展", goal: "拓展：看见概率振幅叠加如何累积成干涉条纹" }
   };
 
   const GUIDE_STEPS = [
@@ -22,9 +22,9 @@
     cursorRatio: 0,
     mode: "spacing",
     guideStep: 0,
-    showRays: true,
+    showRays: false,
     showWaves: true,
-    showEnvelope: true,
+    showEnvelope: false,
     showLabels: true,
     samples: [],
     whichPath: false,
@@ -728,7 +728,7 @@
   });
   refs.darkButton.addEventListener("click", () => setMode("path")); refs.recordButton.addEventListener("click", recordSample); refs.clearDataButton.addEventListener("click", () => { if (state.mode === "photon") clearPhotonData(); else state.samples = []; sync(); });
   refs.resetButton.addEventListener("click", () => {
-    Object.assign(state, { wavelength: 600, slit: .3, slitWidth: .06, screen: 1.2, cursorRatio: 0, mode: "spacing", guideStep: 0, showRays: true, showWaves: true, showEnvelope: true, showLabels: true, samples: [], whichPath: false, photonsRunning: false, photonRate: 20, photonHits: [], activePhotons: [], lastPhotonRatio: null, waveTime: 0 });
+    Object.assign(state, { wavelength: 600, slit: .3, slitWidth: .06, screen: 1.2, cursorRatio: 0, mode: "spacing", guideStep: 0, showRays: false, showWaves: true, showEnvelope: false, showLabels: true, samples: [], whichPath: false, photonsRunning: false, photonRate: 20, photonHits: [], activePhotons: [], lastPhotonRatio: null, waveTime: 0 });
     nextPhotonEmissionAt = 0;
     sync();
   });

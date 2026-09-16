@@ -32,7 +32,7 @@
     { title: "再锁定不变量", prompt: "改变一个状态量时，过程约束决定另外两个量怎样联动。" },
     { title: "最后比较统计量", prompt: "同温下氦气更快，为什么它与氮气仍能产生相同压强？" }
   ];
-  const state = { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, dragging: false, showVelocity: true, showTrails: true, showCollisions: true, showPressure: true, showSample: true };
+  const state = { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, dragging: false, showVelocity: true, showTrails: false, showCollisions: true, showPressure: true, showSample: true };
   let particles = [];
   let collisionFlashes = [];
   let frameCount = 0;
@@ -156,7 +156,7 @@
     [refs.amountInput, refs.volumeInput, refs.temperatureInput, refs.processInput].forEach(rangeProgress); drawGasScene(); drawCharts(current);
   }
   function setMode(modeName) { if (!modes[modeName]) return; coreInteraction = false; document.body.classList.remove("has-core-interaction"); state.mode = modeName; state.progress = 0; state.running = modeName === "microscopic"; collisionFlashes = []; renderUi(); }
-  function reset() { Object.assign(state, { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, showVelocity: true, showTrails: true, showCollisions: true, showPressure: true, showSample: true }); coreInteraction = false; document.body.classList.remove("has-core-interaction"); [refs.showVelocityToggle, refs.showTrailsToggle, refs.showCollisionsToggle, refs.showPressureToggle, refs.showSampleToggle].forEach((input) => { input.checked = true; }); rebuildParticles(); renderUi(); }
+  function reset() { Object.assign(state, { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, showVelocity: true, showTrails: false, showCollisions: true, showPressure: true, showSample: true }); coreInteraction = false; document.body.classList.remove("has-core-interaction"); [refs.showVelocityToggle, refs.showCollisionsToggle, refs.showPressureToggle, refs.showSampleToggle].forEach((input) => { input.checked = true; }); refs.showTrailsToggle.checked = false; rebuildParticles(); renderUi(); }
   function setState(next = {}) {
     if (!next || typeof next !== "object") return;
     const previousAmount = state.amount;
