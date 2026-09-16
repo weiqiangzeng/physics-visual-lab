@@ -166,7 +166,9 @@
     theta: -0.72,
     phi: 1.02
   };
-  const TERRAIN = { clipV: 100, verticalScale: 0.055, sampleX: 72, sampleY: 48 };
+  // The point-charge potential is singular at the source. Leave a small visual
+  // hole for the source marker instead of connecting clipped samples across it.
+  const TERRAIN = { clipV: 100, verticalScale: 0.055, sampleX: 72, sampleY: 48, surfaceHoleRadius: 0.28 };
   // 这是教学动画时间尺度，不对应真实实验计时；方向和加速度仍来自模型力矢量。
   const MOTION = {
     effectiveMassNanoKg: 1,
@@ -404,8 +406,9 @@
         const y = WORLD.yMin + (WORLD.yMax - WORLD.yMin) * j / ny;
         const sample = surfaceFieldAt(x, y);
         const index = j * (nx + 1) + i;
-        values[index] = Number.isFinite(sample.potential) ? sample.potential : NaN;
-        magnitudes[index] = Number.isFinite(sample.magnitude) ? sample.magnitude : NaN;
+        const valid = Number.isFinite(sample.potential) && (sample.nearest === null || sample.nearest >= TERRAIN.surfaceHoleRadius);
+        values[index] = valid ? sample.potential : NaN;
+        magnitudes[index] = valid && Number.isFinite(sample.magnitude) ? sample.magnitude : NaN;
       }
     }
     const finiteMagnitudes = magnitudes.filter((value) => Number.isFinite(value) && value >= 0).sort((a, b) => a - b);
@@ -456,7 +459,9 @@
         const b = a + 1;
         const d = (j + 1) * (nx + 1) + i;
         const c = d + 1;
-        indices.push(a, b, d, b, c, d);
+        if ([a, b, d, c].every((index) => Number.isFinite(grid.values[index]))) {
+          indices.push(a, b, d, b, c, d);
+        }
       }
     }
     const geometry = new THREE.BufferGeometry();
