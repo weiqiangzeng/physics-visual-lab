@@ -35,9 +35,6 @@
   const state = { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, dragging: false, showVelocity: true, showTrails: false, showCollisions: true, showPressure: true, showSample: true };
   let particles = [];
   let collisionFlashes = [];
-  let pistonImpact = 0;
-  let pistonCollisionClock = 0;
-  let pistonBursts = [];
   let frameCount = 0;
 
   function clamp(value, min, max) { return Math.min(max, Math.max(min, Number(value))); }
@@ -51,24 +48,12 @@
     particles = Array.from({ length: desiredParticleCount() }, () => ({ x: 0.04 + random() * 0.92, y: 0.05 + random() * 0.9, previousX: 0, previousY: 0, gx: gaussian(random), gy: gaussian(random), gz: gaussian(random) }));
     particles.forEach((particle) => { particle.previousX = particle.x; particle.previousY = particle.y; });
     collisionFlashes = [];
-    pistonImpact = 0;
-    pistonCollisionClock = 0;
-    pistonBursts = [];
   }
   function updateParticles(delta, current) {
     const massScale = Math.sqrt(model.SPECIES.nitrogen.molarMass / current.species.molarMass);
     const temperatureScale = Math.sqrt(current.temperature / 300);
     const volumeScale = Math.max(0.45, current.volumeLiters / 10);
     const visualScale = 0.24 * massScale * temperatureScale * state.playbackRate;
-    pistonImpact = Math.max(0, pistonImpact - delta * 2.4);
-    const ratios = collisionRatios(current);
-    pistonCollisionClock += delta * 2.6 * ratios.frequency;
-    while (pistonCollisionClock >= 1) {
-      pistonCollisionClock -= 1;
-      const y = (0.13 + ((pistonBursts.length * 0.37) % 0.74));
-      pistonBursts.push({ y, life: 1, impulseRatio: ratios.impulse });
-      pistonImpact = Math.min(1, pistonImpact + .32 + .12 * ratios.impulse);
-    }
     particles.forEach((particle) => {
       particle.previousX = particle.x; particle.previousY = particle.y;
       particle.x += particle.gx * visualScale * delta / volumeScale;
@@ -78,7 +63,6 @@
         particle.x = clamp(particle.x, 0, 1); particle.gx *= -1;
         const impulseRatio = Math.sqrt(current.temperature / Math.max(1e-9, state.baseTemperature));
         if (state.showCollisions) collisionFlashes.push({ wall, y: particle.y, life: 1, impulseRatio });
-        if (wall === "right") pistonImpact = Math.min(1, pistonImpact + .12 + .05 * impulseRatio);
       }
       if (particle.y <= 0 || particle.y >= 1) {
         const wall = particle.y <= 0 ? "top" : "bottom";
@@ -88,8 +72,6 @@
     });
     collisionFlashes.forEach((flash) => { flash.life -= delta * 3.8; });
     collisionFlashes = collisionFlashes.filter((flash) => flash.life > 0).slice(-64);
-    pistonBursts.forEach((burst) => { burst.life -= delta * 2.6; });
-    pistonBursts = pistonBursts.filter((burst) => burst.life > 0).slice(-12);
   }
 
   function setCanvasSize(canvas, canvasContext, minimumHeight = 180) {
@@ -130,14 +112,7 @@
     });
     if (state.showCollisions) collisionFlashes.forEach((flash) => { const alpha = Math.round(clamp(flash.life, 0, 1) * 210).toString(16).padStart(2, "0"); const x = flash.wall === "left" ? box.left : flash.wall === "right" ? box.right : box.left + flash.x * box.width; const y = flash.wall === "top" ? box.top : flash.wall === "bottom" ? box.bottom : box.top + flash.y * box.height; const radius = 4 + (1 - flash.life) * (8 + Math.min(10, (flash.impulseRatio || 1) * 4)); context.strokeStyle = `${COLORS.energy}${alpha}`; context.lineWidth = 2 + Math.min(2, (flash.impulseRatio || 1) - 1); context.beginPath(); context.arc(x, y, radius, 0, Math.PI * 2); context.stroke(); });
     const ratios = collisionRatios(current);
-    if (state.showCollisions) pistonBursts.forEach((burst) => { const alpha = Math.round(clamp(burst.life, 0, 1) * 225).toString(16).padStart(2, "0"); const x = box.right; const y = box.top + burst.y * box.height; const radius = 5 + (1 - burst.life) * (12 + burst.impulseRatio * 6); context.strokeStyle = `${COLORS.energy}${alpha}`; context.lineWidth = 2.5 + burst.impulseRatio; context.beginPath(); context.arc(x, y, radius, -Math.PI * .8, Math.PI * .8); context.stroke(); });
     if (state.showPressure) { const count = Math.max(3, Math.min(9, Math.round(current.pressureRatio * 4))); for (let index = 0; index < count; index += 1) { const y = box.top + box.height * (index + 1) / (count + 1); arrow(context, box.right - 9, y, box.right + 22 + Math.min(30, current.pressureRatio * 10), y, `${COLORS.pressure}cc`, 1.5); } text(context, `p = ${fmt(current.pressureKPa, 2)} kPa`, box.right + 12, box.bottom + 28, COLORS.pressure, 10, "center", 700); }
-    const impactX = box.right + 5;
-    const impactY = (box.top + box.bottom) / 2;
-    const impactRadius = 11 + pistonImpact * 26;
-    context.strokeStyle = `${COLORS.energy}${Math.round(pistonImpact * 220).toString(16).padStart(2, "0")}`;
-    context.lineWidth = 2 + pistonImpact * 3;
-    context.beginPath(); context.arc(impactX, impactY, impactRadius, -Math.PI * .75, Math.PI * .75); context.stroke();
     text(context, `碰壁频率 ${fmt(ratios.frequency, 2)}×`, box.right + 16, box.top + 14, COLORS.energy, 9, "left", 700);
     text(context, `单次冲量 ${fmt(ratios.impulse, 2)}×`, box.right + 16, box.top + 28, COLORS.temperature, 9, "left", 700);
     text(context, `${current.species.label} · ${fmt(current.temperature, 0)} K`, box.left, box.top - 18, COLORS.temperature, 10, "left", 700); text(context, `vᵣₘₛ = ${fmt(current.rmsSpeed, 1)} m/s · ${fmt(Math.sqrt(current.temperature / state.baseTemperature), 2)}×基准`, box.left + 142, box.top - 18, COLORS.energy, 9, "left", 700); text(context, `V = ${fmt(current.volumeLiters, 2)} L`, box.left, box.bottom + 28, COLORS.volume, 10, "left", 700);
@@ -189,7 +164,7 @@
     refs.playButton.textContent = state.running ? "▶ 运行中" : "▶ 运行"; refs.playButton.setAttribute("aria-pressed", String(state.running)); refs.keyButton.textContent = mode.key;
     [refs.amountInput, refs.volumeInput, refs.temperatureInput, refs.processInput].forEach(rangeProgress); drawGasScene(); drawCharts(current);
   }
-  function setMode(modeName) { if (!modes[modeName]) return; coreInteraction = false; document.body.classList.remove("has-core-interaction"); state.mode = modeName; state.progress = 0; state.running = modeName === "microscopic"; collisionFlashes = []; pistonImpact = 0; pistonCollisionClock = 0; pistonBursts = []; renderUi(); }
+  function setMode(modeName) { if (!modes[modeName]) return; coreInteraction = false; document.body.classList.remove("has-core-interaction"); state.mode = modeName; state.progress = 0; state.running = modeName === "microscopic"; collisionFlashes = []; renderUi(); }
   function reset() { Object.assign(state, { mode: "microscopic", amount: 0.1, baseVolume: 10, baseTemperature: 300, species: "nitrogen", progress: 0, running: true, playbackRate: 0.5, elapsed: 0, guideStep: 0, showVelocity: true, showTrails: false, showCollisions: true, showPressure: true, showSample: true }); coreInteraction = false; document.body.classList.remove("has-core-interaction"); [refs.showVelocityToggle, refs.showCollisionsToggle, refs.showPressureToggle, refs.showSampleToggle].forEach((input) => { input.checked = true; }); refs.showTrailsToggle.checked = false; rebuildParticles(); renderUi(); }
   function setState(next = {}) {
     if (!next || typeof next !== "object") return;
